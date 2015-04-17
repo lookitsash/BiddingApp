@@ -62,6 +62,17 @@
     <Content Include="Default.aspx" />
     <Content Include="Foundation.dll" />
     <Content Include="Newtonsoft.Json.dll" />
+    <Content Include="Resources\CSS\Site.css" />
+    <Content Include="Resources\Images\Hamburger.png" />
+    <Content Include="Resources\Images\sprite-closemodal-flat-1.png" />
+    <Content Include="Resources\Scripts\dropit\dropit.css" />
+    <Content Include="Resources\Scripts\dropit\dropit.js" />
+    <Content Include="Resources\Scripts\jquery-1.11.0.min.js" />
+    <Content Include="Resources\Scripts\jquery-cmodal.js" />
+    <Content Include="Resources\Scripts\jquery-ui-1.10.3.min.js" />
+    <Content Include="Resources\Scripts\Modals.js" />
+    <Content Include="Resources\Scripts\Resources.js" />
+    <Content Include="Resources\Scripts\Statics.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -76,6 +87,7 @@
     </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
@@ -93,6 +105,7 @@
   <ItemGroup>
     <Content Include="Site.Master" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />
   <ProjectExtensions>
