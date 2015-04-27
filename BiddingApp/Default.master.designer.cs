@@ -10,7 +10,7 @@
 namespace BiddingApp {
     
     
-    public partial class Site {
+    public partial class Default1 {
         
         /// <summary>
         /// CPH_HEAD control.

@@ -12,8 +12,9 @@
             return sourceStr.split(strToFind).join(replaceWith);
         },
 
-        stringContains: function (sourceStr, strToFind) {
-            return sourceStr.toUpperCase().indexOf(strToFind.toUpperCase()) >= 0;
+        stringContains: function (sourceStr, strToFind, caseSensitive) {
+            if (caseSensitive) return sourceStr.indexOf(strToFind) >= 0;
+            else return sourceStr.toUpperCase().indexOf(strToFind.toUpperCase()) >= 0;
         },
 
         stringStartsWith: function (sourceStr, strToFind) {
@@ -56,6 +57,27 @@
         isValidEmail: function (email) {
             var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             return re.test(email);
+        },
+
+        isValidPassword: function (password) {
+            var charGroups = [
+                { chars: 'abcdefghijklmnopqrstuvwxyz', match: false },
+                { chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', match: false },
+                { chars: '0123456789', match: false }
+            ];
+
+            for (var i = 0; i < password.length; i++) {
+                var c = password.charAt(i);
+                resources.arrayEnum(charGroups, function (charGroup) {
+                    if (resources.stringContains(charGroup.chars, c, true)) charGroup.match = true;
+                });
+            };
+
+            var charGroupFailed = false;
+            resources.arrayEnum(charGroups, function (charGroup) {
+                if (!charGroup.match) charGroupFailed = true;
+            });
+            return !charGroupFailed;
         },
 
         isValidFilename: function (filename) {
@@ -707,6 +729,59 @@
                 Object.defineProperty(obj, newPropName, Object.getOwnPropertyDescriptor(obj, oldPropName));
                 delete obj[oldPropName];
             }
+        },
+
+        objectToString: function (obj) {
+            var str = '';
+            for (var propName in obj) {
+                str += propName + ': ' + obj[propName] + '\n';
+            }
+            return str;
+        },
+
+        dataFieldsToObject: function (parent) {
+            var dataObj = new Object();
+            $('[class*=\'data-\']', parent).each(function () {
+                var dataValue = resources.stringTrim($(this).val());
+                if ($(this).attr('type') == 'radio') dataValue = $(this).is(':checked');
+                var classNames = $(this).attr('class').split(' ');
+                resources.arrayEnum($(this).attr('class').split(' '), function (className) {
+                    if (resources.stringStartsWith(className, 'data-')) {
+                        dataObj[resources.stringReplace(className, 'data-', '')] = dataValue;
+                    }
+                });
+                //signupData[$(this).attr('data-id')] = $(this).val();
+            });
+            return dataObj;
+        },
+
+        dataFieldsValidate: function (parent, validationResetFunc, validationFailedFunc) {
+            if (validationResetFunc != null) validationResetFunc();
+
+            var errorFields = new Array();
+            $('[class*=\'data-\']', parent).each(function () {
+                var hasError = false;
+                if ($(this).hasClass('validateRequired')) {
+                    var dataValue = $(this).val();
+                    if (resources.stringNullOrEmpty(dataValue)) {
+                        errorFields.push($(this));
+                        hasError = true;
+                    }
+                }
+                if (!hasError && $(this).hasClass('validateEmail')) {
+                    var dataValue = $(this).val();
+                    if (!resources.stringNullOrEmpty(dataValue) && !resources.isValidEmail(dataValue)) {
+                        errorFields.push($(this));
+                        hasError = true;
+                    }
+                }
+            });
+
+            if (errorFields.length > 0) {
+                if (validationFailedFunc != null) validationFailedFunc(errorFields);
+                return false;
+            }
+            else return true;
         }
     };
 })();

@@ -70,6 +70,41 @@ var modals = (function () {
                 modals.show('lightbox-wait');
             }
             else modals.hide();
+        },
+
+        clearValidation: function (modalID) {
+            $('#' + modalID + ' .validateRequired').removeClass('error');
+            $('#' + modalID + ' .errorHeader').hide();
+        },
+
+        applyValidation: function (modalID) {
+            return resources.dataFieldsValidate($('#' + modalID), function () { modals.clearValidation(modalID); }, function (errorFields) {
+                $('#' + modalID + ' .errorHeader').show();
+                resources.arrayEnum(errorFields, function (field) { field.addClass('error'); });
+            });
+        },
+
+        showSignupModal: function () {
+            modals.clearValidation('signupModal');
+            resources.uiToggleCheckbox($('#signupModal .data-membershipBasic'), true);
+            resources.uiToggleCheckbox($('#signupModal .data-membershipAdvance'), false);
+            modals.show('signupModal');
+        },
+
+        signup: function () {
+            if (modals.applyValidation('signupModal')) {
+                var signupData = resources.dataFieldsToObject($('#signupModal'));
+                if (signupData.password != signupData.passwordConfirm) {
+                    modals.showNotificationModal('Passwords do not match, please re-enter');
+                    return;
+                }
+                if (!resources.isValidPassword(signupData.password)) {
+                    modals.showNotificationModal('Password must be at least 8 characters, and contain 1 capital letter, 1 lowercase letter and 1 number');
+                    return;
+                }
+                alert(resources.objectToString(signupData));
+            }
+            //$('#signupModal .firstNameField').addClass('error');
         }
     };
 })();

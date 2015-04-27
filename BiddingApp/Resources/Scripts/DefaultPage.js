@@ -1,0 +1,4 @@
+﻿var defaultPage = (function () {
+    return {
+    };
+})();

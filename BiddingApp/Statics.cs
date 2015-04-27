@@ -23,5 +23,7 @@ namespace BiddingApp
         {
             return new Logger(name);
         }
+
+        public static Access Access { get { return new Access(SqlConnectionString); } }
     }
 }

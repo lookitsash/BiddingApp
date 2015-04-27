@@ -227,3 +227,27 @@ a { text-decoration:none; }
 .form-group {
     margin-bottom: 15px;
 }
+
+.centerDiv {
+    width:800px;
+    padding:10px;
+    height:50px;
+    position:absolute;
+    margin-top:-25px;
+    margin-left:-400px;
+    text-align:center;
+    top:50%;
+    left:50%;
+}
+
+.error 
+{
+    border: 1px solid #ff0000;
+}
+
+.errorHeader
+{
+    color:#ff0000;
+    font-weight:bold;
+    display:none;
+}
