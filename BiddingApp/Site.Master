@@ -7,14 +7,25 @@
     <title></title>
 
     <link rel="stylesheet" href="Resources/CSS/Site.css" type="text/css" />
+    <link rel="stylesheet" href="Resources/scripts/jquery-ui/jquery-ui.min.css" type="text/css" />
     <link rel="stylesheet" href="Resources/scripts/dropit/dropit.css" type="text/css" />
 
     <script type="text/javascript" src="Resources/Scripts/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="Resources/Scripts/jquery-ui/jquery-ui.min.js"></script>
     <script type="text/javascript" src="Resources/Scripts/jquery-cmodal.js"></script>
+    <script type="text/javascript" src="Resources/Scripts/jquery.session.js"></script>
     <script type="text/javascript" src="Resources/scripts/dropit/dropit.js"></script>    
+    <script type="text/javascript" src="Resources/Scripts/Statics.js"></script>
     <script type="text/javascript" src="Resources/Scripts/Resources.js"></script>
     <script type="text/javascript" src="Resources/Scripts/Modals.js"></script>
-
+    <%
+        if (BiddingApp.Statics.DevMode)
+        {
+    %>
+    <script type="text/javascript" src="Resources/Scripts/Dev.js"></script>
+    <%
+        }
+    %>
     
 
     <asp:ContentPlaceHolder ID="CPH_HEAD" runat="server">
@@ -22,6 +33,31 @@
 </head>
 <body>
     <div class="cmodalbg lightboxContainer" style="z-index:15000;"></div>
+
+    <div id="genericWaitModal" class="lightbox white centered" style="display:none; width:500px;">
+        <div class="content">
+            <p class="notificationText"></p><br />
+            <img src="Resources/Images/spinner.gif" />
+        </div>        
+    </div>
+
+    <div id="genericNotificationModal" class="lightbox white centered" style="display:none; width:500px;">
+        <a href="#" onclick="modals.confirmModalResponse(false);return false;" class="iconclosemodal"></a>        
+        <div class="content">
+            <p class="notificationText"></p>
+            <a href="#" onclick="modals.confirmModalResponse(true);return false;" class="btn gray">OK</a>
+        </div>        
+    </div>
+
+    <div id="genericConfirmModal" class="lightbox white centered" style="display:none; width:500px;">
+        <a href="#" onclick="modals.confirmModalResponse(false);return false;" class="iconclosemodal"></a>        
+        <div class="content">
+            <p class="confirmText">Are you sure you want to do this?</p>
+            <a id="genericConfirmModalYesButton" href="#" onclick="modals.confirmModalResponse(true);return false;" class="btn btn-info">Yes</a>
+            <a id="genericConfirmModalNoButton" href="#" onclick="modals.confirmModalResponse(false);return false;" class="btn gray">No</a>                
+        </div>        
+    </div>
+
     <asp:ContentPlaceHolder ID="CPH_CONTENT" runat="server">
         
     </asp:ContentPlaceHolder>

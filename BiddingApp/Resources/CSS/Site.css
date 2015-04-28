@@ -251,3 +251,42 @@ a { text-decoration:none; }
     font-weight:bold;
     display:none;
 }
+
+.customTab .ui-widget-header 
+{
+    border: 1px solid #b0b0b0;
+}
+
+.customTab .ui-state-active a, .customTab .ui-state-active a:link, .customTab .ui-state-active a:visited
+{
+    color: #000000;
+}
+
+.customTab .ui-state-active, .customTab .ui-widget-content .ui-state-active, .customTab .ui-widget-header .ui-state-active 
+{
+    border: 1px solid #969696;
+}
+
+.customTab .ui-state-hover
+{
+    border: 1px solid #969696;
+}
+
+.addContactButton
+{
+    color:#00afff;
+    position:absolute;
+    left:868px;
+    top:56px;
+    cursor:pointer; 
+    border:3px solid #00afff;
+    font-size:18pt;
+    width:30px;
+    height:30px;
+}
+
+.addContactButton:hover
+{
+    background-color: #0085C2;
+    color: white;
+}

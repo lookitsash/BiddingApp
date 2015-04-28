@@ -64,18 +64,43 @@
     <Content Include="Foundation.dll" />
     <Content Include="Newtonsoft.Json.dll" />
     <Content Include="Receiver.asmx" />
+    <Content Include="Resources\CSS\Images\SelectedMiddle.png" />
+    <Content Include="Resources\CSS\Images\SelectedSides.png" />
+    <Content Include="Resources\CSS\Images\TabMenu.png" />
+    <Content Include="Resources\CSS\Images\TabSeperator.png" />
+    <Content Include="Resources\Scripts\jquery-ui\images\ui-bg_diagonals-thick_18_b81900_40x40.png" />
+    <Content Include="Resources\Scripts\jquery-ui\images\ui-bg_diagonals-thick_20_666666_40x40.png" />
+    <Content Include="Resources\Scripts\jquery-ui\images\ui-bg_flat_10_000000_40x100.png" />
+    <Content Include="Resources\Scripts\jquery-ui\images\ui-bg_glass_100_f6f6f6_1x400.png" />
+    <Content Include="Resources\Scripts\jquery-ui\images\ui-bg_glass_100_fdf5ce_1x400.png" />
+    <Content Include="Resources\Scripts\jquery-ui\images\ui-bg_glass_65_ffffff_1x400.png" />
+    <Content Include="Resources\Scripts\jquery-ui\images\ui-bg_gloss-wave_35_f6a828_500x100.png" />
+    <Content Include="Resources\Scripts\jquery-ui\images\ui-bg_highlight-soft_100_eeeeee_1x100.png" />
+    <Content Include="Resources\Scripts\jquery-ui\images\ui-bg_highlight-soft_75_ffe45c_1x100.png" />
+    <Content Include="Resources\Scripts\jquery-ui\images\ui-icons_222222_256x240.png" />
+    <Content Include="Resources\Scripts\jquery-ui\images\ui-icons_228ef1_256x240.png" />
+    <Content Include="Resources\Scripts\jquery-ui\images\ui-icons_ef8c08_256x240.png" />
+    <Content Include="Resources\Scripts\jquery-ui\images\ui-icons_ffd27a_256x240.png" />
+    <Content Include="Resources\Scripts\jquery-ui\images\ui-icons_ffffff_256x240.png" />
+    <Content Include="Resources\Scripts\jquery-ui\jquery-ui.min.css" />
     <Content Include="Resources\CSS\Site.css" />
+    <Content Include="Resources\Images\gear.png" />
     <Content Include="Resources\Images\Hamburger.png" />
+    <Content Include="Resources\Images\logout.png" />
+    <Content Include="Resources\Images\spinner.gif" />
     <Content Include="Resources\Images\sprite-closemodal-flat-1.png" />
     <Content Include="Resources\Scripts\DefaultPage.js" />
+    <Content Include="Resources\Scripts\Dev.js" />
     <Content Include="Resources\Scripts\dropit\dropit.css" />
     <Content Include="Resources\Scripts\dropit\dropit.js" />
     <Content Include="Resources\Scripts\jquery-1.11.0.min.js" />
     <Content Include="Resources\Scripts\jquery-cmodal.js" />
-    <Content Include="Resources\Scripts\jquery-ui-1.10.3.min.js" />
+    <Content Include="Resources\Scripts\jquery-ui\jquery-ui.min.js" />
+    <Content Include="Resources\Scripts\jquery.session.js" />
     <Content Include="Resources\Scripts\Modals.js" />
     <Content Include="Resources\Scripts\Resources.js" />
     <Content Include="Resources\Scripts\Statics.js" />
+    <Content Include="Settings.aspx" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -110,10 +135,18 @@
     <Compile Include="Default.master.designer.cs">
       <DependentUpon>Default.master</DependentUpon>
     </Compile>
+    <Compile Include="Enums.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Receiver.asmx.cs">
       <DependentUpon>Receiver.asmx</DependentUpon>
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Settings.aspx.cs">
+      <DependentUpon>Settings.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Settings.aspx.designer.cs">
+      <DependentUpon>Settings.aspx</DependentUpon>
     </Compile>
     <Compile Include="Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>

@@ -215,8 +215,7 @@
             resources.createCookie(name, "", -1);
         },
 
-        ajaxPost: function (serverPage, serverFunction, params, successCallbackFunction, errorCallbackFunction, throttleUploader) {
-            //if (throttleUploader) imageUpload.yuiPauseUpload();
+        ajaxPost: function (serverPage, serverFunction, params, successCallbackFunction, errorCallbackFunction) {
             jQuery.ajax
             ({
                 type: "POST",
@@ -235,7 +234,6 @@
                         }
                         successCallbackFunction(json, null);
                     }
-                    //if (throttleUploader) imageUpload.yuiResumeUpload();
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                     if (errorCallbackFunction != null) {
@@ -244,7 +242,6 @@
                     else if (successCallbackFunction != null) {
                         successCallbackFunction({ Success: false, ErrorMessage: 'We\'re sorry, but your request could not be processed.  Your Internet connection has been lost.' });
                     }
-                    //if (throttleUploader) imageUpload.yuiResumeUpload();
                 }
             });
         },

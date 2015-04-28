@@ -4,26 +4,34 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $('.menu').dropit();
-            //modals.show('signupModal');
+            defaultPage.refreshSession();
         });
     </script>
 
-    <asp:ContentPlaceHolder ID="CPH_HEAD" runat="server">
-    </asp:ContentPlaceHolder>
+    <asp:ContentPlaceHolder ID="CPH_HEAD" runat="server"></asp:ContentPlaceHolder>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="CPH_CONTENT" runat="server">
     <div>
         <table border="0" style="width:100%;">
             <tr>
                 <td>
-                <span style=" font-size:25pt;"><b>Bidding</b><i>App</i></span>
+                    <a href="Default.aspx" style="color:#000000;"><span style="font-size:25pt;"><b>Bidding</b><i>App</i></span></a>
                 </td>
-                <td style="width:80%"></td>
-                <td>
+                <td style="width:80%; text-align:center;font-size:25pt; font-weight:bold;"><asp:ContentPlaceHolder ID="CPH_HEADING" runat="server"></asp:ContentPlaceHolder></td>
+                <td class="outSession">
                     <a href="#" onclick="modals.showLoginModal();return false;" class="btn btn-primary">LOGIN</a>
                 </td>
-                <td>
+                <td class="outSession">
                     <a href="#" onclick="modals.showSignupModal();return false;" class="btn btn-primary">SIGN UP</a>
+                </td>
+                <td class="inSession">
+                    <a href="#" onclick="modals.logout();return false;"><img src="Resources/Images/logout.png" /></a>
+                </td>
+                <td class="inSession">
+                    <a href="Settings.aspx"><img src="Resources/Images/gear.png" /></a>
+                </td>
+                <td class="inSession">
+                    <a href="#" onclick="return false;" class="btn btn-primary">START BIDDING</a>
                 </td>
                 <td>
                     <ul id="menu1" class="menu">
@@ -44,23 +52,6 @@
         </asp:ContentPlaceHolder>
     </div>
 
-    <div id="genericNotificationModal" class="lightbox white centered" style="display:none; width:500px;">
-        <a href="#" onclick="modals.confirmModalResponse(false);return false;" class="iconclosemodal"></a>        
-        <div class="content">
-            <p class="notificationText"></p>
-            <a href="#" onclick="modals.confirmModalResponse(true);return false;" class="btn gray">OK</a>
-        </div>        
-    </div>
-
-    <div id="genericConfirmModal" class="lightbox white centered" style="display:none; width:500px;">
-        <a href="#" onclick="modals.confirmModalResponse(false);return false;" class="iconclosemodal"></a>        
-        <div class="content">
-            <p class="confirmText">Are you sure you want to do this?</p>
-            <a id="genericConfirmModalYesButton" href="#" onclick="modals.confirmModalResponse(true);return false;" class="btn btn-info">Yes</a>
-            <a id="genericConfirmModalNoButton" href="#" onclick="modals.confirmModalResponse(false);return false;" class="btn gray">No</a>                
-        </div>        
-    </div>
-
     <div id="loginModal" class="lightbox default" style="display:none; width:350px;">
         <a href="#" onclick="modals.hide();return false;" class="iconclosemodal"></a>
         <section>
@@ -71,9 +62,10 @@
 
                 <section class="panel white solid">
                     <div class="panel-body form" style=" text-align:center;">
-                        <input type="text" style="width:250px;" id="TB_Login_Email" placeholder="Email Address" /><br />
+                        <div class="errorHeader">Please enter the required fields below</div>
+                        <input type="text" style="width:250px;" class="data-email validateEmail validateRequired" placeholder="Email Address" /><br />
                         <br />
-                        <input type="text" style="width:250px;" TextMode="Password" id="TB_Login_Password" placeholder="Password"/><br />
+                        <input type="password" style="width:250px;" class="data-password validateRequired" placeholder="Password"/><br />
                         <br />
                         <a href="#">Forgot your password?</a><br />
                         <a href="#">Don't have an account?  Create one.</a>
@@ -83,7 +75,7 @@
             <div class="footerwrapper">
                 <div class="footer">
                     <div class="right">
-                        <a href="#" onclick="return false;" class="btn btn-primary">Login</a>                                                    
+                        <a href="#" onclick="modals.login();return false;" class="btn btn-primary">Login</a>                                                    
                     </div>
                 </div>
             </div>
@@ -102,14 +94,24 @@
                     <div class="panel-body form" style=" text-align:center;">
                         <div class="errorHeader">Please enter the required fields below</div>
                         <table style="width:100%;">
+                            <%
+                                if (BiddingApp.Statics.DevMode)
+                                {
+                            %>
+                            <tr>
+                                <td colspan="2"><a href="#" onclick="dev.generateRandomSignupData();return false;">(generate random data)</a></td>
+                            </tr>
+                            <%
+                                }
+                            %>
                             <tr>
                                 <td align="left"><input type="text" style="width:200px;" class="data-firstName validateRequired" placeholder="First Name"/></td>
                                 <td align="right"><input type="text" style="width:200px;" class="data-lastName validateRequired" placeholder="Last Name"/></td>
                             </tr>
                             <tr>
-                                <td align="left"><input type="text" style="width:200px;" class="data-company companyField" placeholder="Company Name"/></td>
+                                <td align="left"><input type="text" style="width:200px;" class="data-company" placeholder="Company Name"/></td>
                                 <td align="right">
-                                    <select style="width:205px;" class="countryField">
+                                    <select style="width:205px;" class="data-country countryField">
                                         <option value="AF">Afghanistan</option>
                                         <option value="AX">Åland Islands</option>
                                         <option value="AL">Albania</option>

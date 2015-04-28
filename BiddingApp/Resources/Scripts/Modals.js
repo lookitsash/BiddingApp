@@ -1,5 +1,7 @@
 ﻿/// <reference path="Resources.js" />
 /// <reference path="Statics.js" />
+/// <reference path="DefaultPage.js" />
+/// <reference path="Dev.js" />
 
 var modals = (function () {
     var currentModal = null;
@@ -65,9 +67,9 @@ var modals = (function () {
         toggleWaitingModal: function (isVisible, text) {
             if (isVisible) {
                 if (text == null) text = 'Please wait...';
-                $('.lightbox-wait .modalTitle').html(text);
+                $('#genericWaitModal .notificationText').html(text);
 
-                modals.show('lightbox-wait');
+                modals.show('genericWaitModal');
             }
             else modals.hide();
         },
@@ -84,8 +86,49 @@ var modals = (function () {
             });
         },
 
+        showLoginModal: function () {
+            $('#loginModal .data-email, #loginModal .data-password').off('keypress').on('keypress', function (ev) {
+                var keycode = (ev.keyCode ? ev.keyCode : ev.which);
+                if (keycode == '13') {
+                    modals.login();
+                }
+            });
+
+            modals.clearValidation('signupModal');
+            $('#loginModal input').val('');
+            modals.show('loginModal');
+        },
+
+        login: function () {
+            if (modals.applyValidation('loginModal')) {
+                var loginData = resources.dataFieldsToObject($('#loginModal'));
+                modals.hide();
+                modals.toggleWaitingModal(true, 'Please wait...');
+                resources.ajaxPost('Receiver', 'Login', loginData, function (data) {
+                    modals.hide();
+                    if (data.Success) {
+                        $.session.set('SessionGUID', data.SessionGUID);
+                        defaultPage.refreshSession();
+                    }
+                    else {
+                        modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('loginModal'); });
+                    }
+                });
+            };
+        },
+
+        logout: function () {
+            modals.showConfirmModal('Are you sure you want to log out?', function (success) {
+                if (success) {
+                    $.session.clear();
+                    defaultPage.validateSession();
+                }
+            });
+        },
+
         showSignupModal: function () {
             modals.clearValidation('signupModal');
+            $('#signupModal input').val('');
             resources.uiToggleCheckbox($('#signupModal .data-membershipBasic'), true);
             resources.uiToggleCheckbox($('#signupModal .data-membershipAdvance'), false);
             modals.show('signupModal');
@@ -102,9 +145,20 @@ var modals = (function () {
                     modals.showNotificationModal('Password must be at least 8 characters, and contain 1 capital letter, 1 lowercase letter and 1 number');
                     return;
                 }
-                alert(resources.objectToString(signupData));
+
+                modals.hide();
+                modals.toggleWaitingModal(true, 'Please wait...');
+                resources.ajaxPost('Receiver', 'Signup', { signupData: signupData }, function (data) {
+                    modals.hide();
+                    if (data.Success) {
+                        $.session.set('SessionGUID', data.SessionGUID);
+                        defaultPage.refreshSession();
+                    }
+                    else {
+                        modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('signupModal'); });
+                    }
+                });
             }
-            //$('#signupModal .firstNameField').addClass('error');
         }
     };
 })();
