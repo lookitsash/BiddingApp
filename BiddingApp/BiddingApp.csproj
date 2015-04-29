@@ -68,6 +68,10 @@
     <Content Include="Resources\CSS\Images\SelectedSides.png" />
     <Content Include="Resources\CSS\Images\TabMenu.png" />
     <Content Include="Resources\CSS\Images\TabSeperator.png" />
+    <Content Include="Resources\Images\green_light_16.png" />
+    <Content Include="Resources\Images\red_light_16.png" />
+    <Content Include="Resources\Scripts\Bidding.js" />
+    <Content Include="Resources\Scripts\hoverIntent.js" />
     <Content Include="Resources\Scripts\jquery-ui\images\ui-bg_diagonals-thick_18_b81900_40x40.png" />
     <Content Include="Resources\Scripts\jquery-ui\images\ui-bg_diagonals-thick_20_666666_40x40.png" />
     <Content Include="Resources\Scripts\jquery-ui\images\ui-bg_flat_10_000000_40x100.png" />
@@ -171,7 +175,7 @@
         <WebProjectProperties>
           <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>58596</DevelopmentServerPort>
+          <DevelopmentServerPort>64405</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>
           </IISUrl>

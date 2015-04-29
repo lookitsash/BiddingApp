@@ -39,14 +39,14 @@ var modals = (function () {
         showConfirmModal: function (confirmText, responseCallback, yesButtonOptions, noButtonOptions) {
             if (yesButtonOptions == null) yesButtonOptions = { text: 'Yes' }
             else if (typeof yesButtonOptions === 'string') yesButtonOptions = { text: yesButtonOptions };
-            if (yesButtonOptions.cssClass == null) yesButtonOptions.cssClass = 'btn btn-info';
+            if (yesButtonOptions.cssClass == null) yesButtonOptions.cssClass = 'btn btn-primary';
             $('#genericConfirmModalYesButton').removeAttr('class');
             $('#genericConfirmModalYesButton').attr('class', yesButtonOptions.cssClass);
             $('#genericConfirmModalYesButton').html(yesButtonOptions.text);
 
             if (noButtonOptions == null) noButtonOptions = { text: 'No' }
             else if (typeof noButtonOptions === 'string') noButtonOptions = { text: noButtonOptions };
-            if (noButtonOptions.cssClass == null) noButtonOptions.cssClass = 'btn gray';
+            if (noButtonOptions.cssClass == null) noButtonOptions.cssClass = 'btn btn-cancel';
             $('#genericConfirmModalNoButton').removeAttr('class');
             $('#genericConfirmModalNoButton').attr('class', noButtonOptions.cssClass);
             $('#genericConfirmModalNoButton').html(noButtonOptions.text);
@@ -159,6 +159,17 @@ var modals = (function () {
                     }
                 });
             }
+        },
+
+        showNewInterestModal: function () {
+            modals.show('createInterestModal');
+        },
+
+        showNewContactModal: function () {
+            modals.show('createContactModal');
+        },
+
+        showInterestModal: function () {
         }
     };
 })();

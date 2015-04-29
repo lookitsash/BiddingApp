@@ -46,6 +46,15 @@ a { text-decoration:none; }
     opacity:0.8;
 }
 
+.btn.btn-cancel {
+    background-color: #ff0000;
+    border-color:#ff0000;
+    color: #ffffff;
+}
+.btn.btn-cancel:hover {
+    opacity:0.8;
+}
+
 .btn.btn-success {
     background-color: #36acac;
     color: #ffffff !important;
@@ -252,6 +261,12 @@ a { text-decoration:none; }
     display:none;
 }
 
+.dialogBox .ui-widget-header 
+{
+    border: 1px solid #b0b0b0;
+}
+
+
 .customTab .ui-widget-header 
 {
     border: 1px solid #b0b0b0;
@@ -289,4 +304,68 @@ a { text-decoration:none; }
 {
     background-color: #0085C2;
     color: white;
+}
+
+.addContactButtonBidding
+{
+    color:#00afff;
+    cursor:pointer; 
+    border:3px solid #00afff;
+    font-size:18pt;
+    width:30px;
+    height:30px;
+    text-align:center;
+}
+
+.addContactButtonBidding:hover
+{
+    background-color: #0085C2;
+    color: white;
+}
+
+.interestsButton
+{
+    color:#00afff;
+    cursor:pointer; 
+    border-top :3px solid #00afff;
+    border-bottom:3px solid #00afff;
+    border-right :3px solid #00afff;
+    font-size:18pt;
+    width:120px;
+    height:30px;
+    text-align:center;
+}
+
+.interestsButton:hover
+{
+    background-color: #0085C2;
+    color: white;
+}
+
+.contactsButton
+{
+    color:#00afff;
+    cursor:pointer; 
+    border-top :3px solid #00afff;
+    border-bottom:3px solid #00afff;
+    border-left :3px solid #00afff;
+    font-size:18pt;
+    width:120px;
+    height:30px;
+    text-align:center;
+}
+
+.contactsButton:hover
+{
+    background-color: #0085C2;
+    color: white;
+}
+
+.contactsSearch
+{
+    display:none;
+    border-top :3px solid #00afff;
+    border-bottom:3px solid #00afff;
+    border-left :3px solid #00afff;
+    height:30px;
 }

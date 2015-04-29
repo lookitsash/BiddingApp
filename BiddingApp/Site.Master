@@ -18,6 +18,7 @@
     <script type="text/javascript" src="Resources/Scripts/Statics.js"></script>
     <script type="text/javascript" src="Resources/Scripts/Resources.js"></script>
     <script type="text/javascript" src="Resources/Scripts/Modals.js"></script>
+    <script type="text/javascript" src="Resources/Scripts/DefaultPage.js"></script>
     <%
         if (BiddingApp.Statics.DevMode)
         {
@@ -27,6 +28,24 @@
         }
     %>
     
+    <script type="text/javascript">
+        $(document).ready(function () {
+    <%
+    if (BiddingApp.Statics.DevMode && !String.IsNullOrEmpty(BiddingApp.Statics.DevEmail) && !String.IsNullOrEmpty(BiddingApp.Statics.DevPassword))
+    {
+        string sessionGUID = Convert.ToString(Session["SessionGUID"]) ?? "";
+        if (String.IsNullOrEmpty(sessionGUID))
+        {
+            sessionGUID = BiddingApp.Statics.Access.Login(BiddingApp.Statics.DevEmail, BiddingApp.Statics.DevPassword, Request.UserHostAddress, Request.UserAgent); 
+            Session.Add("SessionGUID", sessionGUID);
+        }
+    %>
+        $.session.set('SessionGUID', '<% =sessionGUID %>');
+    <%
+    }
+    %>
+        });
+    </script>
 
     <asp:ContentPlaceHolder ID="CPH_HEAD" runat="server">
     </asp:ContentPlaceHolder>
@@ -53,9 +72,35 @@
         <a href="#" onclick="modals.confirmModalResponse(false);return false;" class="iconclosemodal"></a>        
         <div class="content">
             <p class="confirmText">Are you sure you want to do this?</p>
-            <a id="genericConfirmModalYesButton" href="#" onclick="modals.confirmModalResponse(true);return false;" class="btn btn-info">Yes</a>
-            <a id="genericConfirmModalNoButton" href="#" onclick="modals.confirmModalResponse(false);return false;" class="btn gray">No</a>                
+            <a id="genericConfirmModalNoButton" href="#" onclick="modals.confirmModalResponse(false);return false;" class="btn btn-cancel">No</a>                
+            <a id="genericConfirmModalYesButton" href="#" onclick="modals.confirmModalResponse(true);return false;" class="btn btn-primary">Yes</a>
         </div>        
+    </div>
+
+    <div id="createContactModal" class="lightbox default" style="display:none; width:420px;">
+        <a href="#" onclick="modals.hide();return false;" class="iconclosemodal"></a>
+        <section>
+            <header>
+                <h2 class="modalTitle">Add New Contact</h2>
+            </header>
+            <div class="contentwrapper">              
+
+                <section class="panel white solid">
+                    <div class="panel-body form" style=" text-align:center;">
+                        <div class="errorHeader">Please enter the required fields below</div>
+                        <input type="text" style="width:300px;" class="data-email validateEmail validateRequired" placeholder="Enter New Contact Email" />
+                    </div>
+                </section>
+            </div>
+            <div class="footerwrapper">
+                <div class="footer">
+                    <div class="right">
+                        <a href="#" onclick="modals.hide();return false;" class="btn btn-cancel">Cancel</a>
+                        <a href="#" onclick="modals.hide();return false;" class="btn btn-primary">Add</a>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 
     <asp:ContentPlaceHolder ID="CPH_CONTENT" runat="server">

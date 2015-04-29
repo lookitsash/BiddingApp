@@ -1,6 +1,5 @@
 ﻿<%@ Master Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.master.cs" Inherits="BiddingApp.Default1" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="CPH_HEAD" runat="server">
-    <script type="text/javascript" src="Resources/Scripts/DefaultPage.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
             $('.menu').dropit();
@@ -31,7 +30,7 @@
                     <a href="Settings.aspx"><img src="Resources/Images/gear.png" /></a>
                 </td>
                 <td class="inSession">
-                    <a href="#" onclick="return false;" class="btn btn-primary">START BIDDING</a>
+                    <a href="Bidding.aspx" class="btn btn-primary">START BIDDING</a>
                 </td>
                 <td>
                     <ul id="menu1" class="menu">

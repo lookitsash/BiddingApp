@@ -2,6 +2,7 @@
 
 var dev = (function () {
     return {
+        sessionGUID: null,
         generateRandomSignupData: function () {
             $('#signupModal .data-firstName').val('firstName');
             $('#signupModal .data-lastName').val('lastName');

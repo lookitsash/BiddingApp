@@ -27,5 +27,7 @@ namespace BiddingApp
         public static Access Access { get { return new Access(SqlConnectionString); } }
 
         public static bool DevMode { get { return ConfigAdapter.GetAppSetting<bool>("DevMode"); } }
+        public static string DevEmail { get { return ConfigAdapter.GetAppSetting("DevEmail"); } }
+        public static string DevPassword { get { return ConfigAdapter.GetAppSetting("DevPassword"); } }
     }
 }
