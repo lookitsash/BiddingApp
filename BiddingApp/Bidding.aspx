@@ -29,22 +29,33 @@
                 }
                 return false;
             });
+
+            bidding.spawnWindow('biddingWindow', 'BUY Product');
+            bidding.spawnWindow('biddingNoOrderWindow', 'BUY Product');
+            bidding.spawnWindow('viewInterestWindow', 'SELL Product - fName1');
+            bidding.spawnWindow('viewInterestNoOrderWindow', 'BUY Product - fName2');
+            bidding.spawnWindow('viewInterestFirmWindow', 'BUY Product - fName2');
         });
 
         function toggleContactSearch(isVisible) {
             if (isVisible) {
                 $('.contactsButton').hide();
-                $('.contactsSearch').show();
+                $('.menuContactsLI .contactsSearch').show();
                 $('.contactsSearchField').focus()
             }
             else {
                 $('.contactsButton').show();
-                $('.contactsSearch').hide();
+                $('.menuContactsLI .contactsSearch').hide();
             }
         }
     </script>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="CPH_CONTENT" runat="server">
+    <%
+        int biddingWindowUserScrollHeight = 175;
+        if (Request.UserAgent.ToUpper().Contains("IE") || Request.UserAgent.ToUpper().Contains("TRIDENT")) biddingWindowUserScrollHeight = 180;
+        else if (Request.UserAgent.ToUpper().Contains("FIREFOX")) biddingWindowUserScrollHeight = 183;
+     %>
     <div>
         <table cellspacing="0" cellpadding="0" border="0" style="width:100%;">
             <tr>
@@ -55,6 +66,9 @@
                     <ul id="menu1" class="menu menuInterests">
                         <li><a href="#"><div class="interestsButton">Interests</div></a>
                         <ul class="dropit" style="padding:0px;">
+                            <li style="white-space:nowrap;">
+                            <a href="#" onclick="bidding.autoArrangeWindows();return false;">Arrange Windows</a>
+                            </li>
                             <li>
                                 <div style="background-color:Green; cursor:pointer; border: 1px solid #000000;">
                                     <table width="100%">
@@ -123,8 +137,326 @@
         </table>        
     </div>
     <div>
-        <div class="dialogBox" style="display:none;" title="Basic dialog">
-          <p>This is the default dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
+        <div class="biddingWindow" style="display:none;">
+          <table style="min-width:435px; left:-10px; height:100%;" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td valign="top" style="font-size:10pt; border:2px solid #4f81bd;">
+                    <table style="width:100%; height:100%; background:#93cddd;" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td style="" colspan="3">
+                                <div style="padding:5px;">
+                                    Condition<br />
+                                    Quantity<br />
+                                    Remarks
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="height:1px;">
+                            <td style="width:20px;"></td>
+                            <td style="text-align:center; border:1px solid #ffffff;"></td>
+                            <td style="width:20px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="" colspan="3">
+                                <div style="padding:5px;">
+                                Order: <b>Working order @ XX.XXXX<br />
+                                Good for another AA Hr BB Min</b>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;" colspan="3">
+                                <a href="#" onclick="return false;" class="btn btn-cancel">X</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary">Cancel Order</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary">Check Prices</a>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                </td>
+                <td valign="top" style="width:130px;font-size:10pt; background-color:#b7dee8; border-top: 2px solid #4f81bd; border-right: 2px solid #4f81bd; border-bottom: 2px solid #4f81bd;">
+                    <div style="max-height:<% =biddingWindowUserScrollHeight %>px; overflow:auto;">
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                    </div>
+                </td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="biddingNoOrderWindow" style="display:none;">
+          <table style="min-width:435px; left:-10px; height:100%;" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td valign="top" style="font-size:10pt; border:2px solid #4f81bd;">
+                    <table style="width:100%; height:100%; background:#d99694;" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td style="" colspan="3">
+                                <div style="padding:5px;">
+                                    Condition<br />
+                                    Quantity<br />
+                                    Remarks
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="height:1px;">
+                            <td style="width:20px;"></td>
+                            <td style="text-align:center; border:1px solid #ffffff;"></td>
+                            <td style="width:20px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="" colspan="3">
+                                <div style="padding:5px;">
+                                Order: <b>None</b>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;" colspan="3">
+                                <a href="#" onclick="return false;" class="btn btn-cancel">X</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary">Leave Order</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary">Check Prices</a>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                </td>
+                <td valign="top" style="width:130px;font-size:10pt; background-color:#b7dee8; border-top: 2px solid #4f81bd; border-right: 2px solid #4f81bd; border-bottom: 2px solid #4f81bd;">
+                    <div style="max-height:<% =biddingWindowUserScrollHeight %>px; overflow:auto;">
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
+                    </div>
+                </td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="viewInterestWindow" style="display:none;">
+          <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td valign="top" style="font-size:10pt; border:2px solid #4f81bd;">
+                    <table style="width:100%; height:100%; background:#c3d69b;" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td style=" font-weight:bold;" colspan="3">
+                                <div style="padding:5px;">
+                                Status Update
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="" colspan="3">
+                                <table width="100%" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td>
+                                            <div style="padding:5px;">
+                                                Condition<br />
+                                                Quantity<br />
+                                                Remarks
+                                            </div>
+                                        </td>
+                                        <td valign="top" align="right">
+                                        <span>Showing</span> <div class="priceContainer" style="margin-right:7px; background-color:#b7dee8; color:#4f81bd; font-weight:bold; padding:5px; text-align:center; vertical-align:middle;">00.0000</div>
+                                        </td>
+                                    </tr>
+                                </table>                                
+                            </td>
+                        </tr>
+                        <tr style="height:1px;">
+                            <td style="width:20px;"></td>
+                            <td style="text-align:center; border:1px solid #ffffff;"></td>
+                            <td style="width:20px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="" colspan="3">
+                                <div style="padding:5px;">
+                                    <table style="width:100%;">
+                                        <tr>
+                                            <td>
+                                                Order: <b>Working order @ XX.XXXX<br />
+                                                Good for another AA Hr BB Min</b>
+                                            </td>
+                                            <td align="right">
+                                                <a href="#" onclick="return false;" class="btn btn-primary">Fill Order</a>
+                                            </td>
+                                        </tr>
+                                    </table>                                    
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;" colspan="3">
+                                <a href="#" onclick="return false;" class="btn btn-cancel">X</a>
+                                <div class="priceContainer" style="vertical-align:middle;"><input class="priceField" style="height:23px; width:50px;" placeholder="Price" type="text" /></div>
+                                <a href="#" onclick="return false;" class="btn btn-primary">Show Indic</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary">Show Firm</a>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                </td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="viewInterestNoOrderWindow" style="display:none;">
+          <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td valign="top" style="font-size:10pt; border:2px solid #4f81bd;">
+                    <table style="width:100%; height:100%; background:#fac090;" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td style=" font-weight:bold;" colspan="3">
+                                <div style="padding:5px;">
+                                Status Update
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="" colspan="3">
+                                <table width="100%" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td>
+                                            <div style="padding:5px;">
+                                                Condition<br />
+                                                Quantity<br />
+                                                Remarks
+                                            </div>
+                                        </td>
+                                        <td valign="top" align="right">
+                                        <span>Showing</span> <div class="priceContainer" style="margin-right:7px; background-color:#b7dee8; color:#4f81bd; font-weight:bold; padding:5px; text-align:center; vertical-align:middle;">00.0000</div>
+                                        </td>
+                                    </tr>
+                                </table>                                
+                            </td>
+                        </tr>
+                        <tr style="height:1px;">
+                            <td style="width:20px;"></td>
+                            <td style="text-align:center; border:1px solid #ffffff;"></td>
+                            <td style="width:20px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="" colspan="3">
+                                <div style="padding:5px;">
+                                    <table style="width:100%;">
+                                        <tr>
+                                            <td>
+                                                Order: <b>None</b>
+                                            </td>
+                                            <td align="right">
+                                                <a href="#" onclick="return false;" class="btn btn-primary" style="visibility:hidden;">Fill Order</a>
+                                            </td>
+                                        </tr>
+                                    </table>                                    
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;" colspan="3">
+                                <a href="#" onclick="return false;" class="btn btn-cancel">X</a>
+                                <div class="priceContainer" style="vertical-align:middle;"><input class="priceField" style="height:23px; width:50px;" placeholder="Price" type="text" /></div>
+                                <a href="#" onclick="return false;" class="btn btn-primary">Show Indic</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary">Show Firm</a>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                </td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="viewInterestFirmWindow" style="display:none;">
+          <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td valign="top" style="font-size:10pt; border:2px solid #4f81bd;">
+                    <table style="width:100%; height:100%; background:#ffffff;" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td style=" font-weight:bold;" colspan="3">
+                                <div style="padding:5px;">
+                                Status Update
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="" colspan="3">
+                                <table width="100%" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td>
+                                            <div style="padding:5px;">
+                                                Condition<br />
+                                                Quantity<br />
+                                                Remarks
+                                            </div>
+                                        </td>
+                                        <td valign="top" align="right">
+                                        <span style="font-weight:bold;">Firm</span> <div class="priceContainer" style="margin-right:7px; background-color:#b7dee8; border: 3px solid #ff0000; color:#4f81bd; font-weight:bold; padding:5px; text-align:center; vertical-align:middle;">00.0000</div>
+                                        </td>
+                                    </tr>
+                                </table>                                
+                            </td>
+                        </tr>
+                        <tr style="height:1px;">
+                            <td style="width:20px;"></td>
+                            <td style="text-align:center; border:1px solid #ffffff;"></td>
+                            <td style="width:20px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="" colspan="3">
+                                <div style="padding:5px;">
+                                    <table style="width:100%;">
+                                        <tr>
+                                            <td>
+                                                Order @ XX.XXX<br />
+                                                Good until AA hour BB min
+                                            </td>
+                                            <td align="right">
+                                                <a href="#" onclick="return false;" class="btn btn-primary">Fill Order</a>
+                                            </td>
+                                        </tr>
+                                    </table>                                    
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;" colspan="3">
+                                <div class="priceContainer" style="vertical-align:middle;"><input class="priceField" style="height:23px; width:50px;" placeholder="Price" type="text" /></div>
+                                <a href="#" onclick="return false;" class="btn btn-primary">Update Firm</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary">Off</a>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                </td>
+            </tr>
+          </table>
         </div>
 
         <div id="createInterestModal" class="lightbox default" style="display:none; width:420px;">
