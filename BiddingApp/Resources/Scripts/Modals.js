@@ -170,6 +170,48 @@ var modals = (function () {
         },
 
         showInterestModal: function () {
+        },
+
+        showCheckPricesModal: function () {
+            resources.uiToggleCheckbox($('#checkPricesModal .allContacts'), true);
+            $('#checkPricesModal .selectContactsDiv').hide();
+
+            $('#checkPricesModal .allContacts').unbind('click.bidding').bind('click.bidding', function (e) {
+                $('#checkPricesModal .selectContactsDiv').hide();
+                windowUpdate();
+            });
+            $('#checkPricesModal .selectedContacts').unbind('click.bidding').bind('click.bidding', function (e) {
+                $('#checkPricesModal .selectContactsDiv').show();
+                windowUpdate();
+            });
+
+            modals.show('checkPricesModal');
+        },
+
+        showLeaveOrderModal: function () {
+            resources.uiToggleCheckbox($('#leaveOrderModal .goodUntilCancelled'), true);
+            resources.uiToggleCheckbox($('#leaveOrderModal .allContacts'), true);
+            $('#leaveOrderModal .selectContactsDiv').hide();
+
+            $('#leaveOrderModal .allContacts').unbind('click.bidding').bind('click.bidding', function (e) {
+                $('#leaveOrderModal .selectContactsDiv').hide();
+                windowUpdate();
+            });
+            $('#leaveOrderModal .selectedContacts').unbind('click.bidding').bind('click.bidding', function (e) {
+                $('#leaveOrderModal .selectContactsDiv').show();
+                windowUpdate();
+            });
+            $('#leaveOrderModal .hourField, #leaveOrderModal .minuteField').unbind('click.bidding').bind('click.bidding', function (e) {
+                resources.uiToggleCheckbox($('#leaveOrderModal .goodUntilCancelled'), false);
+                resources.uiToggleCheckbox($('#leaveOrderModal .goodUntilDuration'), true);
+            });
+
+            modals.show('leaveOrderModal');
+        },
+
+        showNoAdvanceContactsModal: function () {
+            modals.show('noAdvanceContactsModal');
         }
+
     };
 })();

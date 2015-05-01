@@ -259,12 +259,15 @@
         },
 
         uiToggleCheckbox: function (checkbox, isChecked) {
+            checkbox.prop("checked", isChecked);
+            /*
             checkbox.parent().removeClass('checked');
             checkbox.removeAttr('checked');
             if (isChecked) {
                 checkbox.parent().addClass('checked');
                 checkbox.attr('checked', true);
             }
+            */
         },
 
         uiToggleEnable: function (control, isEnabled) {

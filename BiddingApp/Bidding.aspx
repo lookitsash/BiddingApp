@@ -30,11 +30,19 @@
                 return false;
             });
 
-            bidding.spawnWindow('biddingWindow', 'BUY Product');
-            bidding.spawnWindow('biddingNoOrderWindow', 'BUY Product');
-            bidding.spawnWindow('viewInterestWindow', 'SELL Product - fName1');
-            bidding.spawnWindow('viewInterestNoOrderWindow', 'BUY Product - fName2');
+            bidding.spawnWindow(WINDOWTYPE_BIDDING, 'BUY Product');
+            bidding.spawnWindow(WINDOWTYPE_BIDDINGNOORDER, 'BUY Product');
+            bidding.spawnWindow(WINDOWTYPE_VIEWINTEREST, 'SELL Product - fName1');
+            bidding.spawnWindow(WINDOWTYPE_VIEWINTERESTNOORDER, 'BUY Product - fName2');
             bidding.spawnWindow('viewInterestFirmWindow', 'BUY Product - fName2');
+            bidding.spawnWindow(WINDOWTYPE_DEALCONFIRM, 'Confirm Deal: Product');
+            bidding.spawnWindow(WINDOWTYPE_DEALCOMPLETE, 'Confirmed Deal DDMMMYY HH:MM');
+            bidding.spawnWindow(WINDOWTYPE_FILLORDERCONFIRM, 'Fill Order');
+
+            //bidding.spawnWindow(WINDOWTYPE_CHAT, 'fName1 lName1');
+            //bidding.spawnWindow(WINDOWTYPE_CHAT, 'fName2 lName2');
+            //modals.showDealCompleteModal();
+            
         });
 
         function toggleContactSearch(isVisible) {
@@ -482,8 +490,8 @@
                     </section>
                 </div>
                 <div class="footerwrapper">
-                    <div class="footer">
-                        <div class="right">
+                    <div class="footer centered">
+                        <div>
                             <a href="#" onclick="modals.hide();return false;" class="btn btn-cancel">Cancel</a>
                             <a href="#" onclick="modals.hide();return false;" class="btn btn-primary">BUY</a>
                             <a href="#" onclick="modals.hide();return false;" class="btn btn-primary">SELL</a>
@@ -492,5 +500,238 @@
                 </div>
             </section>
         </div>
+
+        <div id="checkPricesModal" class="lightbox default" style="display:none; width:500px;">
+            <a href="#" onclick="modals.hide();return false;" class="iconclosemodal"></a>
+            <section>
+                <header>
+                    <h2 class="modalTitle">Check Prices</h2>
+                </header>
+                <div class="contentwrapper">              
+
+                    <section class="panel white solid">
+                        <div class="panel-body form">
+                            Check Prices with:<br />
+                            <label><input type="radio" name="contactSelection" class="allContacts" />All my advance contacts</label><br />
+                            <label><input type="radio" name="contactSelection" class="selectedContacts" />Selected advance contacts</label><br />
+                            <div class="selectContactsDiv">
+                                <br />
+                                <table style="width:100%;">
+                                    <tr>
+                                        <td><label><input type="checkbox" />Company1 - fName1</label></td>
+                                        <td><label><input type="checkbox" />Company2 - fName2</label></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label><input type="checkbox" />Company1 - fName1</label></td>
+                                        <td><label><input type="checkbox" />Company2 - fName2</label></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <div class="footerwrapper">
+                    <div class="footer centered">
+                        <div>
+                            <a href="#" onclick="modals.hide();return false;" class="btn btn-cancel">X</a>
+                            <a href="#" onclick="modals.hide();return false;" class="btn btn-primary">Call for FIRM</a>
+                            <a href="#" onclick="modals.hide();return false;" class="btn btn-primary">Call for Indic</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div id="leaveOrderModal" class="lightbox default" style="display:none; width:500px;">
+            <a href="#" onclick="modals.hide();return false;" class="iconclosemodal"></a>
+            <section>
+                <header>
+                    <h2 class="modalTitle">Leave Order</h2>
+                </header>
+                <div class="contentwrapper">              
+
+                    <section class="panel white solid">
+                        <div class="panel-body form">
+                            Work an order with:<br />
+                            <label><input type="radio" name="contactSelection" class="allContacts" />All my advance contacts</label><br />
+                            <label><input type="radio" name="contactSelection" class="selectedContacts" />Selected advance contacts</label><br />
+                            <div class="selectContactsDiv">
+                                <br />
+                                <table style="width:100%;">
+                                    <tr>
+                                        <td><label><input type="checkbox" />Company1 - fName1</label></td>
+                                        <td><label><input type="checkbox" />Company2 - fName2</label></td>
+                                    </tr>
+                                    <tr>
+                                        <td><label><input type="checkbox" />Company1 - fName1</label></td>
+                                        <td><label><input type="checkbox" />Company2 - fName2</label></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <br />
+                            Good Until:<br />
+                            <label><input type="radio" name="goodUntil" class="goodUntilCancelled" />Cancelled</label><br />
+                            <input type="radio" name="goodUntil" class="goodUntilDuration" />For <input class="hourField" style="width:25px;" type="text" /> hour <input style="width:25px;" class="minuteField" type="text" /> min
+                        </div>
+                    </section>
+                </div>
+                <div class="footerwrapper">
+                    <div class="footer centered">
+                        <div>
+                            <a href="#" onclick="modals.hide();return false;" class="btn btn-cancel">X</a>
+                            <a href="#" onclick="modals.hide();return false;" class="btn btn-primary">Confirm</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div id="noAdvanceContactsModal" class="lightbox default" style="display:none; width:500px;">
+            <a href="#" onclick="modals.hide();return false;" class="iconclosemodal"></a>
+            <section>
+                <header>
+                    <h2 class="modalTitle">No Advance Contacts</h2>
+                </header>
+                <div class="contentwrapper">              
+
+                    <section class="panel white solid">
+                        <div class="panel-body form">
+                            You do not have any active advance contacts yet.  <u>Go to your contact list</u> to grant them permission to see your interest and show prices.
+                        </div>
+                    </section>
+                </div>
+                <div class="footerwrapper">
+                    <div class="footer centered">
+                        <div>
+                            <a href="#" onclick="modals.hide();return false;" class="btn btn-cancel">X</a>
+                            <a href="#" onclick="return false;" class="btn disabled" style="cursor:default;">Call for FIRM</a>
+                            <a href="#" onclick="return false;" class="btn disabled" style="cursor:default;">Call for Indic</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="chatWindow" style="display:none;">
+          <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td valign="bottom" style="background-color:#ffffff;font-size:10pt; border:3px solid #4f6228; padding:5px;">
+                    <div style="overflow:auto; max-height:100px;">
+                    <div style="text-align:center; cursor:pointer; font-size:8pt; color:#000000;">- Load Earlier Messages -</div>
+                    fname1: message1<br />
+                    fname1: message1<br />
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color:#4f6228; height:50px; padding:5px;">
+                    <textarea style="margin-left:2px; font-size:8pt; width:379px; height:40px;"></textarea><div onclick="" style="cursor:pointer; position:absolute; right:50px; top:-30px;"><img src="Resources/images/eye-on.png" style="height:16px;" /></div>
+                </td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="dealConfirmWindow" style="display:none;">
+          <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td valign="top" style="font-size:10pt; border:2px solid #4f81bd;">
+                    <table style="width:100%; height:100%; background:#ffffff;" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td>
+                                <div style="padding:5px;">
+                                    Company - fName<br />
+                                    BUY/SELL Product<br />
+                                    Condition<br />
+                                    Quantity<br />
+                                    Remarks
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="padding:5px; text-align:center; font-weight:bold; margin-bottom:12px; font-size:15pt;">
+                                DEAL @ XX.YYYY
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;">
+                                <a href="#" onclick="return false;" class="btn btn-cancel">Off (4)</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary">Confirm</a>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                </td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="dealCompleteWindow" style="display:none;">
+          <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td valign="top" style="font-size:10pt; border:2px solid #4f81bd;">
+                    <table style="width:100%; height:100%; background:#ffffff;" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td style="" colspan="3">
+                                <div style="padding:5px;">
+                                    Company - fName<br />
+                                    BUY/SELL Product<br />
+                                    Condition<br />
+                                    Quantity<br />
+                                    Remarks<br />
+                                    <br />
+                                    Counterparty: Company - fName lName<br />
+                                    Price: XX.YY
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;" colspan="3">
+                                <a href="#" onclick="modals.hide();return false;" class="btn btn-primary">Close Window</a>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                </td>
+            </tr>
+          </table>
+        </div>  
+        
+        <div class="fillOrderConfirmWindow" style="display:none;">
+          <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td valign="top" style="font-size:10pt; border:2px solid #4f81bd;">
+                    <table style="width:100%; height:100%; background:#ffffff;" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td>
+                                <div style="padding:5px;">
+                                    Company - fName<br />
+                                    BUY/SELL Product<br />
+                                    Condition<br />
+                                    Quantity<br />
+                                    Remarks
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="padding:5px; text-align:center; font-weight:bold; margin-bottom:12px; font-size:15pt;">
+                                Order Price @ XX.YYYY
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;">
+                                <a href="#" onclick="return false;" class="btn btn-cancel">Cancel</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary">Confirm Fill</a>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                </td>
+            </tr>
+          </table>
+        </div>      
     </div>
 </asp:Content>

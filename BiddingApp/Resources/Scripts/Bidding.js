@@ -3,11 +3,13 @@
 
 var bidding = (function () {
     var biddingWindows = new Array();
-    var initialBiddingWindowSize = { width: 415, height: 422 };
+    var chatWindows = new Array();
+
+    var defaultWindowSize = { width: 415, height: 422 };
     var actualWindowSize = { width: 425, height: 250 };
 
     return {
-        getAvailableWindowPositions: function (windowOffset) {
+        getAvailableWindowPositions: function (windowOffset, windowType) {
             var positions = new Array();
             var windowXPadding = 5;
             var windowYPadding = 5;
@@ -23,6 +25,11 @@ var bidding = (function () {
             var maxWidth = $(window).width();
             var maxHeight = $(window).height();
             var curPos = { x: 5 + (windowOffset * 30), y: yOffset + (windowOffset * 30) };
+            if (windowType == WINDOWTYPE_CHAT) {
+                curPos.x += 20;
+                curPos.y += 20;
+            }
+
             while (curPos.y <= (maxHeight - actualWindowSize.height)) {
                 if (curPos.x <= (maxWidth - actualWindowSize.width) && curPos.y <= (maxHeight - actualWindowSize.height)) {
                     positions.push({ x: curPos.x, y: curPos.y });
@@ -30,6 +37,9 @@ var bidding = (function () {
                 curPos.x += (actualWindowSize.width + windowXPadding);
                 if (curPos.x > (maxWidth - actualWindowSize.width)) {
                     curPos.x = 5 + (windowOffset * 30);
+                    if (windowType == WINDOWTYPE_CHAT) {
+                        curPos.x += 20;
+                    }
                     curPos.y += actualWindowSize.height + windowYPadding;
                 }
             }
@@ -41,23 +51,28 @@ var bidding = (function () {
             return (Math.abs(pos1.x - pos2.x) <= padding && Math.abs(pos1.y - pos2.y) <= padding);
         },
 
-        getNewWindowPos: function (windowCollection) {
+        getNewWindowPos: function (windowCollection, windowType) {
             var pos = null;
 
-            if (windowCollection == null) windowCollection = biddingWindows;
+            if (windowCollection == null) {
+                if (windowType == WINDOWTYPE_CHAT) windowCollection = chatWindows;
+                else windowCollection = biddingWindows;
+            }
 
             var windowOffset = 0;
             while (windowOffset < 100) {
-                var availablePositions = bidding.getAvailableWindowPositions(windowOffset);
+                var availablePositions = bidding.getAvailableWindowPositions(windowOffset, windowType);
                 while (availablePositions.length > 0) {
                     var curPos = availablePositions.shift();
                     var positionConflictFound = false;
-                    resources.arrayEnum(windowCollection, function (dia) {
-                        var windowPos = dia.closest('.ui-dialog').offset();
-                        //console.log(Math.round(windowPos.left) + ',' + Math.round(windowPos.top) + '  :  ' + curPos.x + ',' + curPos.y);
-                        if (bidding.positionsWithinRange({ x: Math.round(windowPos.left), y: Math.round(windowPos.top) }, curPos, 5)) {
-                            positionConflictFound = true;
-                        }
+                    resources.arrayEnum(windowCollection, function (curWindow) {
+                        //if (curWindow.windowType != WINDOWTYPE_DEALCONFIRM) {
+                            var windowPos = curWindow.dialog.closest('.ui-dialog').offset();
+                            //console.log(Math.round(windowPos.left) + ',' + Math.round(windowPos.top) + '  :  ' + curPos.x + ',' + curPos.y);
+                            if (bidding.positionsWithinRange({ x: Math.round(windowPos.left), y: Math.round(windowPos.top) }, curPos, 5)) {
+                                positionConflictFound = true;
+                            }
+                        //}
                     });
 
                     if (!positionConflictFound) {
@@ -68,40 +83,66 @@ var bidding = (function () {
                 if (pos != null) break;
                 windowOffset++;
             }
-            if (pos == null) pos = { left: 5, top: 40 };
+            if (pos == null) {
+                if (windowType == WINDOWTYPE_CHAT) pos = { left: 20, top: 50 };
+                else pos = { left: 5, top: 40 };
+            }
             return pos;
         },
 
         autoArrangeWindows: function () {
+            bidding.autoArrangeWindowsByCollection(biddingWindows);
+            bidding.autoArrangeWindowsByCollection(chatWindows);
+
+        },
+
+        autoArrangeWindowsByCollection: function (collection) {
             var windowCollection = new Array();
-            resources.arrayEnum(biddingWindows, function (curWindow) {
+            resources.arrayEnum(collection, function (curWindow) {
                 //console.log($(curWindow[0]).dialog('option', 'position'));
-                var windowPos = bidding.getNewWindowPos(windowCollection);
-                $(curWindow[0]).dialog('option', 'position', { my: "left top", at: "left+" + windowPos.left + " top+" + windowPos.top, of: window })
-                $(curWindow[0]).dialog('moveToTop');
+                var windowPos = null;
+                /*if (curWindow.windowType == WINDOWTYPE_DEALCONFIRM) {
+                    windowPos = { my: "center", at: "center", of: window };
+                }
+                else {*/
+                    var pos = bidding.getNewWindowPos(windowCollection, curWindow.windowType);
+                    windowPos = { my: "left top", at: "left+" + pos.left + " top+" + pos.top, of: window };
+                //}
+
+                $(curWindow.dialog[0]).dialog('option', 'position', windowPos)
+                $(curWindow.dialog[0]).dialog('moveToTop');
                 windowCollection.push(curWindow);
             });
         },
 
-        spawnWindow: function (dialogClass, title) {
-            var windowPos = bidding.getNewWindowPos();
-            var dialogHtml = $('.' + dialogClass).html();
+        spawnWindow: function (windowType, title) {
+            var windowPos = null;
+            /*if (windowType == WINDOWTYPE_DEALCONFIRM) {
+                windowPos = { my: "center", at: "center", of: window };
+            }
+            else {*/
+                var pos = bidding.getNewWindowPos(null, windowType);
+                windowPos = { my: "left top", at: "left+" + pos.left + " top+" + pos.top, of: window };
+            //}
+
+            var dialogHtml = $('.' + windowType).html();
             dialogHtml = resources.stringReplace(dialogHtml, '!MAXHEIGHT', '175px');
             var div = $(dialogHtml);
             var dia = $(div).dialog({
-                position: { my: "left top", at: "left+" + windowPos.left + " top+" + windowPos.top, of: window },
-                width: initialBiddingWindowSize.width,
-                height: initialBiddingWindowSize.height,
+                position: windowPos,
+                width: defaultWindowSize.width,
+                height: defaultWindowSize.height,
                 resizable: false,
                 autoOpen: true,
                 title: title,
-                dialogClass: dialogClass,
+                dialogClass: windowType,
                 close: function (event, ui) {
-                    resources.removeObjectInArray(biddingWindows, event.target, function (a, b) { return a[0] == b; });
+                    resources.removeObjectInArray(biddingWindows, event.target, function (a, b) { return a.dialog[0] == b; });
                 }
             });
             //$(div).html($('.dialogBox').html());
-            biddingWindows.push(dia);
+            if (windowType == WINDOWTYPE_CHAT) chatWindows.push({ windowType: windowType, dialog: dia });
+            else biddingWindows.push({ windowType: windowType, dialog: dia });
         },
 
         deleteInterest: function () {

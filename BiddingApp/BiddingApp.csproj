@@ -68,6 +68,8 @@
     <Content Include="Resources\CSS\Images\SelectedSides.png" />
     <Content Include="Resources\CSS\Images\TabMenu.png" />
     <Content Include="Resources\CSS\Images\TabSeperator.png" />
+    <Content Include="Resources\Images\eye-off.png" />
+    <Content Include="Resources\Images\eye-on.png" />
     <Content Include="Resources\Images\green_light_16.png" />
     <Content Include="Resources\Images\red_light_16.png" />
     <Content Include="Resources\Scripts\Bidding.js" />
