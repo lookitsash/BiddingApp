@@ -136,19 +136,19 @@ var modals = (function () {
 
         signup: function () {
             if (modals.applyValidation('signupModal')) {
-                var signupData = resources.dataFieldsToObject($('#signupModal'));
-                if (signupData.password != signupData.passwordConfirm) {
+                var formData = resources.dataFieldsToObject($('#signupModal'));
+                if (formData.password != formData.passwordConfirm) {
                     modals.showNotificationModal('Passwords do not match, please re-enter');
                     return;
                 }
-                if (!resources.isValidPassword(signupData.password)) {
+                if (!resources.isValidPassword(formData.password)) {
                     modals.showNotificationModal('Password must be at least 8 characters, and contain 1 capital letter, 1 lowercase letter and 1 number');
                     return;
                 }
 
                 modals.hide();
                 modals.toggleWaitingModal(true, 'Please wait...');
-                resources.ajaxPost('Receiver', 'Signup', { signupData: signupData }, function (data) {
+                resources.ajaxPost('Receiver', 'Signup', { formData: formData }, function (data) {
                     modals.hide();
                     if (data.Success) {
                         $.session.set('SessionGUID', data.SessionGUID);
@@ -166,10 +166,30 @@ var modals = (function () {
         },
 
         showNewContactModal: function () {
+            modals.clearValidation('createContactModal');
+            $('#createContactModal input').val('');
             modals.show('createContactModal');
         },
 
-        showInterestModal: function () {
+        addNewContact: function () {
+            if (modals.applyValidation('createContactModal')) {
+                var formData = resources.dataFieldsToObject($('#createContactModal'));
+                modals.hide();
+                modals.toggleWaitingModal(true, 'Please wait...');
+                resources.ajaxPost('Receiver', 'AddContact', { guid: defaultPage.sessionGUID(), formData: formData }, function (data) {
+                    modals.hide();
+                    if (data.Success) {
+                        
+                    }
+                    else {
+                        modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('createContactModal'); });
+                    }
+                });
+            }
+        },
+
+        showDeleteContactModal: function () {
+            modals.show('deleteContactModal');
         },
 
         showCheckPricesModal: function () {

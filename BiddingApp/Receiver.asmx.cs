@@ -41,12 +41,12 @@ namespace BiddingApp
             try
             {
                 JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
-                SignupData signupData = JsonConvert.DeserializeObject<SignupData>(jToken.Value<JToken>("signupData").ToString());
+                SignupData signupData = JsonConvert.DeserializeObject<SignupData>(jToken.Value<JToken>("formData").ToString());
 
-                if (Statics.Access.GetUserID(signupData.email) > 0) throw new NotifyException("Email already registered");
+                if (Statics.Access.GetUserID(null, signupData.Email) > 0) throw new NotifyException("Email already registered");
                 
                 Statics.Access.Signup(signupData);
-                string sessionGUID = Statics.Access.Login(signupData.email, signupData.password, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
+                string sessionGUID = Statics.Access.Login(signupData.Email, signupData.Password, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
                 if (String.IsNullOrEmpty(sessionGUID)) throw new Exception("Unable to get session GUID");
 
                 return JsonConvert.SerializeObject(new { Success = true, SessionGUID = sessionGUID });
@@ -56,6 +56,54 @@ namespace BiddingApp
                 Log("Signup Exception", ex);
                 return JsonError(ex);
             }
+        }
+
+        [WebMethod]
+        public string AddContact(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                ContactData signupData = JsonConvert.DeserializeObject<ContactData>(jToken.Value<JToken>("formData").ToString());
+
+                Statics.Access.Contact_Add(userID, signupData.Email);
+
+                return JsonConvert.SerializeObject(new { Success = true, Contacts = Statics.Access.Contact_Get(userID) });
+            }
+            catch (Exception ex)
+            {
+                Log("AddContact Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string DeleteContact(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string contactGUID = jToken.Value<string>("contactGUID");
+
+                Statics.Access.Contact_Delete(userID, contactGUID);
+
+                return JsonConvert.SerializeObject(new { Success = true, Contacts = Statics.Access.Contact_Get(userID) });
+            }
+            catch (Exception ex)
+            {
+                Log("AddContact Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        private int GetUserID(JToken jToken)
+        {
+            string sessionGUID = jToken.Value<string>("guid");
+            int userID = Statics.Access.GetUserID(sessionGUID);
+            if (userID > 0) return userID;
+            else throw new Exception("Could not retrieve UserID from sessionGUID " + sessionGUID);
         }
 
         private string JsonError(Exception ex)
@@ -75,8 +123,16 @@ namespace BiddingApp
     public class SignupData
     {
         public int ID;
-        public string firstName, lastName, company, country, email, password;
-        public bool membershipBasic, membershipAdvance;
+        public string FirstName, LastName, Company, Country, Email, Password;
+        public bool MembershipBasic, MembershipAdvance;
+    }
+
+    public class ContactData
+    {
+        public int ID;
+        public string GUID, Email, FirstName, LastName;
+        public bool AllowBid, Block, AppearOnline;
+        public MembershipTypes MembershipTypeID;
     }
 
     public class NotifyException : Exception

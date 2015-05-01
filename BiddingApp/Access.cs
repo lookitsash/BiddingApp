@@ -25,11 +25,13 @@ namespace BiddingApp
         }
         private T SqlParamGet<T>(SqlCommand cmd, string paramName) { return ValueConverter.Get<T>(cmd.Parameters[paramName].Value); }
 
-        public int GetUserID(string email)
+        public int GetUserID(string sessionGUID) { return GetUserID(sessionGUID, null); }
+        public int GetUserID(string sessionGUID, string email)
         {
             using (SqlCommand cmd = SqlProc("STP_User_Get"))
             {
-                SqlParam(cmd, "Email", email);
+                if (!String.IsNullOrEmpty(sessionGUID)) SqlParam(cmd, "SessionGUID", sessionGUID);
+                if (!String.IsNullOrEmpty(email)) SqlParam(cmd, "Email", email);
                 return ExecuteScalar<int>(cmd);
             }
         }
@@ -38,13 +40,13 @@ namespace BiddingApp
         {
             using (SqlCommand cmd = SqlProc("STP_User_Register"))
             {
-                SqlParam(cmd, "FirstName", signupData.firstName);
-                SqlParam(cmd, "LastName", signupData.lastName);
-                SqlParam(cmd, "Company", signupData.company);
-                SqlParam(cmd, "Country", signupData.country);
-                SqlParam(cmd, "Email", signupData.email);
-                SqlParam(cmd, "Password", signupData.password);
-                SqlParam(cmd, "MembershipTypeID", signupData.membershipBasic ? MembershipTypes.Basic : MembershipTypes.Advance);
+                SqlParam(cmd, "FirstName", signupData.FirstName);
+                SqlParam(cmd, "LastName", signupData.LastName);
+                SqlParam(cmd, "Company", signupData.Company);
+                SqlParam(cmd, "Country", signupData.Country);
+                SqlParam(cmd, "Email", signupData.Email);
+                SqlParam(cmd, "Password", signupData.Password);
+                SqlParam(cmd, "MembershipTypeID", signupData.MembershipBasic ? MembershipTypes.Basic : MembershipTypes.Advance);
                 SqlParamOut(cmd, "UserID", SqlDbType.Int);
                 ExecuteNonQuery(cmd);
                 signupData.ID = SqlParamGet<int>(cmd, "UserID");
@@ -61,6 +63,44 @@ namespace BiddingApp
                 SqlParam(cmd, "UserAgent", userAgent);
                 return ExecuteScalar<string>(cmd);
             }
+        }
+
+        public void Contact_Add(int userID, string contactEmail)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Contact_Add"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "ContactEmail", contactEmail);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
+        public List<ContactData> Contact_Get(int userID)
+        {
+            List<ContactData> contacts = new List<ContactData>();
+            using (SqlCommand cmd = SqlProc("STP_Contact_Get"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                foreach (DataRowAdapter dra in DataRowAdapter.Create(GetTable(cmd)))
+                {
+                    contacts.Add(new ContactData()
+                    {
+                        Email = dra.Get<string>("Email"),
+                        FirstName = dra.Get<string>("FirstName"),
+                        LastName = dra.Get<string>("LastName"),
+                        GUID = dra.Get<string>("GUID"),
+                        AllowBid = dra.Get<bool>("AllowBid"),
+                        Block = dra.Get<bool>("Block"),
+                        AppearOnline = dra.Get<bool>("AppearOnline"),
+                        MembershipTypeID = (MembershipTypes)dra.Get<int>("MembershipTypeID")
+                    });
+                }
+            }
+            return contacts;
+        }
+
+        public void Contact_Delete(int userID, string contactGUID)
+        {
         }
     }
 }

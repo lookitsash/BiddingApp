@@ -81,7 +81,7 @@
                                 <div style="background-color:Green; cursor:pointer; border: 1px solid #000000;">
                                     <table width="100%">
                                         <tr>
-                                            <td onclick="modals.showInterestModal()">
+                                            <td onclick="bidding.spawnWindow(WINDOWTYPE_BIDDING, 'BUY Product');">
                                                 BUY Product<br />
                                                 Order @ X1
                                             </td>

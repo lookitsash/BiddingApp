@@ -18,7 +18,7 @@
     <li><a href="#tabs-3">Account</a></li>
   </ul>
   <div id="tabs-1" style="width:870px;">
-  <div onclick="" class="addContactButton">+</div>
+  <div onclick="modals.showNewContactModal()" class="addContactButton">+</div>
   <center>
     <table cellspacing="0" style="width:800px; font-size:10pt;">
         <tr>

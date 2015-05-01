@@ -96,7 +96,34 @@
                 <div class="footer">
                     <div class="right">
                         <a href="#" onclick="modals.hide();return false;" class="btn btn-cancel">Cancel</a>
-                        <a href="#" onclick="modals.hide();return false;" class="btn btn-primary">Add</a>
+                        <a href="#" onclick="modals.addNewContact();return false;" class="btn btn-primary">Add</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="deleteContactModal" class="lightbox default" style="display:none; width:400px;">
+        <a href="#" onclick="modals.hide();return false;" class="iconclosemodal"></a>
+        <section>
+            <header>
+                <h2 class="modalTitle">Delete Contact</h2>
+            </header>
+            <div class="contentwrapper">              
+
+                <section class="panel white solid">
+                    <div class="panel-body form" style=" text-align:left;">
+                    Are you sure you want to delete name3 (email3)?<br />
+                    <br />
+                    <label><input type="checkbox" class="deleteField" />Also block this contact</label>
+                    </div>
+                </section>
+            </div>
+            <div class="footerwrapper">
+                <div class="footer">
+                    <div class="right">
+                        <a href="#" onclick="modals.hide();return false;" class="btn btn-cancel">Cancel</a>
+                        <a href="#" onclick="modals.hide();return false;" class="btn btn-primary">Delete</a>
                     </div>
                 </div>
             </div>
