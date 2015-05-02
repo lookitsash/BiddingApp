@@ -1,9 +1,11 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Default.master" AutoEventWireup="true" CodeBehind="Settings.aspx.cs" Inherits="BiddingApp.Settings" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="CPH_HEAD" runat="server">
+    <script type="text/javascript" src="Resources/Scripts/SettingsPage.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
             defaultPage.validateSession();
             $("#tabs").tabs();
+            settingsPage.refreshContacts();
         });
     </script>
 </asp:Content>
@@ -18,42 +20,25 @@
     <li><a href="#tabs-3">Account</a></li>
   </ul>
   <div id="tabs-1" style="width:870px;">
-  <div onclick="modals.showNewContactModal()" class="addContactButton">+</div>
+  <div onclick="settingsPage.showNewContactModal()" class="addContactButton">+</div>
   <center>
-    <table cellspacing="0" style="width:800px; font-size:10pt;">
+    <table class="contactsList" cellspacing="0" style="width:800px; font-size:10pt;">
         <tr>
             <td style="border-bottom: 1px solid #000000;" colspan="2"><b>Active Contacts</b></td>
             <td style="width:150px;border-bottom: 1px solid #000000;">Allow contact to see my item listing and bid</td>
             <td style="text-align:center;border-bottom: 1px solid #000000;">Delete Contact</td>
         </tr>
         <tr><td colspan="4">&nbsp;</td></tr>
-        <tr>
-            <td style="width:50px;">&nbsp;</td>
-            <td>Name (email1)</td>
-            <td style="text-align:center;"><input type="checkbox" /></td>
-            <td style="text-align:center;"><a href="#">X</a></td>
-        </tr>
-        <tr>
-            <td>&nbsp;</td>
-            <td>Name (email2)</td>
-            <td>Not an advance user</td>
-            <td style="text-align:center;"><a href="#">X</a></td>
-        </tr>
     </table>
     <br /><br />
 
-    <table border="0" cellspacing="0" style="width:800px; font-size:10pt;">
+    <table class="blockedContactsList" border="0" cellspacing="0" style="width:800px; font-size:10pt;">
         <tr>
             <td style="border-bottom: 1px solid #000000;" colspan="2"><b>Blocked Contacts</b></td>
             <td style="width:150px;border-bottom: 1px solid #000000;"></td>
             <td style="text-align:center;border-bottom: 1px solid #000000;"><span style="visibility:hidden;">Delete Contact</span></td>
         </tr>
         <tr><td colspan="4">&nbsp;</td></tr>
-        <tr>
-            <td style="width:50px;">&nbsp;</td>
-            <td>Name (email3)</td>
-            <td colspan="2"><a href="#">Unblock</a></td>
-        </tr>
     </table>
 
     </center>

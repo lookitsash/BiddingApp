@@ -6,6 +6,8 @@
 var modals = (function () {
     var currentModal = null;
     var currentModals = new Array();
+    var currentEditingGUID = null;
+    var modalCallback = null;
 
     return {
         show: function (modalID) {
@@ -165,7 +167,8 @@ var modals = (function () {
             modals.show('createInterestModal');
         },
 
-        showNewContactModal: function () {
+        showNewContactModal: function (callback) {
+            modalCallback = callback;
             modals.clearValidation('createContactModal');
             $('#createContactModal input').val('');
             modals.show('createContactModal');
@@ -179,7 +182,7 @@ var modals = (function () {
                 resources.ajaxPost('Receiver', 'AddContact', { guid: defaultPage.sessionGUID(), formData: formData }, function (data) {
                     modals.hide();
                     if (data.Success) {
-                        
+                        if (modalCallback != null) modalCallback(data.Contacts);
                     }
                     else {
                         modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('createContactModal'); });
@@ -188,8 +191,26 @@ var modals = (function () {
             }
         },
 
-        showDeleteContactModal: function () {
+        showDeleteContactModal: function (contactGUID, callback) {
+            modalCallback = callback;
+            currentEditingGUID = contactGUID;
+            resources.uiToggleCheckbox($('#deleteContactModal .deleteField'), false);
             modals.show('deleteContactModal');
+        },
+
+        deleteContact: function () {
+            var blockContact = resources.uiCheckboxSelected($('#deleteContactModal .deleteField'));
+            modals.hide();
+            modals.toggleWaitingModal(true, 'Please wait...');
+            resources.ajaxPost('Receiver', 'DeleteContact', { guid: defaultPage.sessionGUID(), contactGUID: currentEditingGUID, blockContact: blockContact }, function (data) {
+                modals.hide();
+                if (data.Success) {
+                    if (modalCallback != null) modalCallback(data.Contacts);
+                }
+                else {
+                    modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('createContactModal'); });
+                }
+            });
         },
 
         showCheckPricesModal: function () {

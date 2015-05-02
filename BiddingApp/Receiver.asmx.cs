@@ -86,14 +86,74 @@ namespace BiddingApp
                 JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
                 int userID = GetUserID(jToken);
                 string contactGUID = jToken.Value<string>("contactGUID");
+                bool blockContact = jToken.Value<bool>("blockContact");
 
-                Statics.Access.Contact_Delete(userID, contactGUID);
+                if (blockContact) Statics.Access.Contact_Block(userID, contactGUID);
+                else Statics.Access.Contact_Delete(userID, contactGUID);
 
                 return JsonConvert.SerializeObject(new { Success = true, Contacts = Statics.Access.Contact_Get(userID) });
             }
             catch (Exception ex)
             {
-                Log("AddContact Exception", ex);
+                Log("DeleteContact Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string UnblockContact(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string contactGUID = jToken.Value<string>("contactGUID");
+
+                Statics.Access.Contact_Unblock(userID, contactGUID);
+
+                return JsonConvert.SerializeObject(new { Success = true, Contacts = Statics.Access.Contact_Get(userID) });
+            }
+            catch (Exception ex)
+            {
+                Log("DeleteContact Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string UpdateContact(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string contactGUID = jToken.Value<string>("contactGUID");
+                bool allowBid = jToken.Value<bool>("allowBid");
+
+                Statics.Access.Contact_Update(userID, contactGUID, allowBid);
+
+                return JsonConvert.SerializeObject(new { Success = true, Contacts = Statics.Access.Contact_Get(userID) });
+            }
+            catch (Exception ex)
+            {
+                Log("DeleteContact Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string GetContacts(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+
+                return JsonConvert.SerializeObject(new { Success = true, Contacts = Statics.Access.Contact_Get(userID) });
+            }
+            catch (Exception ex)
+            {
+                Log("GetContacts Exception", ex);
                 return JsonError(ex);
             }
         }

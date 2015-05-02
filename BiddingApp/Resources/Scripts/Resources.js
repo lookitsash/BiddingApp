@@ -264,8 +264,8 @@
             checkbox.parent().removeClass('checked');
             checkbox.removeAttr('checked');
             if (isChecked) {
-                checkbox.parent().addClass('checked');
-                checkbox.attr('checked', true);
+            checkbox.parent().addClass('checked');
+            checkbox.attr('checked', true);
             }
             */
         },
@@ -281,7 +281,7 @@
         },
 
         uiCheckboxSelected: function (checkbox) {
-            return (checkbox.attr('checked') == 'checked');
+            return checkbox.prop("checked");
         },
 
         uiSetDate: function (datepicker, val) {

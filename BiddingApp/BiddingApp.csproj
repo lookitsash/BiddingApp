@@ -103,8 +103,10 @@
     <Content Include="Resources\Scripts\jquery-cmodal.js" />
     <Content Include="Resources\Scripts\jquery-ui\jquery-ui.min.js" />
     <Content Include="Resources\Scripts\jquery.session.js" />
+    <Content Include="Resources\Scripts\json2.js" />
     <Content Include="Resources\Scripts\Modals.js" />
     <Content Include="Resources\Scripts\Resources.js" />
+    <Content Include="Resources\Scripts\SettingsPage.js" />
     <Content Include="Resources\Scripts\Statics.js" />
     <Content Include="Settings.aspx" />
     <Content Include="Web.config" />

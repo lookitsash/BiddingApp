@@ -101,6 +101,43 @@ namespace BiddingApp
 
         public void Contact_Delete(int userID, string contactGUID)
         {
+            using (SqlCommand cmd = SqlProc("STP_Contact_Delete"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "ContactGUID", contactGUID);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
+        public void Contact_Block(int userID, string contactGUID)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Contact_Block"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "ContactGUID", contactGUID);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
+        public void Contact_Unblock(int userID, string contactGUID)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Contact_Unblock"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "ContactGUID", contactGUID);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
+        public void Contact_Update(int userID, string contactGUID, bool allowBid)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Contact_Update"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "ContactGUID", contactGUID);
+                SqlParam(cmd, "AllowBid", allowBid);
+                ExecuteNonQuery(cmd);
+            }
         }
     }
 }

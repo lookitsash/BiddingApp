@@ -12,6 +12,7 @@
 
     <script type="text/javascript" src="Resources/Scripts/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="Resources/Scripts/jquery-ui/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="Resources/Scripts/json2.js"></script>
     <script type="text/javascript" src="Resources/Scripts/jquery-cmodal.js"></script>
     <script type="text/javascript" src="Resources/Scripts/jquery.session.js"></script>
     <script type="text/javascript" src="Resources/scripts/dropit/dropit.js"></script>    
@@ -123,7 +124,7 @@
                 <div class="footer">
                     <div class="right">
                         <a href="#" onclick="modals.hide();return false;" class="btn btn-cancel">Cancel</a>
-                        <a href="#" onclick="modals.hide();return false;" class="btn btn-primary">Delete</a>
+                        <a href="#" onclick="modals.deleteContact();return false;" class="btn btn-primary">Delete</a>
                     </div>
                 </div>
             </div>
