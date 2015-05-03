@@ -6,7 +6,7 @@ var settingsPage = (function () {
     return {
         contacts: null,
 
-        refreshContacts: function (refreshCache) {
+        refreshContacts: function (newContacts, refreshCache) {
             var _refreshContacts = function () {
                 $('.contactItem').remove();
                 $('.blockedContactItem').remove();
@@ -46,6 +46,7 @@ var settingsPage = (function () {
                 });
             };
 
+            if (newContacts != null) settingsPage.contacts = newContacts;
             if (settingsPage.contacts == null || refreshCache) {
                 modals.toggleWaitingModal(true, 'Loading, please wait...');
                 resources.ajaxPost('Receiver', 'GetContacts', { guid: defaultPage.sessionGUID() }, function (data) {
@@ -55,7 +56,7 @@ var settingsPage = (function () {
                         _refreshContacts();
                     }
                     else {
-                        modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('createContactModal'); });
+                        modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX));
                     }
                 });
             }

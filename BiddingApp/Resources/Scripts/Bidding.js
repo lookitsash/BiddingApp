@@ -9,6 +9,8 @@ var bidding = (function () {
     var actualWindowSize = { width: 425, height: 250 };
 
     return {
+        contacts: null,
+
         getAvailableWindowPositions: function (windowOffset, windowType) {
             var positions = new Array();
             var windowXPadding = 5;
@@ -67,11 +69,11 @@ var bidding = (function () {
                     var positionConflictFound = false;
                     resources.arrayEnum(windowCollection, function (curWindow) {
                         //if (curWindow.windowType != WINDOWTYPE_DEALCONFIRM) {
-                            var windowPos = curWindow.dialog.closest('.ui-dialog').offset();
-                            //console.log(Math.round(windowPos.left) + ',' + Math.round(windowPos.top) + '  :  ' + curPos.x + ',' + curPos.y);
-                            if (bidding.positionsWithinRange({ x: Math.round(windowPos.left), y: Math.round(windowPos.top) }, curPos, 5)) {
-                                positionConflictFound = true;
-                            }
+                        var windowPos = curWindow.dialog.closest('.ui-dialog').offset();
+                        //console.log(Math.round(windowPos.left) + ',' + Math.round(windowPos.top) + '  :  ' + curPos.x + ',' + curPos.y);
+                        if (bidding.positionsWithinRange({ x: Math.round(windowPos.left), y: Math.round(windowPos.top) }, curPos, 5)) {
+                            positionConflictFound = true;
+                        }
                         //}
                     });
 
@@ -102,11 +104,11 @@ var bidding = (function () {
                 //console.log($(curWindow[0]).dialog('option', 'position'));
                 var windowPos = null;
                 /*if (curWindow.windowType == WINDOWTYPE_DEALCONFIRM) {
-                    windowPos = { my: "center", at: "center", of: window };
+                windowPos = { my: "center", at: "center", of: window };
                 }
                 else {*/
-                    var pos = bidding.getNewWindowPos(windowCollection, curWindow.windowType);
-                    windowPos = { my: "left top", at: "left+" + pos.left + " top+" + pos.top, of: window };
+                var pos = bidding.getNewWindowPos(windowCollection, curWindow.windowType);
+                windowPos = { my: "left top", at: "left+" + pos.left + " top+" + pos.top, of: window };
                 //}
 
                 $(curWindow.dialog[0]).dialog('option', 'position', windowPos)
@@ -118,11 +120,11 @@ var bidding = (function () {
         spawnWindow: function (windowType, title) {
             var windowPos = null;
             /*if (windowType == WINDOWTYPE_DEALCONFIRM) {
-                windowPos = { my: "center", at: "center", of: window };
+            windowPos = { my: "center", at: "center", of: window };
             }
             else {*/
-                var pos = bidding.getNewWindowPos(null, windowType);
-                windowPos = { my: "left top", at: "left+" + pos.left + " top+" + pos.top, of: window };
+            var pos = bidding.getNewWindowPos(null, windowType);
+            windowPos = { my: "left top", at: "left+" + pos.left + " top+" + pos.top, of: window };
             //}
 
             var dialogHtml = $('.' + windowType).html();
@@ -148,6 +150,42 @@ var bidding = (function () {
         deleteInterest: function () {
             modals.showConfirmModal('Confirm delete interest to BUY Product3?', function (success) {
             }, 'Delete', 'Cancel');
+        },
+
+        refreshContacts: function (newContacts, refreshCache) {
+            var _refreshContacts = function () {
+                var htmlArray = new Array();
+                resources.arrayEnum(bidding.contacts, function (contact) {
+                    //console.log(contact.Email);
+                    if (!contact.Block && contact.MembershipTypeID != MEMBERSHIPTYPE_NOTSIGNEDUP) {
+                        var html = '<li><div style="background-color:white; cursor:pointer; white-space:nowrap;"><table width="100%"><tr><td>' + contact.FirstName + ' ' + contact.LastName + '</td><td align="right"><img src="Resources/Images/green_light_16.png" /></td></tr></table></div></li>';
+                        htmlArray.push(html);
+                    }
+                });
+                $('.menuContacts .menuContactsDropdown').html(htmlArray.join(''));
+            };
+
+            if (newContacts != null) bidding.contacts = newContacts;
+            if (bidding.contacts == null || refreshCache) {
+                modals.toggleWaitingModal(true, 'Loading, please wait...');
+                resources.ajaxPost('Receiver', 'GetContacts', { guid: defaultPage.sessionGUID() }, function (data) {
+                    modals.hide();
+                    if (data.Success) {
+                        bidding.contacts = data.Contacts;
+                        _refreshContacts();
+                    }
+                    else {
+                        modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX));
+                    }
+                });
+            }
+            else _refreshContacts();
+        },
+
+        showNewContactModal: function () {
+            modals.showNewContactModal(function (contacts) {
+                bidding.refreshContacts(contacts);
+            });
         }
     };
 })();

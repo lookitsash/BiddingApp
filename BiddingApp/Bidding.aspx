@@ -30,15 +30,18 @@
                 return false;
             });
 
+            bidding.refreshContacts();
+
+            
             bidding.spawnWindow(WINDOWTYPE_BIDDING, 'BUY Product');
             bidding.spawnWindow(WINDOWTYPE_BIDDINGNOORDER, 'BUY Product');
             bidding.spawnWindow(WINDOWTYPE_VIEWINTEREST, 'SELL Product - fName1');
             bidding.spawnWindow(WINDOWTYPE_VIEWINTERESTNOORDER, 'BUY Product - fName2');
-            bidding.spawnWindow('viewInterestFirmWindow', 'BUY Product - fName2');
+            bidding.spawnWindow(WINDOWTYPE_VIEWINTERESTFIRM, 'BUY Product - fName2');
             bidding.spawnWindow(WINDOWTYPE_DEALCONFIRM, 'Confirm Deal: Product');
             bidding.spawnWindow(WINDOWTYPE_DEALCOMPLETE, 'Confirmed Deal DDMMMYY HH:MM');
             bidding.spawnWindow(WINDOWTYPE_FILLORDERCONFIRM, 'Fill Order');
-
+            
             //bidding.spawnWindow(WINDOWTYPE_CHAT, 'fName1 lName1');
             //bidding.spawnWindow(WINDOWTYPE_CHAT, 'fName2 lName2');
             //modals.showDealCompleteModal();
@@ -68,7 +71,7 @@
         <table cellspacing="0" cellpadding="0" border="0" style="width:100%;">
             <tr>
                 <td style="width:1px;"></td>
-                <td style="width:30px"><div onclick="modals.showNewInterestModal()" class="addContactButtonBidding">+</div></td>
+                <td style="width:30px"><div onclick="bidding.showNewInterestModal()" class="addContactButtonBidding">+</div></td>
                 <td style="width:120px">
                     
                     <ul id="menu1" class="menu menuInterests">
@@ -107,34 +110,6 @@
                         <li class="menuContactsLI">
                             <a href="#"><div class="contactsButton">Contacts</div></a><div class="contactsSearch"><input class="contactsSearchField" style="height:25px;" type="text" /></div>
                             <ul class="dropit-right menuContactsDropdown" style="padding:0px;">
-                                <li>
-                                    <div style="background-color:white; cursor:pointer; white-space:nowrap;">
-                                        <table width="100%">
-                                            <tr>
-                                                <td>
-                                                    fNadfdsfdsme lNamedsfds dsf
-                                                </td>
-                                                <td align="right">
-                                                    <img src="Resources/Images/green_light_16.png" />
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div style="background-color:white; cursor:pointer;">
-                                        <table width="100%">
-                                            <tr>
-                                                <td>
-                                                    fName lName
-                                                </td>
-                                                <td align="right">
-                                                    <img src="Resources/Images/red_light_16.png" />
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                </li>
                             </ul>
                         </li>
                     </ul>
