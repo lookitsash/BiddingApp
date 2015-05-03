@@ -2,6 +2,20 @@
 
 var defaultPage = (function () {
     return {
+        ctrlPressed: false,
+        shiftPressed: false,
+
+        initialize: function () {
+            // Monitor special key press combinations
+            $(window).keydown(function (evt) {
+                if (evt.which == 17) defaultPage.ctrlPressed = true;
+                else if (evt.which == 16) defaultPage.shiftPressed = true;
+            }).keyup(function (evt) {
+                if (evt.which == 17) defaultPage.ctrlPressed = false;
+                else if (evt.which == 16) defaultPage.shiftPressed = false;
+            });
+        },
+
         sessionGUID: function () {
             return $.session.get('SessionGUID');
         },

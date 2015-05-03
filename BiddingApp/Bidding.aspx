@@ -3,36 +3,8 @@
     <script type="text/javascript" src="Resources/Scripts/Bidding.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-            defaultPage.validateSession();
-            $('.menuInterests').dropit();
+            bidding.initialize();
 
-            $('.menuContacts').dropit({
-                afterHide: function () {
-                    toggleContactSearch(false);
-                }
-            });
-
-            $('.contactsButton').bind('click.biddingApp', function (e) {
-                toggleContactSearch(true);
-                $('.menuContactsLI').removeClass('dropit-open');
-                $('.menuContactsLI').addClass('dropit-open');
-                $('.menuContactsDropdown').show();
-                if (e.preventDefault) {
-                    e.preventDefault();
-                }
-                return false;
-            });
-
-            $('.contactsSearchField').bind('click.biddingApp', function (e) {
-                if (e.preventDefault) {
-                    e.preventDefault();
-                }
-                return false;
-            });
-
-            bidding.refreshContacts();
-
-            
             bidding.spawnWindow(WINDOWTYPE_BIDDING, 'BUY Product');
             bidding.spawnWindow(WINDOWTYPE_BIDDINGNOORDER, 'BUY Product');
             bidding.spawnWindow(WINDOWTYPE_VIEWINTEREST, 'SELL Product - fName1');
@@ -41,11 +13,11 @@
             bidding.spawnWindow(WINDOWTYPE_DEALCONFIRM, 'Confirm Deal: Product');
             bidding.spawnWindow(WINDOWTYPE_DEALCOMPLETE, 'Confirmed Deal DDMMMYY HH:MM');
             bidding.spawnWindow(WINDOWTYPE_FILLORDERCONFIRM, 'Fill Order');
-            
+
             //bidding.spawnWindow(WINDOWTYPE_CHAT, 'fName1 lName1');
             //bidding.spawnWindow(WINDOWTYPE_CHAT, 'fName2 lName2');
             //modals.showDealCompleteModal();
-            
+
         });
 
         function toggleContactSearch(isVisible) {
@@ -114,7 +86,7 @@
                         </li>
                     </ul>
                 </td>
-                <td style="width:30px"><div onclick="modals.showNewContactModal();" class="addContactButtonBidding">+</div></td>
+                <td style="width:30px"><div onclick="bidding.showNewContactModal();" class="addContactButtonBidding">+</div></td>
                 <td style="width:1px;"></td>
             </tr>
         </table>        
@@ -591,16 +563,14 @@
           <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
             <tr>
                 <td valign="bottom" style="background-color:#ffffff;font-size:10pt; border:3px solid #4f6228; padding:5px;">
-                    <div style="overflow:auto; max-height:100px;">
-                    <div style="text-align:center; cursor:pointer; font-size:8pt; color:#000000;">- Load Earlier Messages -</div>
-                    fname1: message1<br />
-                    fname1: message1<br />
+                    <div class="chatContent" style="overflow:auto; max-height:100px;">
+                        <div class="loadEarlierMessages" style="text-align:center; cursor:pointer; font-size:8pt; color:#000000;">- Load Earlier Messages -</div>
                     </div>
                 </td>
             </tr>
             <tr>
                 <td style="background-color:#4f6228; height:50px; padding:5px;">
-                    <textarea style="margin-left:2px; font-size:8pt; width:379px; height:40px;"></textarea><div onclick="" style="cursor:pointer; position:absolute; right:50px; top:-30px;"><img src="Resources/images/eye-on.png" style="height:16px;" /></div>
+                    <textarea class="chatField" style="margin-left:2px; font-size:8pt; width:379px; height:40px;"></textarea><div onclick="" style="cursor:pointer; position:absolute; right:50px; top:-30px;"><img src="Resources/images/eye-on.png" style="height:16px;" /></div>
                 </td>
             </tr>
           </table>

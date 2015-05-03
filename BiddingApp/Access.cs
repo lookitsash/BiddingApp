@@ -36,7 +36,25 @@ namespace BiddingApp
             }
         }
 
-        public void Signup(SignupData signupData)
+        public UserData GetUserData(int userID)
+        {
+            using (SqlCommand cmd = SqlProc("STP_User_GetData"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                DataRowAdapter dra = DataRowAdapter.Create(GetTopRow(cmd));
+                return new UserData()
+                {
+                    FirstName = dra.Get<string>("FirstName"),
+                    LastName = dra.Get<string>("LastName"),
+                    Company = dra.Get<string>("Company"),
+                    Country = dra.Get<string>("Country"),
+                    Email = dra.Get<string>("Email"),
+                    MembershipType = (MembershipTypes)dra.Get<int>("MembershipTypeID")
+                };
+            }
+        }
+
+        public void Signup(UserData signupData)
         {
             using (SqlCommand cmd = SqlProc("STP_User_Register"))
             {
@@ -136,6 +154,17 @@ namespace BiddingApp
                 SqlParam(cmd, "UserID", userID);
                 SqlParam(cmd, "ContactGUID", contactGUID);
                 SqlParam(cmd, "AllowBid", allowBid);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
+        public void Chat(int userID, string emailTo, string message)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Chat"))
+            {
+                SqlParam(cmd, "UserIDFrom", userID);
+                SqlParam(cmd, "EmailTo", emailTo);
+                SqlParam(cmd, "Message", message);
                 ExecuteNonQuery(cmd);
             }
         }

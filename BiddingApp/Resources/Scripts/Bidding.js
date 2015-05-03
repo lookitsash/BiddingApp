@@ -1,5 +1,6 @@
 ﻿/// <reference path="Resources.js" />
 /// <reference path="Modals.js" />
+/// <reference path="DefaultPage.js" />
 
 var bidding = (function () {
     var biddingWindows = new Array();
@@ -10,6 +11,60 @@ var bidding = (function () {
 
     return {
         contacts: null,
+        userData: null,
+
+        initialize: function () {
+            defaultPage.validateSession();
+            $('.menuInterests').dropit();
+
+            $('.menuContacts').dropit({
+                afterHide: function () {
+                    toggleContactSearch(false);
+                }
+            });
+
+            $('.contactsButton').bind('click.biddingApp', function (e) {
+                toggleContactSearch(true);
+                $('.menuContactsLI').removeClass('dropit-open');
+                $('.menuContactsLI').addClass('dropit-open');
+                $('.menuContactsDropdown').show();
+                if (e.preventDefault) {
+                    e.preventDefault();
+                }
+                return false;
+            });
+
+            $('.contactsSearchField').bind('click.biddingApp', function (e) {
+                if (e.preventDefault) {
+                    e.preventDefault();
+                }
+                return false;
+            });
+
+            bidding.refreshContacts();
+            bidding.getData();
+        },
+
+        getData: function (options) {
+            if (options == null) options = { contacts: true, userData: true };
+            options.guid = defaultPage.sessionGUID();
+            modals.toggleWaitingModal(true, 'Loading, please wait...');
+            resources.ajaxPost('Receiver', 'GetData', options, function (data) {
+                modals.hide();
+                if (data.Success) {
+                    if (data.Contacts != null) {
+                        bidding.contacts = data.Contacts;
+                        bidding.refreshContacts();
+                    }
+                    if (data.UserData != null) {
+                        bidding.userData = data.UserData;
+                    }
+                }
+                else {
+                    modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX));
+                }
+            });
+        },
 
         getAvailableWindowPositions: function (windowOffset, windowType) {
             var positions = new Array();
@@ -117,7 +172,7 @@ var bidding = (function () {
             });
         },
 
-        spawnWindow: function (windowType, title) {
+        spawnWindow: function (windowType, title, windowID, data) {
             var windowPos = null;
             /*if (windowType == WINDOWTYPE_DEALCONFIRM) {
             windowPos = { my: "center", at: "center", of: window };
@@ -143,8 +198,19 @@ var bidding = (function () {
                 }
             });
             //$(div).html($('.dialogBox').html());
-            if (windowType == WINDOWTYPE_CHAT) chatWindows.push({ windowType: windowType, dialog: dia });
-            else biddingWindows.push({ windowType: windowType, dialog: dia });
+
+            var windowObj = { windowType: windowType, dialog: dia, windowID: windowID, data: data };
+            bidding.getWindowCollection(windowType).push(windowObj);
+            return windowObj;
+        },
+
+        getWindowCollection: function (windowType) {
+            if (windowType == WINDOWTYPE_CHAT) return chatWindows;
+            else return biddingWindows;
+        },
+
+        getWindowByTypeAndID: function (windowType, windowID) {
+            return resources.getArrayItem(bidding.getWindowCollection(windowType), function (w) { return w.windowType == windowType && resources.stringEqual(w.windowID, windowID); });
         },
 
         deleteInterest: function () {
@@ -156,9 +222,8 @@ var bidding = (function () {
             var _refreshContacts = function () {
                 var htmlArray = new Array();
                 resources.arrayEnum(bidding.contacts, function (contact) {
-                    //console.log(contact.Email);
                     if (!contact.Block && contact.MembershipTypeID != MEMBERSHIPTYPE_NOTSIGNEDUP) {
-                        var html = '<li><div style="background-color:white; cursor:pointer; white-space:nowrap;"><table width="100%"><tr><td>' + contact.FirstName + ' ' + contact.LastName + '</td><td align="right"><img src="Resources/Images/green_light_16.png" /></td></tr></table></div></li>';
+                        var html = '<li><div onclick="bidding.showChatWindow(\'' + contact.GUID + '\')" style="background-color:white; cursor:pointer; white-space:nowrap;"><table width="100%"><tr><td>' + contact.FirstName + ' ' + contact.LastName + '</td><td align="right"><img src="Resources/Images/green_light_16.png" /></td></tr></table></div></li>';
                         htmlArray.push(html);
                     }
                 });
@@ -186,6 +251,50 @@ var bidding = (function () {
             modals.showNewContactModal(function (contacts) {
                 bidding.refreshContacts(contacts);
             });
+        },
+
+        getContactByGUID: function (contactGUID) {
+            return resources.getArrayItem(bidding.contacts, function (contact) { return resources.stringEqual(contact.GUID, contactGUID); });
+        },
+
+        getContactByEmail: function (email) {
+            return resources.getArrayItem(bidding.contacts, function (contact) { return resources.stringEqual(contact.Email, email); });
+        },
+
+        showChatWindow: function (contactGUID) {
+            var contact = bidding.getContactByGUID(contactGUID);
+            if (contact != null) {
+                var chatWindow = bidding.getWindowByTypeAndID(WINDOWTYPE_CHAT, contact.Email);
+                if (chatWindow == null) {
+                    var windowObj = bidding.spawnWindow(WINDOWTYPE_CHAT, contact.FirstName + ' ' + contact.LastName, contact.Email, contact);
+                    $('.loadEarlierMessages', windowObj.dialog).hide();
+                    $('.chatField', windowObj.dialog).attr('data-id', contact.Email).bind('keydown', function (e) {
+                        var keycode = (e.keyCode ? e.keyCode : e.which);
+                        if (keycode == '13') {
+                            if (!defaultPage.shiftPressed) {
+                                var emailTo = $(this).attr('data-id');
+                                var message = resources.htmlEncode(resources.stringTrim($(this).val()));
+                                if (!resources.stringNullOrEmpty(message)) {
+                                    var html = '<div class="chatMessage"><b style="color:#ff0000;">' + bidding.userData.FirstName + ':</b> ' + resources.stringReplace(message, '\n', '</br>') + '</div>';
+                                    var _chatWindow = bidding.getWindowByTypeAndID(WINDOWTYPE_CHAT, emailTo);
+                                    $('.chatContent', _chatWindow.dialog).append($(html));
+
+                                    resources.ajaxPost('Receiver', 'Chat', { guid: defaultPage.sessionGUID(), emailTo: emailTo, message: message }, function (data) {
+                                        if (data.Success) {
+                                        }
+                                        else {
+                                        }
+                                    });
+                                }
+                                $(this).val('');
+                                e.preventDefault();
+                                return false;
+                            }
+                        }
+                    });
+                }
+                else $(chatWindow.dialog[0]).dialog('moveToTop');
+            }
         }
     };
 })();

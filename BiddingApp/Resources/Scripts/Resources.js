@@ -21,6 +21,10 @@
             return sourceStr.indexOf(strToFind) == 0;
         },
 
+        stringEqual: function (str1, str2) {
+            return resources.stringTrim(str1.toUpperCase()) == resources.stringTrim(str2.toUpperCase());
+        },
+
         stringTrim: function (str) {
             return $.trim(str);
         },

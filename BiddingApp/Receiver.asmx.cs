@@ -41,7 +41,7 @@ namespace BiddingApp
             try
             {
                 JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
-                SignupData signupData = JsonConvert.DeserializeObject<SignupData>(jToken.Value<JToken>("formData").ToString());
+                UserData signupData = JsonConvert.DeserializeObject<UserData>(jToken.Value<JToken>("formData").ToString());
 
                 if (Statics.Access.GetUserID(null, signupData.Email) > 0) throw new NotifyException("Email already registered");
                 
@@ -158,6 +158,56 @@ namespace BiddingApp
             }
         }
 
+        [WebMethod]
+        public string Chat(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string emailTo = jToken.Value<string>("emailTo");
+                string message = jToken.Value<string>("message");
+
+                Statics.Access.Chat(userID, emailTo, message);
+
+                return JsonConvert.SerializeObject(new { Success = true });
+            }
+            catch (Exception ex)
+            {
+                Log("Chat Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string GetData(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+
+                List<ContactData> contacts = null;
+                if (jToken.Value<bool>("contacts"))
+                {
+                    contacts = Statics.Access.Contact_Get(userID);
+                }
+
+                UserData userData = null;
+                if (jToken.Value<bool>("userData"))
+                {
+                    userData = Statics.Access.GetUserData(userID);
+                }
+
+                return JsonConvert.SerializeObject(new { Success = true, Contacts = contacts, UserData = userData });
+            }
+            catch (Exception ex)
+            {
+                Log("GetData Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
         private int GetUserID(JToken jToken)
         {
             string sessionGUID = jToken.Value<string>("guid");
@@ -180,11 +230,12 @@ namespace BiddingApp
         private void Log(string str, Exception ex) { Statics.GetLogger("Receiver").Log(str, ex); }
     }
 
-    public class SignupData
+    public class UserData
     {
         public int ID;
         public string FirstName, LastName, Company, Country, Email, Password;
         public bool MembershipBasic, MembershipAdvance;
+        public MembershipTypes MembershipType;
     }
 
     public class ContactData
