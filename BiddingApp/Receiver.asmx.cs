@@ -180,6 +180,25 @@ namespace BiddingApp
         }
 
         [WebMethod]
+        public string GetChatHistory(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string emailTo = jToken.Value<string>("emailTo");
+                int lastChatID = jToken.Value<int>("lastChatID");
+
+                return JsonConvert.SerializeObject(new { Success = true, ChatHistory = Statics.Access.Chat_Get(userID, emailTo, lastChatID) });
+            }
+            catch (Exception ex)
+            {
+                Log("GetChatHistory Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
         public string GetData(string json)
         {
             try
@@ -240,7 +259,7 @@ namespace BiddingApp
 
     public class ContactData
     {
-        public int ID;
+        public int ID, RecentChatID;
         public string GUID, Email, FirstName, LastName;
         public bool AllowBid, Block, AppearOnline;
         public MembershipTypes MembershipTypeID;
@@ -249,5 +268,12 @@ namespace BiddingApp
     public class NotifyException : Exception
     {
         public NotifyException(string str) : base(str) { }
+    }
+
+    public class ChatData
+    {
+        public int ID;
+        public string FirstName, Message;
+        public bool Outgoing;
     }
 }

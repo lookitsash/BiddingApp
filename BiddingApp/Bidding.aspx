@@ -565,6 +565,7 @@
                 <td valign="bottom" style="background-color:#ffffff;font-size:10pt; border:3px solid #4f6228; padding:5px; height:110px;">
                     <div class="chatContent" style="overflow:auto; max-height:106px;">
                         <div class="loadEarlierMessages" style="text-align:center; cursor:pointer; font-size:8pt; color:#000000;">- Load Earlier Messages -</div>
+                        <div class="loadingMessages" style="overflow:hidden; text-align:center;"><img src="Resources/Images/spinner.gif" /></div>
                     </div>
                 </td>
             </tr>

@@ -6,6 +6,7 @@ var bidding = (function () {
     var biddingWindows = new Array();
     var chatWindows = new Array();
     var chatHistory = new Object();
+    var chatHistoryMinChatIDLookup = new Object();
 
     var defaultWindowSize = { width: 415, height: 422 };
     var actualWindowSize = { width: 425, height: 250 };
@@ -274,18 +275,69 @@ var bidding = (function () {
             return resources.getArrayItem(bidding.contacts, function (contact) { return resources.stringEqual(contact.Email, email); });
         },
 
-        logChat: function (data) {
+        logChat: function (data, prepend) {
             var chatHistoryKey = data.Email.toLowerCase();
             if (chatHistory[chatHistoryKey] == null) chatHistory[chatHistoryKey] = new Array();
-            chatHistory[chatHistoryKey].push(data);
+
+            if (prepend) chatHistory[chatHistoryKey].splice(0, 0, data);
+            else chatHistory[chatHistoryKey].push(data);
         },
 
         showChatWindow: function (firstName, lastName, email) {
             var chatWindow = bidding.spawnWindow(WINDOWTYPE_CHAT, firstName + ' ' + lastName, email, null);
             $('.loadEarlierMessages', chatWindow.dialog).bind('click', function (e) {
-                $(this).hide();
+                var loadEarlierMessages = $(this);
+                var loadingMessages = $('.loadingMessages', loadEarlierMessages.parent());
+                loadEarlierMessages.hide();
+                loadingMessages.show();
+                var emailTo = loadEarlierMessages.attr('data-id');
+                var lastChatID = loadEarlierMessages.attr('data-lastchatid');
+                resources.ajaxPost('Receiver', 'GetChatHistory', { guid: defaultPage.sessionGUID(), emailTo: emailTo, lastChatID: lastChatID }, function (data) {
+                    loadEarlierMessages.show();
+                    loadingMessages.hide();
+                    if (data.Success) {
+                        var minChatID = 0;
+                        var chatHistory = data.ChatHistory.sort(function (a, b) { return b.ID - a.ID; });
+                        resources.arrayEnum(chatHistory, function (chatItem) {
+                            if (minChatID == 0 || chatItem.ID < minChatID) minChatID = chatItem.ID;
+
+                            chatItem.Email = emailTo;
+                            bidding.logChat(chatItem, true);
+                            var html = '<div class="chatMessage"><b style="color:#' + (chatItem.Outgoing ? 'ff0000' : '0000ff') + ';">' + chatItem.FirstName + ':</b> ' + resources.stringReplace(chatItem.Message, '\n', '</br>') + '</div>';
+                            loadingMessages.after($(html));
+                        });
+                        lastChatID = minChatID;
+                        if (minChatID == 0) loadEarlierMessages.hide();
+                        else {
+                            lastChatID = Math.max(lastChatID - 1, 0);
+                            loadEarlierMessages.attr('data-lastchatid', lastChatID);
+
+                            if (chatHistoryMinChatIDLookup[emailTo.toLowerCase()] != null) {
+                                chatHistoryMinChatIDLookup[emailTo.toLowerCase()] = Math.min(chatHistoryMinChatIDLookup[emailTo.toLowerCase()], lastChatID);
+                            }
+                            else chatHistoryMinChatIDLookup[emailTo.toLowerCase()] = lastChatID;
+                        }
+                    }
+                    else {
+                    }
+                });
             });
-            //$('.loadEarlierMessages', chatWindow.dialog).hide();
+
+            var lastChatID = 0;
+            var existingContact = bidding.getContactByEmail(email);
+            if (existingContact != null) {
+                lastChatID = existingContact.RecentChatID;
+                if (chatHistoryMinChatIDLookup[email.toLowerCase()] != null) {
+                    lastChatID = Math.min(chatHistoryMinChatIDLookup[email.toLowerCase()], lastChatID);
+                    chatHistoryMinChatIDLookup[email.toLowerCase()] = lastChatID;
+                }
+                else chatHistoryMinChatIDLookup[email.toLowerCase()] = lastChatID;
+            }
+
+            $('.loadEarlierMessages', chatWindow.dialog).attr('data-id', email);
+            $('.loadEarlierMessages', chatWindow.dialog).attr('data-lastchatid', lastChatID);
+            $('.loadingMessages', chatWindow.dialog).hide();
+            if (lastChatID == 0) $('.loadEarlierMessages', chatWindow.dialog).hide();
 
             var chatHistoryItems = chatHistory[email.toLowerCase()];
             if (chatHistoryItems != null) {

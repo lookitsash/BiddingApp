@@ -117,7 +117,8 @@ namespace BiddingApp
                         AllowBid = dra.Get<bool>("AllowBid"),
                         Block = dra.Get<bool>("Block"),
                         AppearOnline = dra.Get<bool>("AppearOnline"),
-                        MembershipTypeID = (MembershipTypes)dra.Get<int>("MembershipTypeID")
+                        MembershipTypeID = (MembershipTypes)dra.Get<int>("MembershipTypeID"),
+                        RecentChatID = dra.Get<int>("RecentChatID")
                     });
                 }
             }
@@ -174,6 +175,23 @@ namespace BiddingApp
                 SqlParam(cmd, "Message", message);
                 ExecuteNonQuery(cmd);
             }
+        }
+
+        public List<ChatData> Chat_Get(int userID, string emailTo, int lastChatID)
+        {
+            List<ChatData> chatItems = new List<ChatData>();
+            using (SqlCommand cmd = SqlProc("STP_Chat_Get"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "EmailTo", emailTo);
+                SqlParam(cmd, "LastChatID", lastChatID);
+                foreach (DataRowAdapter dra in DataRowAdapter.Create(GetTable(cmd)))
+                {
+                    ChatData chatData = new ChatData() { ID = dra.Get<int>("ChatID"), FirstName = dra.Get<string>("FirstName"), Message = dra.Get<string>("Message"), Outgoing = dra.Get<bool>("Outgoing") };
+                    chatItems.Add(chatData);
+                }
+            }
+            return chatItems;
         }
     }
 }
