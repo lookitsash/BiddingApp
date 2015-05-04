@@ -196,7 +196,7 @@ namespace BiddingApp
                 UserData userData = null;
                 if (jToken.Value<bool>("userData"))
                 {
-                    userData = Statics.Access.GetUserData(userID);
+                    userData = Statics.Access.GetUserData(userID, null, false);
                 }
 
                 return JsonConvert.SerializeObject(new { Success = true, Contacts = contacts, UserData = userData });

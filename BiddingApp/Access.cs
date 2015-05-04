@@ -36,21 +36,28 @@ namespace BiddingApp
             }
         }
 
-        public UserData GetUserData(int userID)
+        public UserData GetUserData(int userID, string sessionGUID, bool includeUserID)
         {
             using (SqlCommand cmd = SqlProc("STP_User_GetData"))
             {
-                SqlParam(cmd, "UserID", userID);
+                if (userID > 0) SqlParam(cmd, "UserID", userID);
+                if (!String.IsNullOrEmpty(sessionGUID)) SqlParam(cmd, "SessionGUID", sessionGUID);
                 DataRowAdapter dra = DataRowAdapter.Create(GetTopRow(cmd));
-                return new UserData()
+                if (dra != null)
                 {
-                    FirstName = dra.Get<string>("FirstName"),
-                    LastName = dra.Get<string>("LastName"),
-                    Company = dra.Get<string>("Company"),
-                    Country = dra.Get<string>("Country"),
-                    Email = dra.Get<string>("Email"),
-                    MembershipType = (MembershipTypes)dra.Get<int>("MembershipTypeID")
-                };
+                    UserData userData = new UserData()
+                    {
+                        FirstName = dra.Get<string>("FirstName"),
+                        LastName = dra.Get<string>("LastName"),
+                        Company = dra.Get<string>("Company"),
+                        Country = dra.Get<string>("Country"),
+                        Email = dra.Get<string>("Email"),
+                        MembershipType = (MembershipTypes)dra.Get<int>("MembershipTypeID")
+                    };
+                    if (includeUserID) userData.ID = dra.Get<int>("ID");
+                    return userData;
+                }
+                else return null;
             }
         }
 

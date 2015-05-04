@@ -13,6 +13,8 @@
     <script type="text/javascript" src="Resources/Scripts/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="Resources/Scripts/jquery-ui/jquery-ui.min.js"></script>
     <script type="text/javascript" src="Resources/Scripts/json2.js"></script>
+    <script type="text/javascript" src="Resources/Scripts/jquery.signalR-1.1.4.min.js"></script>
+    <script src='<%: ResolveClientUrl("~/signalr/hubs") %>'></script>
     <script type="text/javascript" src="Resources/Scripts/jquery-cmodal.js"></script>
     <script type="text/javascript" src="Resources/Scripts/jquery.session.js"></script>
     <script type="text/javascript" src="Resources/scripts/dropit/dropit.js"></script>    
@@ -32,6 +34,29 @@
     <script type="text/javascript">
         $(document).ready(function () {
             defaultPage.initialize();
+
+            /*
+            $(function () {
+                var myChatHub = $.connection.chatHub;
+                myChatHub.client.newMessageReceived = function (message) {
+                    //$('#ulChatMessages').append('<li>' + message + '</li>');
+                    console.log('newMessageReceived: ' + message);
+                }
+                $.connection.hub.logging = true;
+                $.connection.hub.error(function (error) {
+                    console.log('SignalR error: ' + error)
+                });
+                $.connection.hub.url = "http://localhost:64405/signalr";
+                $.connection.hub.start().done(function () {
+                    $('.sendDataButton').click(function (e) {
+                        myChatHub.server.broadcastMessageToAll($('.sendDataText').val());
+                    });
+                }).fail(function (error) {
+                    console.error(error);
+                });;
+            
+            });
+            */
     <%
     if (BiddingApp.Statics.DevMode && !String.IsNullOrEmpty(BiddingApp.Statics.DevEmail) && !String.IsNullOrEmpty(BiddingApp.Statics.DevPassword))
     {
@@ -53,6 +78,10 @@
     </asp:ContentPlaceHolder>
 </head>
 <body>
+    <!--
+    <input type="button" value="SEND DATA" class="sendDataButton" />
+    <input type="text" class="sendDataText" />
+    -->
     <div class="cmodalbg lightboxContainer" style="z-index:15000;"></div>
 
     <div id="genericWaitModal" class="lightbox white centered" style="display:none; width:500px;">
