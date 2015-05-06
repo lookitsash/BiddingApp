@@ -1,10 +1,12 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Bidding.aspx.cs" Inherits="BiddingApp.Bidding" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="CPH_HEAD" runat="server">
+    <script type="text/javascript" src="Resources/Scripts/Windows.js"></script>
     <script type="text/javascript" src="Resources/Scripts/Bidding.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
             bidding.initialize();
 
+            /*
             bidding.spawnWindow(WINDOWTYPE_BIDDING, 'BUY Product');
             bidding.spawnWindow(WINDOWTYPE_BIDDINGNOORDER, 'BUY Product');
             bidding.spawnWindow(WINDOWTYPE_VIEWINTEREST, 'SELL Product - fName1');
@@ -13,6 +15,7 @@
             bidding.spawnWindow(WINDOWTYPE_DEALCONFIRM, 'Confirm Deal: Product');
             bidding.spawnWindow(WINDOWTYPE_DEALCOMPLETE, 'Confirmed Deal DDMMMYY HH:MM');
             bidding.spawnWindow(WINDOWTYPE_FILLORDERCONFIRM, 'Fill Order');
+            */
 
             //bidding.spawnWindow(WINDOWTYPE_CHAT, 'fName1 lName1');
             //bidding.spawnWindow(WINDOWTYPE_CHAT, 'fName2 lName2');
@@ -48,10 +51,7 @@
                     
                     <ul id="menu1" class="menu menuInterests">
                         <li><a href="#"><div class="interestsButton">Interests</div></a>
-                        <ul class="dropit" style="padding:0px;">
-                            <li style="white-space:nowrap;">
-                            <a href="#" onclick="bidding.autoArrangeWindows();return false;">Arrange Windows</a>
-                            </li>
+                        <ul class="dropit menuInterestsDropdown" style="padding:0px; width:300px;">
                             <li>
                                 <div style="background-color:Green; cursor:pointer; border: 1px solid #000000;">
                                     <table width="100%">
@@ -99,7 +99,7 @@
                     <table style="width:100%; height:100%; background:#93cddd;" cellpadding="0" cellspacing="0">
                         <tr>
                             <td style="" colspan="3">
-                                <div style="padding:5px;">
+                                <div style="padding:5px;" class="interestDetails">
                                     Condition<br />
                                     Quantity<br />
                                     Remarks
@@ -114,15 +114,15 @@
                         <tr>
                             <td style="" colspan="3">
                                 <div style="padding:5px;">
-                                Order: <b>Working order @ XX.XXXX<br />
-                                Good for another AA Hr BB Min</b>
+                                    <span class="interestPrice" style="font-weight:bold;">Order @ XX.XXXX</span><br />
+                                    <span class="interestExpiration" style="font-weight:bold;">Good for another AA Hr BB Min</span>
                                 </div>
                             </td>
                         </tr>
                         <tr>
                             <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;" colspan="3">
-                                <a href="#" onclick="return false;" class="btn btn-cancel">X</a>
-                                <a href="#" onclick="return false;" class="btn btn-primary">Cancel Order</a>
+                                <a href="#" onclick="return false;" class="btn btn-cancel closeWindowButton">X</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary cancelOrderButton">Cancel Order</a>
                                 <a href="#" onclick="return false;" class="btn btn-primary">Check Prices</a>
                             </td>
                         </tr>
@@ -182,9 +182,9 @@
                         </tr>
                         <tr>
                             <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;" colspan="3">
-                                <a href="#" onclick="return false;" class="btn btn-cancel">X</a>
-                                <a href="#" onclick="return false;" class="btn btn-primary">Leave Order</a>
-                                <a href="#" onclick="return false;" class="btn btn-primary">Check Prices</a>
+                                <a href="#" class="btn btn-cancel">X</a>
+                                <a href="#" class="btn btn-primary leaveOrderButton">Leave Order</a>
+                                <a href="#" class="btn btn-primary">Check Prices</a>
                             </td>
                         </tr>
                     </table>
@@ -232,7 +232,7 @@
                                 <table width="100%" cellpadding="0" cellspacing="0">
                                     <tr>
                                         <td>
-                                            <div style="padding:5px;">
+                                            <div style="padding:5px;" class="interestDetails">
                                                 Condition<br />
                                                 Quantity<br />
                                                 Remarks
@@ -256,8 +256,8 @@
                                     <table style="width:100%;">
                                         <tr>
                                             <td>
-                                                Order: <b>Working order @ XX.XXXX<br />
-                                                Good for another AA Hr BB Min</b>
+                                                <span class="interestPrice" style="font-weight:bold;">Order @ XX.XXXX</span><br />
+                                                <span class="interestExpiration" style="font-weight:bold;">Good for another AA Hr BB Min</span>
                                             </td>
                                             <td align="right">
                                                 <a href="#" onclick="return false;" class="btn btn-primary">Fill Order</a>
@@ -440,8 +440,8 @@
                     <div class="footer centered">
                         <div>
                             <a href="#" onclick="modals.hide();return false;" class="btn btn-cancel">Cancel</a>
-                            <a href="#" onclick="modals.hide();return false;" class="btn btn-primary">BUY</a>
-                            <a href="#" onclick="modals.hide();return false;" class="btn btn-primary">SELL</a>
+                            <a href="#" onclick="modals.createNewInterest(INTERESTTYPE_BUY);return false;" class="btn btn-primary">BUY</a>
+                            <a href="#" onclick="modals.createNewInterest(INTERESTTYPE_SELL);return false;" class="btn btn-primary">SELL</a>
                         </div>
                     </div>
                 </div>
@@ -499,6 +499,7 @@
 
                     <section class="panel white solid">
                         <div class="panel-body form">
+                            <div class="errorHeader">Please enter the required fields below</div>
                             Work an order with:<br />
                             <label><input type="radio" name="contactSelection" class="allContacts" />All my advance contacts</label><br />
                             <label><input type="radio" name="contactSelection" class="selectedContacts" />Selected advance contacts</label><br />
@@ -516,9 +517,11 @@
                                 </table>
                             </div>
                             <br />
+                            <input type="text" class="data-price validateRequired" placeholder="Price to work order at" /><br />
+                            <br />
                             Good Until:<br />
                             <label><input type="radio" name="goodUntil" class="goodUntilCancelled" />Cancelled</label><br />
-                            <input type="radio" name="goodUntil" class="goodUntilDuration" />For <input class="hourField" style="width:25px;" type="text" /> hour <input style="width:25px;" class="minuteField" type="text" /> min
+                            <input type="radio" name="goodUntil" class="goodUntilDuration" />For <input class="data-hour hourField" style="width:25px;" type="text" /> hour <input style="width:25px;" class="data-minute minuteField" type="text" /> min
                         </div>
                     </section>
                 </div>
@@ -526,7 +529,7 @@
                     <div class="footer centered">
                         <div>
                             <a href="#" onclick="modals.hide();return false;" class="btn btn-cancel">X</a>
-                            <a href="#" onclick="modals.hide();return false;" class="btn btn-primary">Confirm</a>
+                            <a href="#" onclick="modals.leaveOrder();return false;" class="btn btn-primary">Confirm</a>
                         </div>
                     </div>
                 </div>

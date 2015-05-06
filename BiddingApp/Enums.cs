@@ -5,3 +5,9 @@
     Advance = 2,
     Manager = 3
 }
+
+public enum InterestTypes
+{
+    Sell = 1,
+    Buy = 2
+}

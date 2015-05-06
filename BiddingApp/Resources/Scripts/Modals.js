@@ -2,6 +2,7 @@
 /// <reference path="Statics.js" />
 /// <reference path="DefaultPage.js" />
 /// <reference path="Dev.js" />
+/// <reference path="Bidding.js" />
 
 var modals = (function () {
     var currentModal = null;
@@ -163,8 +164,29 @@ var modals = (function () {
             }
         },
 
-        showNewInterestModal: function () {
+        showNewInterestModal: function (callback) {
+            modalCallback = callback;
+            modals.clearValidation('createInterestModal');
+            $('#createInterestModal input').val('');
             modals.show('createInterestModal');
+        },
+
+        createNewInterest: function (interestType) {
+            if (modals.applyValidation('createInterestModal')) {
+                var formData = resources.dataFieldsToObject($('#createInterestModal'));
+                formData.interestType = interestType;
+                modals.hide();
+                modals.toggleWaitingModal(true, 'Please wait...');
+                resources.ajaxPost('Receiver', 'CreateInterest', { guid: defaultPage.sessionGUID(), formData: formData }, function (data) {
+                    modals.hide();
+                    if (data.Success) {
+                        if (modalCallback != null) modalCallback(data.Interests);
+                    }
+                    else {
+                        modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('createInterestModal'); });
+                    }
+                });
+            }
         },
 
         showNewContactModal: function (callback) {
@@ -229,7 +251,9 @@ var modals = (function () {
             modals.show('checkPricesModal');
         },
 
-        showLeaveOrderModal: function () {
+        showLeaveOrderModal: function (interestGUID) {
+            currentEditingGUID = interestGUID;
+            $('#leaveOrderModal input').val('');
             resources.uiToggleCheckbox($('#leaveOrderModal .goodUntilCancelled'), true);
             resources.uiToggleCheckbox($('#leaveOrderModal .allContacts'), true);
             $('#leaveOrderModal .selectContactsDiv').hide();
@@ -248,6 +272,43 @@ var modals = (function () {
             });
 
             modals.show('leaveOrderModal');
+        },
+
+        getFormData: function (modalID) {
+            var formData = resources.dataFieldsToObject($('#' + modalID));
+            formData.guid = defaultPage.sessionGUID();
+            return formData;
+        },
+
+        leaveOrder: function () {
+            if (modals.applyValidation('leaveOrderModal')) {
+                var formData = modals.getFormData('leaveOrderModal');
+                formData.price = resources.toDecimal(formData.price);
+                formData.interestGUID = currentEditingGUID;
+                formData.hours = 0;
+                formData.minutes = 0;
+                if (resources.uiCheckboxSelected($('#leaveOrderModal .goodUntilDuration'))) {
+                    formData.hours = resources.toInt(formData.hour);
+                    formData.minutes = resources.toInt(formData.minute);
+                    if (formData.hours == 0 && formData.minutes == 0) {
+                        modals.showNotificationModal('Please enter a valid expiration date');
+                        return;
+                    }
+                }
+                modals.hide();
+                modals.toggleWaitingModal(true, 'Please wait...');
+                resources.ajaxPost('Receiver', 'PlaceOrder', formData, function (data) {
+                    modals.hide();
+                    if (data.Success) {
+                        bidding.interests = data.Interests;
+                        bidding.refreshInterests();
+                        bidding.showInterestWindow(currentEditingGUID);
+                    }
+                    else {
+                        modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('leaveOrderModal'); });
+                    }
+                });
+            };
         },
 
         showNoAdvanceContactsModal: function () {

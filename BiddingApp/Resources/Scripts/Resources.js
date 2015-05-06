@@ -244,7 +244,7 @@
                         errorCallbackFunction(null, { xhr: xhr, ajaxOptions: ajaxOptions, thrownError: thrownError })
                     }
                     else if (successCallbackFunction != null) {
-                        successCallbackFunction({ Success: false, ErrorMessage: 'We\'re sorry, but your request could not be processed.  Your Internet connection has been lost.' });
+                        successCallbackFunction({ Success: false, ErrorMessage: 'We\'re sorry, but your request could not be completed.  Please try again.' });
                     }
                 }
             });
@@ -336,6 +336,12 @@
             return Math.ceil(timeDiff / (1000 * 3600 * 24));
         },
 
+        dateDiffMS: function (startDate, endDate) {
+            startDate = resources.dateConvert(startDate);
+            endDate = resources.dateConvert(endDate);
+            return endDate.getTime() - startDate.getTime();
+        },
+
         dateIsFuture: function (d, currentDate) {
             if (currentDate == null) currentDate = new Date();
             return (resources.dateCompare(d, currentDate) > 0);
@@ -343,6 +349,10 @@
 
         dateAddDays: function (date, days) {
             return new Date(resources.dateConvert(date).getTime() + days * 24 * 60 * 60 * 1000);
+        },
+
+        dateAddMs: function (date, ms) {
+            return new Date(resources.dateConvert(date).getTime() + ms);
         },
 
         dateConvert: function (d) {
@@ -786,6 +796,18 @@
                 return false;
             }
             else return true;
+        },
+
+        toInt: function (str) {
+            var val = parseInt(str);
+            if (isNaN(val)) val = 0;
+            return val;
+        },
+
+        toDecimal: function (str) {
+            var val = parseFloat(str);
+            if (isNaN(val)) val = 0;
+            return val;
         }
     };
 })();

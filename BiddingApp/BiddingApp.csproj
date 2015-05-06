@@ -129,13 +129,16 @@
     <Content Include="Resources\Scripts\Resources.js" />
     <Content Include="Resources\Scripts\SettingsPage.js" />
     <Content Include="Resources\Scripts\Statics.js" />
+    <Content Include="Resources\Scripts\Windows.js" />
     <Content Include="Scripts\jquery-1.6.4-vsdoc.js" />
     <Content Include="Scripts\jquery-1.6.4.js" />
     <Content Include="Scripts\jquery-1.6.4.min.js" />
     <Content Include="Scripts\jquery.signalR-1.1.4.js" />
     <Content Include="Resources\Scripts\jquery.signalR-1.1.4.min.js" />
     <Content Include="Settings.aspx" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>

@@ -59,6 +59,26 @@ namespace BiddingApp
         }
 
         [WebMethod]
+        public string CreateInterest(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                InterestData interestData = JsonConvert.DeserializeObject<InterestData>(jToken.Value<JToken>("formData").ToString());
+
+                Statics.Access.Interest_Create(userID, interestData);
+
+                return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
+            }
+            catch (Exception ex)
+            {
+                Log("CreateInterest Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
         public string AddContact(string json)
         {
             try
@@ -142,23 +162,6 @@ namespace BiddingApp
         }
 
         [WebMethod]
-        public string GetContacts(string json)
-        {
-            try
-            {
-                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
-                int userID = GetUserID(jToken);
-
-                return JsonConvert.SerializeObject(new { Success = true, Contacts = Statics.Access.Contact_Get(userID) });
-            }
-            catch (Exception ex)
-            {
-                Log("GetContacts Exception", ex);
-                return JsonError(ex);
-            }
-        }
-
-        [WebMethod]
         public string Chat(string json)
         {
             try
@@ -199,6 +202,47 @@ namespace BiddingApp
         }
 
         [WebMethod]
+        public string PlaceOrder(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string interestGUID = jToken.Value<string>("interestGUID");
+                decimal price = jToken.Value<decimal>("price");
+                int goodUntilHours = jToken.Value<int>("hours");
+                int goodUntilMins = jToken.Value<int>("minutes");
+                Statics.Access.Interest_PlaceOrder(userID, interestGUID, price, goodUntilHours, goodUntilMins);
+
+                return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
+            }
+            catch (Exception ex)
+            {
+                Log("GetChatHistory Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string CancelOrder(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string interestGUID = jToken.Value<string>("interestGUID");
+                Statics.Access.Interest_CancelOrder(userID, interestGUID);
+
+                return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
+            }
+            catch (Exception ex)
+            {
+                Log("GetChatHistory Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
         public string GetData(string json)
         {
             try
@@ -218,7 +262,13 @@ namespace BiddingApp
                     userData = Statics.Access.GetUserData(userID, null, false);
                 }
 
-                return JsonConvert.SerializeObject(new { Success = true, Contacts = contacts, UserData = userData });
+                List<InterestData> interests = null;
+                if (jToken.Value<bool>("interests"))
+                {
+                    interests = Statics.Access.Interest_Get(userID);
+                }
+
+                return JsonConvert.SerializeObject(new { Success = true, Contacts = contacts, UserData = userData, Interests = interests, ServerDate = Statics.Access.GetSqlDateTime().ToString() });
             }
             catch (Exception ex)
             {
@@ -263,6 +313,13 @@ namespace BiddingApp
         public string GUID, Email, FirstName, LastName;
         public bool AllowBid, Block, AppearOnline;
         public MembershipTypes MembershipTypeID;
+    }
+
+    public class InterestData
+    {
+        public InterestTypes InterestType;
+        public string Product, Condition, Quantity, Remarks, InterestGUID, ContactGUID, ExpirationDate;
+        public decimal Price;
     }
 
     public class NotifyException : Exception

@@ -1,19 +1,17 @@
 ﻿/// <reference path="Resources.js" />
 /// <reference path="Modals.js" />
 /// <reference path="DefaultPage.js" />
+/// <reference path="Windows.js" />
 
 var bidding = (function () {
-    var biddingWindows = new Array();
-    var chatWindows = new Array();
     var chatHistory = new Object();
     var chatHistoryMinChatIDLookup = new Object();
-
-    var defaultWindowSize = { width: 415, height: 422 };
-    var actualWindowSize = { width: 425, height: 250 };
 
     return {
         contacts: null,
         userData: null,
+        interests: null,
+        serverTimeOffsetMS: 0,
 
         initialize: function () {
             defaultPage.validateSession();
@@ -57,15 +55,34 @@ var bidding = (function () {
             }).fail(function (error) {
                 //console.error(error);
             });
+
+            setTimeout(bidding.onTick, 1000);
         },
 
-        getData: function (options) {
-            if (options == null) options = { contacts: true, userData: true };
+        onTick: function () {
+            var openWindows = windows.getOpenWindows();
+            resources.arrayEnum(openWindows, function (windowObj) {
+                if (windowObj.windowType == WINDOWTYPE_VIEWINTEREST || windowObj.windowType == WINDOWTYPE_BIDDING) {
+                    var interestGUID = windowObj.windowID;
+                    var interest = bidding.getInterest(interestGUID);
+                    if (interest != null) {
+                        $('.interestExpiration', windowObj.dialog).html(bidding.getInterestExpirationDesc(interest));
+                    }
+                }
+            });
+            setTimeout(bidding.onTick, 1000);
+        },
+
+        getData: function (options, callback) {
+            if (options == null) options = { contacts: true, userData: true, interests: true };
             options.guid = defaultPage.sessionGUID();
             modals.toggleWaitingModal(true, 'Loading, please wait...');
             resources.ajaxPost('Receiver', 'GetData', options, function (data) {
                 modals.hide();
                 if (data.Success) {
+                    var serverDate = resources.dateConvert(data.ServerDate);
+                    bidding.serverTimeOffsetMS = resources.dateDiffMS(serverDate, new Date());
+
                     if (data.Contacts != null) {
                         bidding.contacts = data.Contacts;
                         bidding.refreshContacts();
@@ -73,163 +90,197 @@ var bidding = (function () {
                     if (data.UserData != null) {
                         bidding.userData = data.UserData;
                     }
+                    if (data.Interests != null) {
+                        bidding.interests = data.Interests;
+                        bidding.refreshInterests();
+                    }
+                    if (callback != null) callback(true);
                 }
                 else {
-                    modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX));
+                    modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { if (callback != null) callback(true); });
                 }
             });
-        },
-
-        getAvailableWindowPositions: function (windowOffset, windowType) {
-            var positions = new Array();
-            var windowXPadding = 5;
-            var windowYPadding = 5;
-            var yOffset = 40;
-            if (resources.browserDetection.isIE()) {
-                windowYPadding = 14;
-                yOffset = 45;
-            }
-            else if (resources.browserDetection.isFirefox()) {
-                windowYPadding = 17;
-                yOffset = 44;
-            }
-            var maxWidth = $(window).width();
-            var maxHeight = $(window).height();
-            var curPos = { x: 5 + (windowOffset * 30), y: yOffset + (windowOffset * 30) };
-            if (windowType == WINDOWTYPE_CHAT) {
-                curPos.x += 20;
-                curPos.y += 20;
-            }
-
-            while (curPos.y <= (maxHeight - actualWindowSize.height)) {
-                if (curPos.x <= (maxWidth - actualWindowSize.width) && curPos.y <= (maxHeight - actualWindowSize.height)) {
-                    positions.push({ x: curPos.x, y: curPos.y });
-                }
-                curPos.x += (actualWindowSize.width + windowXPadding);
-                if (curPos.x > (maxWidth - actualWindowSize.width)) {
-                    curPos.x = 5 + (windowOffset * 30);
-                    if (windowType == WINDOWTYPE_CHAT) {
-                        curPos.x += 20;
-                    }
-                    curPos.y += actualWindowSize.height + windowYPadding;
-                }
-            }
-            return positions;
-        },
-
-        positionsWithinRange: function (pos1, pos2, padding) {
-
-            return (Math.abs(pos1.x - pos2.x) <= padding && Math.abs(pos1.y - pos2.y) <= padding);
-        },
-
-        getNewWindowPos: function (windowCollection, windowType) {
-            var pos = null;
-
-            if (windowCollection == null) {
-                if (windowType == WINDOWTYPE_CHAT) windowCollection = chatWindows;
-                else windowCollection = biddingWindows;
-            }
-
-            var windowOffset = 0;
-            while (windowOffset < 100) {
-                var availablePositions = bidding.getAvailableWindowPositions(windowOffset, windowType);
-                while (availablePositions.length > 0) {
-                    var curPos = availablePositions.shift();
-                    var positionConflictFound = false;
-                    resources.arrayEnum(windowCollection, function (curWindow) {
-                        //if (curWindow.windowType != WINDOWTYPE_DEALCONFIRM) {
-                        var windowPos = curWindow.dialog.closest('.ui-dialog').offset();
-                        //console.log(Math.round(windowPos.left) + ',' + Math.round(windowPos.top) + '  :  ' + curPos.x + ',' + curPos.y);
-                        if (bidding.positionsWithinRange({ x: Math.round(windowPos.left), y: Math.round(windowPos.top) }, curPos, 5)) {
-                            positionConflictFound = true;
-                        }
-                        //}
-                    });
-
-                    if (!positionConflictFound) {
-                        pos = { left: curPos.x, top: curPos.y };
-                        break;
-                    }
-                }
-                if (pos != null) break;
-                windowOffset++;
-            }
-            if (pos == null) {
-                if (windowType == WINDOWTYPE_CHAT) pos = { left: 20, top: 50 };
-                else pos = { left: 5, top: 40 };
-            }
-            return pos;
-        },
-
-        autoArrangeWindows: function () {
-            bidding.autoArrangeWindowsByCollection(biddingWindows);
-            bidding.autoArrangeWindowsByCollection(chatWindows);
-
-        },
-
-        autoArrangeWindowsByCollection: function (collection) {
-            var windowCollection = new Array();
-            resources.arrayEnum(collection, function (curWindow) {
-                //console.log($(curWindow[0]).dialog('option', 'position'));
-                var windowPos = null;
-                /*if (curWindow.windowType == WINDOWTYPE_DEALCONFIRM) {
-                windowPos = { my: "center", at: "center", of: window };
-                }
-                else {*/
-                var pos = bidding.getNewWindowPos(windowCollection, curWindow.windowType);
-                windowPos = { my: "left top", at: "left+" + pos.left + " top+" + pos.top, of: window };
-                //}
-
-                $(curWindow.dialog[0]).dialog('option', 'position', windowPos)
-                $(curWindow.dialog[0]).dialog('moveToTop');
-                windowCollection.push(curWindow);
-            });
-        },
-
-        spawnWindow: function (windowType, title, windowID, data) {
-            var windowPos = null;
-            /*if (windowType == WINDOWTYPE_DEALCONFIRM) {
-            windowPos = { my: "center", at: "center", of: window };
-            }
-            else {*/
-            var pos = bidding.getNewWindowPos(null, windowType);
-            windowPos = { my: "left top", at: "left+" + pos.left + " top+" + pos.top, of: window };
-            //}
-
-            var dialogHtml = $('.' + windowType).html();
-            dialogHtml = resources.stringReplace(dialogHtml, '!MAXHEIGHT', '175px');
-            var div = $(dialogHtml);
-            var dia = $(div).dialog({
-                position: windowPos,
-                width: defaultWindowSize.width,
-                height: defaultWindowSize.height,
-                resizable: false,
-                autoOpen: true,
-                title: title,
-                dialogClass: windowType,
-                close: function (event, ui) {
-                    resources.removeObjectInArray(bidding.getWindowCollection(windowType), event.target, function (a, b) { return a.dialog[0] == b; });
-                }
-            });
-            //$(div).html($('.dialogBox').html());
-
-            var windowObj = { windowType: windowType, dialog: dia, windowID: windowID, data: data };
-            bidding.getWindowCollection(windowType).push(windowObj);
-            return windowObj;
-        },
-
-        getWindowCollection: function (windowType) {
-            if (windowType == WINDOWTYPE_CHAT) return chatWindows;
-            else return biddingWindows;
-        },
-
-        getWindowByTypeAndID: function (windowType, windowID) {
-            return resources.getArrayItem(bidding.getWindowCollection(windowType), function (w) { return w.windowType == windowType && resources.stringEqual(w.windowID, windowID); });
         },
 
         deleteInterest: function () {
             modals.showConfirmModal('Confirm delete interest to BUY Product3?', function (success) {
             }, 'Delete', 'Cancel');
+        },
+
+        showNewInterestModal: function () {
+            modals.showNewInterestModal(function (interests) {
+                bidding.refreshInterests(interests);
+            });
+        },
+
+        showInterestWindow: function (interestGUID) {
+            var interest = bidding.getInterest(interestGUID);
+            if (interest == null) return;
+
+            var interestWindowType = bidding.getInterestWindowType(interest);
+            var windowPos = null;
+            var windowObj = windows.getWindowByID(interestGUID);
+            if (windowObj != null) {
+                windowPos = $(windowObj.dialog[0]).dialog('option', 'position');
+                $(windowObj.dialog[0]).dialog('close');
+            }
+
+            var interestTypeDesc = (interest.InterestType == INTERESTTYPE_BUY) ? "BUY" : "SELL";
+            var windowTitle = interestTypeDesc + ' ' + interest.Product;
+            windowObj = windows.spawnWindow(interestWindowType, windowTitle, interestGUID);
+            if (windowPos != null) $(windowObj.dialog[0]).dialog('option', 'position', windowPos)
+
+            if (interestWindowType == WINDOWTYPE_BIDDINGNOORDER) {
+                $('.leaveOrderButton', windowObj.dialog).bind('click.bidding', function (e) {
+                    modals.showLeaveOrderModal(interestGUID);
+                    return false;
+                });
+            }
+            else if (interestWindowType == WINDOWTYPE_BIDDING) {
+                $('.closeWindowButton', windowObj.dialog).bind('click.bidding', function (e) {
+                    modals.showConfirmModal('You are still working an order.<br/>Confirm close window?<br/><br/><b>Order is still LIVE until you click "Cancel Order"</b>', function (success) {
+                        if (success) {
+                            $(windowObj.dialog[0]).dialog('close');
+                        }
+                    }, 'Close', 'Leave Open');
+                });
+
+                $('.interestDetails', windowObj.dialog).html('Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks);
+                $('.interestPrice', windowObj.dialog).html('Order @ ' + interest.Price);
+                $('.interestExpiration', windowObj.dialog).html(bidding.getInterestExpirationDesc(interest));
+
+                $('.cancelOrderButton', windowObj.dialog).bind('click.bidding', function (e) {
+                    bidding.cancelOrder(interestGUID);
+                });
+            }
+            else if (interestWindowType == WINDOWTYPE_VIEWINTEREST) {
+                $('.closeWindowButton', windowObj.dialog).bind('click.bidding', function (e) {
+                    $(windowObj.dialog[0]).dialog('close');
+                });
+
+                $('.interestDetails', windowObj.dialog).html('Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks);
+                $('.interestPrice', windowObj.dialog).html('Order @ ' + interest.Price);
+                $('.interestExpiration', windowObj.dialog).html(bidding.getInterestExpirationDesc(interest));
+            }
+        },
+
+        getInterestExpirationDesc: function (interest) {
+            var expirationDate = 'Good until Cancelled';
+            if (!resources.stringNullOrEmpty(interest.ExpirationDate)) {
+                var expDate = resources.dateAddMs(resources.dateConvert(interest.ExpirationDate), bidding.serverTimeOffsetMS);
+                var diffMS = expDate.getTime() - (new Date()).getTime();
+                var remainingTimeSec = Math.ceil(resources.dateDiffMS(new Date(), expDate) / 1000);
+                expirationDate = 'Good for another ' + bidding.formatSeconds(remainingTimeSec);
+            }
+            return expirationDate;
+        },
+
+        formatSeconds: function (secs) {
+            var hr = Math.floor(secs / 3600);
+            var min = Math.floor((secs - (hr * 3600)) / 60);
+            var sec = secs - (hr * 3600) - (min * 60);
+
+            var strFormat = '';
+            if (hr > 0 & min > 0 & sec > 0) strFormat = '@HRhr, @MINmin, @SECsec';
+            else if (hr > 0 & min > 0 & sec == 0) strFormat = '@HRhr, @MINmin';
+            else if (hr > 0 & min == 0 & sec == 0) strFormat = '@HRhr';
+            else if (hr == 0 & min > 0 & sec == 0) strFormat = '@MINmin';
+            else if (hr == 0 & min == 0 & sec > 0) strFormat = '@SECsec';
+            else if (hr == 0 & min > 0 & sec > 0) strFormat = '@MINmin, @SECsec';
+            else if (hr > 0 & min == 0 & sec > 0) strFormat = '@HRhr, @SECsec';
+            else strFormat = secs + 'sec';
+            var time = resources.stringReplace(strFormat, '@HR', hr);
+            time = resources.stringReplace(time, '@MIN', min);
+            time = resources.stringReplace(time, '@SEC', sec);
+            return time;
+        },
+
+        cancelOrder: function (interestGUID) {
+            modals.showConfirmModal('Are you sure you want to cancel this order?', function (success) {
+                if (success) {
+                    modals.toggleWaitingModal(true, 'Please wait...');
+                    resources.ajaxPost('Receiver', 'CancelOrder', { guid: defaultPage.sessionGUID(), interestGUID: interestGUID }, function (data) {
+                        modals.hide();
+                        if (data.Success) {
+                            bidding.interests = data.Interests;
+                            bidding.refreshInterests();
+                            bidding.showInterestWindow(interestGUID);
+                        }
+                        else {
+                            modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { });
+                        }
+                    });
+                }
+            });
+        },
+
+        getInterest: function (interestGUID) {
+            return resources.getArrayItem(bidding.interests, function (a) { return resources.stringEqual(a.InterestGUID, interestGUID); });
+        },
+
+        getInterestWindowType: function (interest) {
+            if (resources.stringNullOrEmpty(interest.ContactGUID)) {
+                if (interest.Price > 0) return WINDOWTYPE_BIDDING;
+                else return WINDOWTYPE_BIDDINGNOORDER;
+            }
+            else {
+                if (interest.Price > 0) return WINDOWTYPE_VIEWINTEREST;
+                else return WINDOWTYPE_VIEWINTERESTNOORDER;
+            }
+        },
+
+        refreshInterests: function (newInterests, refreshCache) {
+            var _refreshInterests = function () {
+                var htmlArray = new Array();
+                if (bidding.interests.length > 0) htmlArray.push('<li style="white-space:nowrap; text-align:center;"><a href="#" onclick="windows.autoArrangeWindows();return false;">Arrange Windows</a></li>');
+                resources.arrayEnum(bidding.interests, function (interest) {
+                    var interestTypeDesc = (interest.InterestType == INTERESTTYPE_BUY) ? "BUY" : "SELL";
+                    var interestWindowType = bidding.getInterestWindowType(interest);
+                    if (interestWindowType == WINDOWTYPE_BIDDING) {
+                        var html = '<li><div style="background-color:#b9cde5; cursor:pointer; border: 1px solid #000000;"><table width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td style="color:Red; text-align:right; font-weight:bolder;" onclick="bidding.deleteInterest()">X&nbsp;</td></tr></table></div></li>';
+                        html = resources.stringReplace(html, '@LINE1', '<b>' + interestTypeDesc + '</b> ' + interest.Product);
+                        html = resources.stringReplace(html, '@LINE2', 'Order @ ' + interest.Price);
+                        html = resources.stringReplace(html, '@INTERESTGUID', interest.InterestGUID);
+                        htmlArray.push(html);
+                    }
+                    else if (interestWindowType == WINDOWTYPE_BIDDINGNOORDER) {
+                        var html = '<li><div style="background-color:#d99694; cursor:pointer; border: 1px solid #000000;"><table class="hoverSimple" width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td style="color:Red; text-align:right; font-weight:bolder;" onclick="bidding.deleteInterest()">X&nbsp;</td></tr></table></div></li>';
+                        html = resources.stringReplace(html, '@LINE1', '<b>' + interestTypeDesc + '</b> ' + interest.Product);
+                        html = resources.stringReplace(html, '@LINE2', interest.Condition);
+                        html = resources.stringReplace(html, '@INTERESTGUID', interest.InterestGUID);
+                        htmlArray.push(html);
+                    }
+                    else if (interestWindowType == WINDOWTYPE_VIEWINTEREST) {
+                        var contact = bidding.getContactByGUID(interest.ContactGUID);
+                        if (contact != null) {
+                            var html = '<li><div style="background-color:#92d050; cursor:pointer; border: 1px solid #000000;"><table width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td>&nbsp;</td></tr></table></div></li>';
+                            html = resources.stringReplace(html, '@LINE1', '<b>' + interestTypeDesc + '</b> ' + interest.Product);
+                            html = resources.stringReplace(html, '@LINE2', 'Order @ ' + interest.Price + ' - ' + contact.FirstName + ' ' + contact.LastName);
+                            html = resources.stringReplace(html, '@INTERESTGUID', interest.InterestGUID);
+                            htmlArray.push(html);
+                        }
+                    }
+                    else if (interestWindowType == WINDOWTYPE_VIEWINTERESTNOORDER) {
+                        var contact = bidding.getContactByGUID(interest.ContactGUID);
+                        if (contact != null) {
+                            var html = '<li><div style="background-color:#fac090; cursor:pointer; border: 1px solid #000000;"><table width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td>&nbsp;</td></tr></table></div></li>';
+                            html = resources.stringReplace(html, '@LINE1', '<b>' + interestTypeDesc + '</b> ' + interest.Product);
+                            html = resources.stringReplace(html, '@LINE2', interest.Condition + ' - ' + contact.FirstName + ' ' + contact.LastName);
+                            html = resources.stringReplace(html, '@INTERESTGUID', interest.InterestGUID);
+                            htmlArray.push(html);
+                        }
+                    }
+                });
+                $('.menuInterests .menuInterestsDropdown').html(htmlArray.join(''));
+            };
+
+            if (newInterests != null) bidding.interests = newInterests;
+            if (bidding.interests == null || refreshCache) {
+                bidding.getData({ interests: true }, function (success) {
+                    if (success) _refreshInterests();
+                });
+            }
+            else _refreshInterests();
         },
 
         refreshContacts: function (newContacts, refreshCache) {
@@ -246,16 +297,8 @@ var bidding = (function () {
 
             if (newContacts != null) bidding.contacts = newContacts;
             if (bidding.contacts == null || refreshCache) {
-                modals.toggleWaitingModal(true, 'Loading, please wait...');
-                resources.ajaxPost('Receiver', 'GetContacts', { guid: defaultPage.sessionGUID() }, function (data) {
-                    modals.hide();
-                    if (data.Success) {
-                        bidding.contacts = data.Contacts;
-                        _refreshContacts();
-                    }
-                    else {
-                        modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX));
-                    }
+                bidding.getData({ contacts: true }, function (success) {
+                    if (success) _refreshContacts();
                 });
             }
             else _refreshContacts();
@@ -284,7 +327,7 @@ var bidding = (function () {
         },
 
         showChatWindow: function (firstName, lastName, email) {
-            var chatWindow = bidding.spawnWindow(WINDOWTYPE_CHAT, firstName + ' ' + lastName, email, null);
+            var chatWindow = windows.spawnWindow(WINDOWTYPE_CHAT, firstName + ' ' + lastName, email, null);
             $('.loadEarlierMessages', chatWindow.dialog).bind('click', function (e) {
                 var loadEarlierMessages = $(this);
                 var loadingMessages = $('.loadingMessages', loadEarlierMessages.parent());
@@ -358,7 +401,7 @@ var bidding = (function () {
                         if (!resources.stringNullOrEmpty(message)) {
                             bidding.logChat({ Email: emailTo, FirstName: bidding.userData.FirstName, LastName: bidding.userData.LastName, Message: message, Outgoing: true });
                             var html = '<div class="chatMessage"><b style="color:#ff0000;">' + bidding.userData.FirstName + ':</b> ' + resources.stringReplace(message, '\n', '</br>') + '</div>';
-                            var _chatWindow = bidding.getWindowByTypeAndID(WINDOWTYPE_CHAT, emailTo);
+                            var _chatWindow = windows.getWindowByTypeAndID(WINDOWTYPE_CHAT, emailTo);
 
                             var chatContent = $('.chatContent', _chatWindow.dialog);
                             chatContent.append($(html));
@@ -384,7 +427,7 @@ var bidding = (function () {
         },
 
         showChatWindow_Incoming: function (data) {
-            var chatWindow = bidding.getWindowByTypeAndID(WINDOWTYPE_CHAT, data.Email);
+            var chatWindow = windows.getWindowByTypeAndID(WINDOWTYPE_CHAT, data.Email);
             if (chatWindow == null) {
                 chatWindow = bidding.showChatWindow(data.FirstName, data.LastName, data.Email); // bidding.spawnWindow(WINDOWTYPE_CHAT, data.FirstName + ' ' + data.LastName, data.Email, null);
             }
@@ -403,7 +446,7 @@ var bidding = (function () {
         showChatWindow_Outgoing: function (contactGUID) {
             var contact = bidding.getContactByGUID(contactGUID);
             if (contact != null) {
-                var chatWindow = bidding.getWindowByTypeAndID(WINDOWTYPE_CHAT, contact.Email);
+                var chatWindow = windows.getWindowByTypeAndID(WINDOWTYPE_CHAT, contact.Email);
                 if (chatWindow == null) {
                     chatWindow = bidding.showChatWindow(contact.FirstName, contact.LastName, contact.Email);
                 }

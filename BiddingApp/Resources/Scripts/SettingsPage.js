@@ -49,7 +49,7 @@ var settingsPage = (function () {
             if (newContacts != null) settingsPage.contacts = newContacts;
             if (settingsPage.contacts == null || refreshCache) {
                 modals.toggleWaitingModal(true, 'Loading, please wait...');
-                resources.ajaxPost('Receiver', 'GetContacts', { guid: defaultPage.sessionGUID() }, function (data) {
+                resources.ajaxPost('Receiver', 'GetData', { guid: defaultPage.sessionGUID(), contacts: true }, function (data) {
                     modals.hide();
                     if (data.Success) {
                         settingsPage.contacts = data.Contacts;

@@ -193,5 +193,73 @@ namespace BiddingApp
             }
             return chatItems;
         }
+
+        public void Interest_Create(int userID, InterestData interestData)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Interest_Create"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "InterestTypeID", (int)interestData.InterestType);
+                SqlParam(cmd, "Name", interestData.Product);
+                SqlParam(cmd, "Condition", interestData.Condition);
+                SqlParam(cmd, "Quantity", interestData.Quantity);
+                SqlParam(cmd, "Remarks", interestData.Remarks);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
+        public List<InterestData> Interest_Get(int userID)
+        {
+            List<InterestData> interests = new List<InterestData>();
+            using (SqlCommand cmd = SqlProc("STP_Interest_Get"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                foreach (DataRowAdapter dra in DataRowAdapter.Create(GetTable(cmd)))
+                {
+                    InterestData interestData = new InterestData()
+                    {
+                        InterestType = (InterestTypes)dra.Get<int>("InterestTypeID"),
+                        Product = dra.Get<string>("Name"),
+                        Condition = dra.Get<string>("Condition"),
+                        Quantity = dra.Get<string>("Quantity"),
+                        Remarks = dra.Get<string>("Remarks"),
+                        Price = dra.Get<decimal>("Price"),
+                        ExpirationDate = dra.Get<string>("ExpirationDate"),
+                        InterestGUID = dra.Get<string>("InterestGUID"),
+                        ContactGUID = dra.Get<string>("ContactGUID")
+                    };
+                    interests.Add(interestData);
+                }
+            }
+            return interests;
+        }
+
+        public void Interest_PlaceOrder(int userID, string interestGUID, decimal price, int hours, int minutes)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Interest_PlaceOrder"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "InterestGUID", interestGUID);
+                SqlParam(cmd, "Price", price);
+                if (hours > 0) SqlParam(cmd, "GoodUntil_Hours", hours);
+                if (minutes > 0) SqlParam(cmd, "GoodUntil_Mins", minutes);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
+        public void Interest_CancelOrder(int userID, string interestGUID)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Interest_CancelOrder"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "InterestGUID", interestGUID);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
+        public DateTime GetSqlDateTime()
+        {
+            return ExecuteScalar<DateTime>("select getdate()");
+        }
     }
 }
