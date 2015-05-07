@@ -5,23 +5,6 @@
     <script type="text/javascript">
         $(document).ready(function () {
             bidding.initialize();
-
-            /*
-            bidding.spawnWindow(WINDOWTYPE_BIDDING, 'BUY Product');
-            bidding.spawnWindow(WINDOWTYPE_BIDDINGNOORDER, 'BUY Product');
-            bidding.spawnWindow(WINDOWTYPE_VIEWINTEREST, 'SELL Product - fName1');
-            bidding.spawnWindow(WINDOWTYPE_VIEWINTERESTNOORDER, 'BUY Product - fName2');
-            bidding.spawnWindow(WINDOWTYPE_VIEWINTERESTFIRM, 'BUY Product - fName2');
-            bidding.spawnWindow(WINDOWTYPE_DEALCONFIRM, 'Confirm Deal: Product');
-            bidding.spawnWindow(WINDOWTYPE_DEALCOMPLETE, 'Confirmed Deal DDMMMYY HH:MM');
-            bidding.spawnWindow(WINDOWTYPE_FILLORDERCONFIRM, 'Fill Order');
-            */
-
-            //bidding.spawnWindow(WINDOWTYPE_CHAT, 'fName1 lName1');
-            //bidding.spawnWindow(WINDOWTYPE_CHAT, 'fName2 lName2');
-            //modals.showDealCompleteModal();
-
-            
         });
 
         function toggleContactSearch(isVisible) {
@@ -93,6 +76,7 @@
         </table>        
     </div>
     <div>
+        <!-- WINDOWTYPE_BIDDING -->
         <div class="biddingWindow" style="display:none;">
           <table style="min-width:435px; left:-10px; height:100%;" border="0" cellpadding="0" cellspacing="0">
             <tr>
@@ -155,6 +139,7 @@
           </table>
         </div>
 
+        <!-- WINDOWTYPE_BIDDINGNOORDER -->
         <div class="biddingNoOrderWindow" style="display:none;">
           <table style="min-width:435px; left:-10px; height:100%;" border="0" cellpadding="0" cellspacing="0">
             <tr>
@@ -162,7 +147,7 @@
                     <table style="width:100%; height:100%; background:#d99694;" cellpadding="0" cellspacing="0">
                         <tr>
                             <td style="" colspan="3">
-                                <div style="padding:5px;">
+                                <div style="padding:5px;" class="interestDetails">
                                     Condition<br />
                                     Quantity<br />
                                     Remarks
@@ -191,31 +176,14 @@
                     </table>
                     
                 </td>
-                <td valign="top" style="width:130px;font-size:10pt; background-color:#b7dee8; border-top: 2px solid #4f81bd; border-right: 2px solid #4f81bd; border-bottom: 2px solid #4f81bd;">
-                    <div style="max-height:<% =biddingWindowUserScrollHeight %>px; overflow:auto;">
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                    </div>
+                <td valign="top" class="bidList" style="width:130px;font-size:10pt; background-color:#b7dee8; border-top: 2px solid #4f81bd; border-right: 2px solid #4f81bd; border-bottom: 2px solid #4f81bd;">
+                    <div class="bidItems" style="max-height:<% =biddingWindowUserScrollHeight %>px; overflow:auto;"></div>
                 </td>
             </tr>
           </table>
         </div>
 
+        <!-- WINDOWTYPE_VIEWINTEREST -->
         <div class="viewInterestWindow" style="display:none;">
           <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
             <tr>
@@ -283,6 +251,7 @@
           </table>
         </div>
 
+        <!-- WINDOWTYPE_VIEWINTERESTNOORDER -->
         <div class="viewInterestNoOrderWindow" style="display:none;">
           <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
             <tr>
@@ -349,6 +318,7 @@
           </table>
         </div>
 
+        <!-- WINDOWTYPE_VIEWINTERESTFIRM -->
         <div class="viewInterestFirmWindow" style="display:none;">
           <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
             <tr>

@@ -215,25 +215,48 @@ namespace BiddingApp
             using (SqlCommand cmd = SqlProc("STP_Interest_Get"))
             {
                 SqlParam(cmd, "UserID", userID);
-                foreach (DataRowAdapter dra in DataRowAdapter.Create(GetTable(cmd)))
+                DataSet ds = GetSet(cmd);
+                for (int i = 0; i < ds.Tables.Count; i++)
                 {
-                    InterestData interestData = new InterestData()
+                    foreach (DataRowAdapter dra in DataRowAdapter.Create(ds.Tables[i].Rows))
                     {
-                        InterestType = (InterestTypes)dra.Get<int>("InterestTypeID"),
-                        Product = dra.Get<string>("Name"),
-                        Condition = dra.Get<string>("Condition"),
-                        Quantity = dra.Get<string>("Quantity"),
-                        Remarks = dra.Get<string>("Remarks"),
-                        Price = dra.Get<decimal>("Price"),
-                        ExpirationDate = dra.Get<string>("ExpirationDate"),
-                        InterestGUID = dra.Get<string>("InterestGUID"),
-                        ContactGUID = dra.Get<string>("ContactGUID"),
-                        StatusDate = dra.Get<string>("StatusDate"),
-                        StatusDescription = dra.Get<string>("StatusDescription"),
-                        PriceShowing = dra.Get<decimal>("PriceShowing"),
-                        BidType = (BidTypes)dra.Get<int>("BidTypeID")
-                    };
-                    interests.Add(interestData);
+                        if (i == 0)
+                        {
+                            InterestData interestData = new InterestData()
+                            {
+                                InterestType = (InterestTypes)dra.Get<int>("InterestTypeID"),
+                                Product = dra.Get<string>("Name"),
+                                Condition = dra.Get<string>("Condition"),
+                                Quantity = dra.Get<string>("Quantity"),
+                                Remarks = dra.Get<string>("Remarks"),
+                                Price = dra.Get<decimal>("Price"),
+                                ExpirationDate = dra.Get<string>("ExpirationDate"),
+                                InterestGUID = dra.Get<string>("InterestGUID"),
+                                ContactGUID = dra.Get<string>("ContactGUID"),
+                                StatusDate = dra.Get<string>("StatusDate"),
+                                StatusDescription = dra.Get<string>("StatusDescription"),
+                                PriceShowing = dra.Get<decimal>("PriceShowing"),
+                                BidType = (BidTypes)dra.Get<int>("BidTypeID")
+                            };
+                            interests.Add(interestData);
+                        }
+                        else if (i == 1)
+                        {
+                            string interestGUID = dra.Get<string>("InterestGUID");
+                            InterestData interest = interests.First(a => a.InterestGUID == interestGUID);
+                            if (interest != null)
+                            {
+                                interest.Bids.Add(new BidData()
+                                {
+                                    InterestGUID = interestGUID,
+                                    ContactGUID = dra.Get<string>("ContactGUID"),
+                                    BidType = (BidTypes)dra.Get<int>("BidTypeID"),
+                                    Price = dra.Get<decimal>("Price"),
+                                    CreationDate = dra.Get<string>("CreationDate")
+                                });
+                            }
+                        }
+                    }
                 }
             }
             return interests;

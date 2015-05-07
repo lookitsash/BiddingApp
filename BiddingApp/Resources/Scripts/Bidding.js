@@ -41,7 +41,6 @@ var bidding = (function () {
                 return false;
             });
 
-            bidding.refreshContacts();
             bidding.getData();
 
             var chatHub = $.connection.chatHub;
@@ -192,7 +191,9 @@ var bidding = (function () {
                     return false;
                 });
 
-                modals.showCheckPricesModal();
+                $('.interestDetails', windowObj.dialog).html('Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks);
+
+                bidding.refreshWindowBids(windowObj, interest);
             }
             else if (interestWindowType == WINDOWTYPE_BIDDING) {
                 $('.closeWindowButton', windowObj.dialog).bind('click.bidding', function (e) {
@@ -327,6 +328,22 @@ var bidding = (function () {
                     var statusDateStr = resources.getCalendarDate(true, statusDate) + ' ' + resources.getClockTime(statusDate, true);
                     $('.interestDetails', windowObj.dialog).html(contact.Company + ' - ' + contact.FirstName + '<br/>Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks + '<br/><br/>Counterparty: ' + bidding.userData.Company + ' - ' + bidding.userData.FirstName + ' ' + bidding.userData.LastName + '<br/>Price: ' + interest.Price);
                 }
+            }
+        },
+
+        refreshWindowBids: function (windowObj, interest) {
+            $('.bidList', windowObj.dialog).hide();
+            var htmlArr = new Array();
+            resources.arrayEnum(interest.Bids, function (bid) {
+                var contact = bidding.getContactByGUID(bid.ContactGUID);
+                if (contact != null) {
+                    var html = '<div style="padding:4px; text-align:center; border-bottom:2px solid #4f81bd;' + ((bid.BidType == BIDTYPE_FIRM) ? 'font-weight:bold;' : '') + '">' + contact.FirstName + ' @ ' + bid.Price + '</div>';
+                    htmlArr.push(html);
+                }
+            });
+            if (htmlArr.length > 0) {
+                $('.bidList', windowObj.dialog).show();
+                $('.bidList .bidItems', windowObj.dialog).html(htmlArr.join(''));
             }
         },
 

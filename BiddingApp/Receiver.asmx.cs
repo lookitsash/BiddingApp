@@ -430,6 +430,14 @@ namespace BiddingApp
         public string Product, Condition, Quantity, Remarks, InterestGUID, ContactGUID, ExpirationDate, StatusDate, StatusDescription;
         public decimal Price, PriceShowing;
         public BidTypes BidType;
+        public List<BidData> Bids = new List<BidData>();
+    }
+
+    public class BidData
+    {
+        public string InterestGUID, ContactGUID, CreationDate;
+        public BidTypes BidType;
+        public decimal Price;
     }
 
     public class NotifyException : Exception
