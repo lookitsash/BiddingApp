@@ -66,19 +66,26 @@ var bidding = (function () {
                     var interestGUID = windowObj.windowID;
                     var interest = bidding.getInterest(interestGUID);
                     if (interest != null) {
-                        $('.interestExpiration', windowObj.dialog).html(bidding.getInterestExpirationDesc(interest));
+                        var expiration = bidding.getInterestExpirationDesc(interest);
+                        if (expiration.expired) {
+                            interest.Price = null;
+                            interest.ExpirationDate = null;
+                            bidding.refreshInterests(null, true, true);
+                            bidding.showInterestWindow(interestGUID);
+                        }
+                        $('.interestExpiration', windowObj.dialog).html(expiration.date);
                     }
                 }
             });
             setTimeout(bidding.onTick, 1000);
         },
 
-        getData: function (options, callback) {
+        getData: function (options, callback, hideSaveModal) {
             if (options == null) options = { contacts: true, userData: true, interests: true };
             options.guid = defaultPage.sessionGUID();
-            modals.toggleWaitingModal(true, 'Loading, please wait...');
+            if (!hideSaveModal) modals.toggleWaitingModal(true, 'Loading, please wait...');
             resources.ajaxPost('Receiver', 'GetData', options, function (data) {
-                modals.hide();
+                if (!hideSaveModal) modals.hide();
                 if (data.Success) {
                     var serverDate = resources.dateConvert(data.ServerDate);
                     bidding.serverTimeOffsetMS = resources.dateDiffMS(serverDate, new Date());
@@ -102,8 +109,29 @@ var bidding = (function () {
             });
         },
 
-        deleteInterest: function () {
-            modals.showConfirmModal('Confirm delete interest to BUY Product3?', function (success) {
+        deleteInterest: function (interestGUID) {
+            var interest = bidding.getInterest(interestGUID);
+            if (interest == null) return;
+
+            var interestTypeDesc = (interest.InterestType == INTERESTTYPE_BUY) ? "BUY" : "SELL";
+
+            modals.showConfirmModal('Confirm delete interest to ' + interestTypeDesc + ' ' + interest.Product + '?', function (success) {
+                if (success) {
+                    modals.toggleWaitingModal(true, 'Please wait...');
+                    resources.ajaxPost('Receiver', 'DeleteInterest', { guid: defaultPage.sessionGUID(), interestGUID: interestGUID }, function (data) {
+                        modals.hide();
+                        if (data.Success) {
+                            bidding.interests = data.Interests;
+                            bidding.refreshInterests();
+
+                            var windowObj = windows.getWindowByID(interestGUID);
+                            if (windowObj != null) windows.closeWindow(windowObj);
+                        }
+                        else {
+                            modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { });
+                        }
+                    });
+                }
             }, 'Delete', 'Cancel');
         },
 
@@ -135,6 +163,13 @@ var bidding = (function () {
                     modals.showLeaveOrderModal(interestGUID);
                     return false;
                 });
+
+                $('.checkPricesButton', windowObj.dialog).bind('click.bidding', function (e) {
+                    modals.showCheckPricesModal(interestGUID);
+                    return false;
+                });
+
+                modals.showCheckPricesModal();
             }
             else if (interestWindowType == WINDOWTYPE_BIDDING) {
                 $('.closeWindowButton', windowObj.dialog).bind('click.bidding', function (e) {
@@ -145,9 +180,14 @@ var bidding = (function () {
                     }, 'Close', 'Leave Open');
                 });
 
+                $('.checkPricesButton', windowObj.dialog).bind('click.bidding', function (e) {
+                    modals.showCheckPricesModal(interestGUID);
+                    return false;
+                });
+
                 $('.interestDetails', windowObj.dialog).html('Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks);
                 $('.interestPrice', windowObj.dialog).html('Order @ ' + interest.Price);
-                $('.interestExpiration', windowObj.dialog).html(bidding.getInterestExpirationDesc(interest));
+                $('.interestExpiration', windowObj.dialog).html(bidding.getInterestExpirationDesc(interest).date);
 
                 $('.cancelOrderButton', windowObj.dialog).bind('click.bidding', function (e) {
                     bidding.cancelOrder(interestGUID);
@@ -158,21 +198,32 @@ var bidding = (function () {
                     $(windowObj.dialog[0]).dialog('close');
                 });
 
-                $('.interestDetails', windowObj.dialog).html('Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks);
-                $('.interestPrice', windowObj.dialog).html('Order @ ' + interest.Price);
-                $('.interestExpiration', windowObj.dialog).html(bidding.getInterestExpirationDesc(interest));
+                var contact = bidding.getContactByGUID(interest.ContactGUID);
+                if (contact != null) {
+                    var statusDate = bidding.convertDateToLocal(interest.StatusDate);
+                    var statusDateStr = resources.getCalendarDate(true, statusDate) + ' ' + resources.getClockTime(statusDate, true);
+                    $('.interestStatus', windowObj.dialog).html(statusDateStr + ' - ' + interest.StatusDescription);
+                    $('.interestDetails', windowObj.dialog).html(contact.Company + ' - ' + contact.FirstName + '<br/>Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks);
+                    $('.interestPrice', windowObj.dialog).html('Order @ ' + interest.Price);
+                    $('.interestExpiration', windowObj.dialog).html(bidding.getInterestExpirationDesc(interest).date);
+                }
             }
         },
 
         getInterestExpirationDesc: function (interest) {
             var expirationDate = 'Good until Cancelled';
+            var expired = false;
             if (!resources.stringNullOrEmpty(interest.ExpirationDate)) {
-                var expDate = resources.dateAddMs(resources.dateConvert(interest.ExpirationDate), bidding.serverTimeOffsetMS);
-                var diffMS = expDate.getTime() - (new Date()).getTime();
-                var remainingTimeSec = Math.ceil(resources.dateDiffMS(new Date(), expDate) / 1000);
+                var expDate = bidding.convertDateToLocal(interest.ExpirationDate);
+                var remainingTimeSec = Math.max(0, Math.floor(resources.dateDiffMS(new Date(), expDate) / 1000));
+                expired = (remainingTimeSec <= 0);
                 expirationDate = 'Good for another ' + bidding.formatSeconds(remainingTimeSec);
             }
-            return expirationDate;
+            return { date: expirationDate, expired: expired };
+        },
+
+        convertDateToLocal: function (date) {
+            return resources.dateAddMs(resources.dateConvert(date), bidding.serverTimeOffsetMS);
         },
 
         formatSeconds: function (secs) {
@@ -229,7 +280,7 @@ var bidding = (function () {
             }
         },
 
-        refreshInterests: function (newInterests, refreshCache) {
+        refreshInterests: function (newInterests, refreshCache, hideSaveModal) {
             var _refreshInterests = function () {
                 var htmlArray = new Array();
                 if (bidding.interests.length > 0) htmlArray.push('<li style="white-space:nowrap; text-align:center;"><a href="#" onclick="windows.autoArrangeWindows();return false;">Arrange Windows</a></li>');
@@ -237,14 +288,14 @@ var bidding = (function () {
                     var interestTypeDesc = (interest.InterestType == INTERESTTYPE_BUY) ? "BUY" : "SELL";
                     var interestWindowType = bidding.getInterestWindowType(interest);
                     if (interestWindowType == WINDOWTYPE_BIDDING) {
-                        var html = '<li><div style="background-color:#b9cde5; cursor:pointer; border: 1px solid #000000;"><table width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td style="color:Red; text-align:right; font-weight:bolder;" onclick="bidding.deleteInterest()">X&nbsp;</td></tr></table></div></li>';
+                        var html = '<li><div style="background-color:#b9cde5; cursor:pointer; border: 1px solid #000000;"><table width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td style="color:Red; text-align:right; font-weight:bolder;" onclick="bidding.deleteInterest(\'@INTERESTGUID\')">X&nbsp;</td></tr></table></div></li>';
                         html = resources.stringReplace(html, '@LINE1', '<b>' + interestTypeDesc + '</b> ' + interest.Product);
                         html = resources.stringReplace(html, '@LINE2', 'Order @ ' + interest.Price);
                         html = resources.stringReplace(html, '@INTERESTGUID', interest.InterestGUID);
                         htmlArray.push(html);
                     }
                     else if (interestWindowType == WINDOWTYPE_BIDDINGNOORDER) {
-                        var html = '<li><div style="background-color:#d99694; cursor:pointer; border: 1px solid #000000;"><table class="hoverSimple" width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td style="color:Red; text-align:right; font-weight:bolder;" onclick="bidding.deleteInterest()">X&nbsp;</td></tr></table></div></li>';
+                        var html = '<li><div style="background-color:#d99694; cursor:pointer; border: 1px solid #000000;"><table class="hoverSimple" width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td style="color:Red; text-align:right; font-weight:bolder;" onclick="bidding.deleteInterest(\'@INTERESTGUID\')">X&nbsp;</td></tr></table></div></li>';
                         html = resources.stringReplace(html, '@LINE1', '<b>' + interestTypeDesc + '</b> ' + interest.Product);
                         html = resources.stringReplace(html, '@LINE2', interest.Condition);
                         html = resources.stringReplace(html, '@INTERESTGUID', interest.InterestGUID);
@@ -278,7 +329,7 @@ var bidding = (function () {
             if (bidding.interests == null || refreshCache) {
                 bidding.getData({ interests: true }, function (success) {
                     if (success) _refreshInterests();
-                });
+                }, hideSaveModal);
             }
             else _refreshInterests();
         },

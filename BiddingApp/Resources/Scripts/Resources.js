@@ -470,15 +470,15 @@
             return days[expirationDate.getDay()] + ' ' + resources.stringPadLeft((expirationDate.getMonth() + 1) + '', 2, '0') + '.' + resources.stringPadLeft(expirationDate.getDate() + '', 2, '0') + '.' + year + ' at 11:59PM PST';
         },
 
-        getCalendarDate: function (abbreviatedMonths) {
+        getCalendarDate: function (abbreviatedMonths, date) {
             var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
             if (abbreviatedMonths) months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-            var now = new Date();
-            var monthnumber = now.getMonth();
+            if (date == null) date = new Date();
+            var monthnumber = date.getMonth();
             var monthname = months[monthnumber];
-            var monthday = now.getDate();
-            var year = now.getYear();
+            var monthday = date.getDate();
+            var year = date.getYear();
             if (year < 2000) { year = year + 1900; }
             var dateString = monthname +
                             ' ' +
@@ -488,26 +488,37 @@
             return dateString;
         },
 
-        getClockTime: function () {
-            var now = new Date();
-            var hour = now.getHours();
-            var minute = now.getMinutes();
-            var second = now.getSeconds();
+        getClockTime: function (date, simple) {
+            if (date == null) date = new Date();
+            var hour = date.getHours();
+            var minute = date.getMinutes();
+            var second = date.getSeconds();
             var ap = "AM";
             if (hour > 11) { ap = "PM"; }
             if (hour > 12) { hour = hour - 12; }
             if (hour == 0) { hour = 12; }
-            if (hour < 10) { hour = "0" + hour; }
-            if (minute < 10) { minute = "0" + minute; }
-            if (second < 10) { second = "0" + second; }
-            var timeString = hour +
+            if (simple) {
+                if (minute < 10) { minute = "0" + minute; }
+                var timeString = hour +
+                            ':' +
+                            minute +
+                            " " +
+                            ap;
+                return timeString;
+            }
+            else {
+                if (hour < 10) { hour = "0" + hour; }
+                if (minute < 10) { minute = "0" + minute; }
+                if (second < 10) { second = "0" + second; }
+                var timeString = hour +
                             ':' +
                             minute +
                             ':' +
                             second +
                             " " +
                             ap;
-            return timeString;
+                return timeString;
+            }
         },
 
         extractFilenameFromPath: function (str) {

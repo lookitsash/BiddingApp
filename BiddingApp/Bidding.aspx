@@ -123,7 +123,7 @@
                             <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;" colspan="3">
                                 <a href="#" onclick="return false;" class="btn btn-cancel closeWindowButton">X</a>
                                 <a href="#" onclick="return false;" class="btn btn-primary cancelOrderButton">Cancel Order</a>
-                                <a href="#" onclick="return false;" class="btn btn-primary">Check Prices</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary checkPricesButton">Check Prices</a>
                             </td>
                         </tr>
                     </table>
@@ -184,7 +184,7 @@
                             <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;" colspan="3">
                                 <a href="#" class="btn btn-cancel">X</a>
                                 <a href="#" class="btn btn-primary leaveOrderButton">Leave Order</a>
-                                <a href="#" class="btn btn-primary">Check Prices</a>
+                                <a href="#" class="btn btn-primary checkPricesButton">Check Prices</a>
                             </td>
                         </tr>
                     </table>
@@ -222,7 +222,7 @@
                     <table style="width:100%; height:100%; background:#c3d69b;" cellpadding="0" cellspacing="0">
                         <tr>
                             <td style=" font-weight:bold;" colspan="3">
-                                <div style="padding:5px;">
+                                <div style="padding:5px;" class="interestStatus">
                                 Status Update
                                 </div>
                             </td>
@@ -463,15 +463,7 @@
                             <label><input type="radio" name="contactSelection" class="selectedContacts" />Selected advance contacts</label><br />
                             <div class="selectContactsDiv">
                                 <br />
-                                <table style="width:100%;">
-                                    <tr>
-                                        <td><label><input type="checkbox" />Company1 - fName1</label></td>
-                                        <td><label><input type="checkbox" />Company2 - fName2</label></td>
-                                    </tr>
-                                    <tr>
-                                        <td><label><input type="checkbox" />Company1 - fName1</label></td>
-                                        <td><label><input type="checkbox" />Company2 - fName2</label></td>
-                                    </tr>
+                                <table style="width:100%;" class="contactsList">
                                 </table>
                             </div>
                         </div>
@@ -481,8 +473,8 @@
                     <div class="footer centered">
                         <div>
                             <a href="#" onclick="modals.hide();return false;" class="btn btn-cancel">X</a>
-                            <a href="#" onclick="modals.hide();return false;" class="btn btn-primary">Call for FIRM</a>
-                            <a href="#" onclick="modals.hide();return false;" class="btn btn-primary">Call for Indic</a>
+                            <a href="#" onclick="modals.checkPrices(BIDTYPE_REQUESTFIRM);return false;" class="btn btn-primary">Call for FIRM</a>
+                            <a href="#" onclick="modals.checkPrices(BIDTYPE_REQUESTINDICATIVE);return false;" class="btn btn-primary">Call for Indic</a>
                         </div>
                     </div>
                 </div>

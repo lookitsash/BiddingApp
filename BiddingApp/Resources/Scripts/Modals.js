@@ -235,20 +235,74 @@ var modals = (function () {
             });
         },
 
-        showCheckPricesModal: function () {
+        showCheckPricesModal: function (interestGUID) {
+            currentEditingGUID = interestGUID;
             resources.uiToggleCheckbox($('#checkPricesModal .allContacts'), true);
             $('#checkPricesModal .selectContactsDiv').hide();
 
-            $('#checkPricesModal .allContacts').unbind('click.bidding').bind('click.bidding', function (e) {
-                $('#checkPricesModal .selectContactsDiv').hide();
-                windowUpdate();
+            $('#checkPricesModal .contactsList').html('');
+            var contactRowHtml = null;
+            var advanceContactCount = 0;
+            resources.arrayEnum(bidding.contacts, function (contact) {
+                if (contact.MembershipTypeID == MEMBERSHIPTYPE_ADVANCE) {
+                    advanceContactCount++;
+                    var baseHtml = '<td><label><input class="contactField" data-id="' + contact.GUID + '" type="checkbox" />' + contact.FirstName + ' ' + contact.LastName + '</label></td>';
+                    if (resources.stringNullOrEmpty(contactRowHtml)) contactRowHtml = '<tr>' + baseHtml;
+                    else {
+                        contactRowHtml += baseHtml + '</tr>';
+                        $('#checkPricesModal .contactsList').append(contactRowHtml);
+                        contactRowHtml = null;
+                    }
+                }
             });
-            $('#checkPricesModal .selectedContacts').unbind('click.bidding').bind('click.bidding', function (e) {
-                $('#checkPricesModal .selectContactsDiv').show();
-                windowUpdate();
-            });
+            if (!resources.stringNullOrEmpty(contactRowHtml)) {
+                contactRowHtml += '<td>&nbsp;</td></tr>';
+                $('#checkPricesModal .contactsList').append(contactRowHtml);
+            }
 
-            modals.show('checkPricesModal');
+            if (advanceContactCount == 0) {
+                modals.showNoAdvanceContactsModal();
+            }
+            else {
+                $('#checkPricesModal .allContacts').unbind('click.bidding').bind('click.bidding', function (e) {
+                    $('#checkPricesModal .selectContactsDiv').hide();
+                    windowUpdate();
+                });
+                $('#checkPricesModal .selectedContacts').unbind('click.bidding').bind('click.bidding', function (e) {
+                    $('#checkPricesModal .selectContactsDiv').show();
+                    windowUpdate();
+                });
+
+                modals.show('checkPricesModal');
+            }
+        },
+
+        checkPrices: function (bidType) {
+            var allContacts = resources.uiCheckboxSelected($('#checkPricesModal .allContacts'));
+            var contactGUIDs = null;
+            if (!allContacts) {
+                contactGUIDs = new Array();
+                $('#checkPricesModal .contactField:checked').each(function () {
+                    contactGUIDs.push($(this).attr('data-id'));
+                });
+                if (contactGUIDs.length == 0) {
+                    modals.showNotificationModal('Please select at least one contact');
+                    return;
+                }
+            }
+
+            modals.hide();
+            modals.toggleWaitingModal(true, 'Please wait...');
+            var formData = { guid: defaultPage.sessionGUID(), interestGUID: currentEditingGUID, bidType: bidType, contactGUIDs: contactGUIDs };
+            resources.ajaxPost('Receiver', 'CheckPrices', formData, function (data) {
+                modals.hide();
+                if (data.Success) {
+
+                }
+                else {
+                    modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('checkPricesModal'); });
+                }
+            });
         },
 
         showLeaveOrderModal: function (interestGUID) {

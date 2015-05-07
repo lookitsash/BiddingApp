@@ -162,6 +162,10 @@ var windows = (function () {
 
         getWindowByTypeAndID: function (windowType, windowID) {
             return resources.getArrayItem(windows.getWindowCollection(windowType), function (w) { return w.windowType == windowType && resources.stringEqual(w.windowID, windowID); });
+        },
+
+        closeWindow: function (windowObj) {
+            $(windowObj.dialog[0]).dialog('close');
         }
     };
 })();

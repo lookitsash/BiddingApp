@@ -118,7 +118,8 @@ namespace BiddingApp
                         Block = dra.Get<bool>("Block"),
                         AppearOnline = dra.Get<bool>("AppearOnline"),
                         MembershipTypeID = (MembershipTypes)dra.Get<int>("MembershipTypeID"),
-                        RecentChatID = dra.Get<int>("RecentChatID")
+                        RecentChatID = dra.Get<int>("RecentChatID"),
+                        Company = dra.Get<string>("Company")
                     });
                 }
             }
@@ -226,7 +227,9 @@ namespace BiddingApp
                         Price = dra.Get<decimal>("Price"),
                         ExpirationDate = dra.Get<string>("ExpirationDate"),
                         InterestGUID = dra.Get<string>("InterestGUID"),
-                        ContactGUID = dra.Get<string>("ContactGUID")
+                        ContactGUID = dra.Get<string>("ContactGUID"),
+                        StatusDate = dra.Get<string>("StatusDate"),
+                        StatusDescription = dra.Get<string>("StatusDescription")
                     };
                     interests.Add(interestData);
                 }
@@ -253,6 +256,29 @@ namespace BiddingApp
             {
                 SqlParam(cmd, "UserID", userID);
                 SqlParam(cmd, "InterestGUID", interestGUID);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
+        public void Interest_Delete(int userID, string interestGUID)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Interest_Delete"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "InterestGUID", interestGUID);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
+        public void Bid_Create(int userID, string interestGUID, string contactGUID, BidTypes bidType, decimal price)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Bid_Create"))
+            {
+                if (userID > 0) SqlParam(cmd, "UserID", userID);
+                if (!String.IsNullOrEmpty(contactGUID)) SqlParam(cmd, "ContactGUID", contactGUID);
+                SqlParam(cmd, "InterestGUID", interestGUID);
+                SqlParam(cmd, "BidTypeID", (int)bidType);
+                if (price > 0) SqlParam(cmd, "Price", price);
                 ExecuteNonQuery(cmd);
             }
         }

@@ -218,7 +218,7 @@ namespace BiddingApp
             }
             catch (Exception ex)
             {
-                Log("GetChatHistory Exception", ex);
+                Log("PlaceOrder Exception", ex);
                 return JsonError(ex);
             }
         }
@@ -237,7 +237,53 @@ namespace BiddingApp
             }
             catch (Exception ex)
             {
-                Log("GetChatHistory Exception", ex);
+                Log("CancelOrder Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string DeleteInterest(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string interestGUID = jToken.Value<string>("interestGUID");
+                Statics.Access.Interest_Delete(userID, interestGUID);
+
+                return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
+            }
+            catch (Exception ex)
+            {
+                Log("DeleteInterest Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string CheckPrices(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string interestGUID = jToken.Value<string>("interestGUID");
+                BidTypes bidType = (BidTypes)jToken.Value<int>("bidType");
+                List<string> contactGUIDs = jToken.Value<JToken>("contactGUIDs") != null ? JsonConvert.DeserializeObject<List<string>>(jToken.Value<JToken>("contactGUIDs").ToString()) : null;
+
+                Access access = Statics.Access;
+                List<ContactData> contacts = access.Contact_Get(userID);
+                foreach (ContactData contact in contacts)
+                {
+                    if (contact.MembershipTypeID == MembershipTypes.Advance && (contactGUIDs == null || contactGUIDs.Contains(contact.GUID))) access.Bid_Create(0, interestGUID, contact.GUID, bidType, 0);
+                }
+
+                return JsonConvert.SerializeObject(new { Success = true });
+            }
+            catch (Exception ex)
+            {
+                Log("CheckPrices Exception", ex);
                 return JsonError(ex);
             }
         }
@@ -310,7 +356,7 @@ namespace BiddingApp
     public class ContactData
     {
         public int ID, RecentChatID;
-        public string GUID, Email, FirstName, LastName;
+        public string GUID, Email, FirstName, LastName, Company;
         public bool AllowBid, Block, AppearOnline;
         public MembershipTypes MembershipTypeID;
     }
@@ -318,7 +364,7 @@ namespace BiddingApp
     public class InterestData
     {
         public InterestTypes InterestType;
-        public string Product, Condition, Quantity, Remarks, InterestGUID, ContactGUID, ExpirationDate;
+        public string Product, Condition, Quantity, Remarks, InterestGUID, ContactGUID, ExpirationDate, StatusDate, StatusDescription;
         public decimal Price;
     }
 
