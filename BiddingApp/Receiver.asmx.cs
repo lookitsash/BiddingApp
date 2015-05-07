@@ -289,6 +289,28 @@ namespace BiddingApp
         }
 
         [WebMethod]
+        public string ShowPrice(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string interestGUID = jToken.Value<string>("interestGUID");
+                BidTypes bidType = (BidTypes)jToken.Value<int>("bidType");
+                decimal price = jToken.Value<decimal>("price");
+
+                Statics.Access.Bid_Create(userID, interestGUID, null, bidType, price);
+
+                return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
+            }
+            catch (Exception ex)
+            {
+                Log("CheckPrices Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
         public string GetData(string json)
         {
             try
@@ -365,7 +387,8 @@ namespace BiddingApp
     {
         public InterestTypes InterestType;
         public string Product, Condition, Quantity, Remarks, InterestGUID, ContactGUID, ExpirationDate, StatusDate, StatusDescription;
-        public decimal Price;
+        public decimal Price, PriceShowing;
+        public BidTypes BidType;
     }
 
     public class NotifyException : Exception

@@ -80,6 +80,16 @@ var bidding = (function () {
             setTimeout(bidding.onTick, 1000);
         },
 
+        showPrice: function (interestGUID, bidType, price) {
+            modals.toggleWaitingModal(true, 'Please wait...');
+            resources.ajaxPost('Receiver', 'ShowPrice', { guid: defaultPage.sessionGUID(), interestGUID: interestGUID, bidType: bidType, price: price }, function (data) {
+                modals.hide();
+                bidding.interests = data.Interests;
+                bidding.refreshInterests();
+                bidding.showInterestWindow(interestGUID);
+            });
+        },
+
         getData: function (options, callback, hideSaveModal) {
             if (options == null) options = { contacts: true, userData: true, interests: true };
             options.guid = defaultPage.sessionGUID();
@@ -198,6 +208,22 @@ var bidding = (function () {
                     $(windowObj.dialog[0]).dialog('close');
                 });
 
+                $('.showIndicButton', windowObj.dialog).bind('click.bidding', function (e) {
+                    var price = resources.toDecimal($('.priceField', windowObj.dialog).val());
+                    if (price <= 0) modals.showNotificationModal('Please enter a valid price');
+                    else {
+                        bidding.showPrice(interestGUID, BIDTYPE_INDICATIVE, price);
+                    }
+                });
+
+                $('.showFirmButton', windowObj.dialog).bind('click.bidding', function (e) {
+                    var price = resources.toDecimal($('.priceField', windowObj.dialog).val());
+                    if (price <= 0) modals.showNotificationModal('Please enter a valid price');
+                    else {
+                        bidding.showPrice(interestGUID, BIDTYPE_FIRM, price);
+                    }
+                });
+
                 var contact = bidding.getContactByGUID(interest.ContactGUID);
                 if (contact != null) {
                     var statusDate = bidding.convertDateToLocal(interest.StatusDate);
@@ -206,6 +232,7 @@ var bidding = (function () {
                     $('.interestDetails', windowObj.dialog).html(contact.Company + ' - ' + contact.FirstName + '<br/>Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks);
                     $('.interestPrice', windowObj.dialog).html('Order @ ' + interest.Price);
                     $('.interestExpiration', windowObj.dialog).html(bidding.getInterestExpirationDesc(interest).date);
+                    $('.priceShowing', windowObj.dialog).html((interest.PriceShowing == 0) ? '-' : interest.PriceShowing);
                 }
             }
         },
@@ -275,7 +302,8 @@ var bidding = (function () {
                 else return WINDOWTYPE_BIDDINGNOORDER;
             }
             else {
-                if (interest.Price > 0) return WINDOWTYPE_VIEWINTEREST;
+                if (interest.PriceShowing > 0 && interest.BidType == BIDTYPE_FIRM) return WINDOWTYPE_VIEWINTERESTFIRM;
+                else if (interest.Price > 0) return WINDOWTYPE_VIEWINTEREST;
                 else return WINDOWTYPE_VIEWINTERESTNOORDER;
             }
         },
@@ -301,7 +329,7 @@ var bidding = (function () {
                         html = resources.stringReplace(html, '@INTERESTGUID', interest.InterestGUID);
                         htmlArray.push(html);
                     }
-                    else if (interestWindowType == WINDOWTYPE_VIEWINTEREST) {
+                    else if (interestWindowType == WINDOWTYPE_VIEWINTEREST || interestWindowType == WINDOWTYPE_VIEWINTERESTFIRM) {
                         var contact = bidding.getContactByGUID(interest.ContactGUID);
                         if (contact != null) {
                             var html = '<li><div style="background-color:#92d050; cursor:pointer; border: 1px solid #000000;"><table width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td>&nbsp;</td></tr></table></div></li>';

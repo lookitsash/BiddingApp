@@ -239,7 +239,7 @@
                                             </div>
                                         </td>
                                         <td valign="top" align="right">
-                                        <span>Showing</span> <div class="priceContainer" style="margin-right:7px; background-color:#b7dee8; color:#4f81bd; font-weight:bold; padding:5px; text-align:center; vertical-align:middle;">00.0000</div>
+                                        <span>Showing</span> <div class="priceContainer priceShowing" style="margin-right:7px; background-color:#b7dee8; color:#4f81bd; font-weight:bold; padding:5px; text-align:center; vertical-align:middle;">00.0000</div>
                                         </td>
                                     </tr>
                                 </table>                                
@@ -271,8 +271,8 @@
                             <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;" colspan="3">
                                 <a href="#" onclick="return false;" class="btn btn-cancel">X</a>
                                 <div class="priceContainer" style="vertical-align:middle;"><input class="priceField" style="height:23px; width:50px;" placeholder="Price" type="text" /></div>
-                                <a href="#" onclick="return false;" class="btn btn-primary">Show Indic</a>
-                                <a href="#" onclick="return false;" class="btn btn-primary">Show Firm</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary showIndicButton">Show Indic</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary showFirmButton">Show Firm</a>
                             </td>
                         </tr>
                     </table>

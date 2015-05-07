@@ -229,7 +229,9 @@ namespace BiddingApp
                         InterestGUID = dra.Get<string>("InterestGUID"),
                         ContactGUID = dra.Get<string>("ContactGUID"),
                         StatusDate = dra.Get<string>("StatusDate"),
-                        StatusDescription = dra.Get<string>("StatusDescription")
+                        StatusDescription = dra.Get<string>("StatusDescription"),
+                        PriceShowing = dra.Get<decimal>("PriceShowing"),
+                        BidType = (BidTypes)dra.Get<int>("BidTypeID")
                     };
                     interests.Add(interestData);
                 }

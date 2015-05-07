@@ -14,6 +14,7 @@ public enum InterestTypes
 
 public enum BidTypes
 {
+    Unknown = 0,
     Indicative = 1,
     Firm = 2,
     RequestIndicative = 3,
