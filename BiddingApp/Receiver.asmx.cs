@@ -305,7 +305,48 @@ namespace BiddingApp
             }
             catch (Exception ex)
             {
-                Log("CheckPrices Exception", ex);
+                Log("ShowPrice Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string CancelBids(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string interestGUID = jToken.Value<string>("interestGUID");
+
+                Statics.Access.Bid_Cancel(userID, interestGUID);
+
+                return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
+            }
+            catch (Exception ex)
+            {
+                Log("CancelBids Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string FillOrder(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string interestGUID = jToken.Value<string>("interestGUID");
+
+                int bidID = Statics.Access.Interest_FillOrder(userID, interestGUID);
+                if (bidID == 0) throw new NotifyException("Order already filled by another user");
+
+                return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
+            }
+            catch (Exception ex)
+            {
+                Log("CancelBids Exception", ex);
                 return JsonError(ex);
             }
         }

@@ -21,6 +21,7 @@
             //bidding.spawnWindow(WINDOWTYPE_CHAT, 'fName2 lName2');
             //modals.showDealCompleteModal();
 
+            
         });
 
         function toggleContactSearch(isVisible) {
@@ -260,7 +261,7 @@
                                                 <span class="interestExpiration" style="font-weight:bold;">Good for another AA Hr BB Min</span>
                                             </td>
                                             <td align="right">
-                                                <a href="#" onclick="return false;" class="btn btn-primary">Fill Order</a>
+                                                <a href="#" onclick="return false;" class="btn btn-primary fillOrderButton">Fill Order</a>
                                             </td>
                                         </tr>
                                     </table>                                    
@@ -269,7 +270,7 @@
                         </tr>
                         <tr>
                             <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;" colspan="3">
-                                <a href="#" onclick="return false;" class="btn btn-cancel">X</a>
+                                <a href="#" onclick="return false;" class="btn btn-cancel closeWindowButton">X</a>
                                 <div class="priceContainer" style="vertical-align:middle;"><input class="priceField" style="height:23px; width:50px;" placeholder="Price" type="text" /></div>
                                 <a href="#" onclick="return false;" class="btn btn-primary showIndicButton">Show Indic</a>
                                 <a href="#" onclick="return false;" class="btn btn-primary showFirmButton">Show Firm</a>
@@ -289,7 +290,7 @@
                     <table style="width:100%; height:100%; background:#fac090;" cellpadding="0" cellspacing="0">
                         <tr>
                             <td style=" font-weight:bold;" colspan="3">
-                                <div style="padding:5px;">
+                                <div style="padding:5px;" class="interestStatus">
                                 Status Update
                                 </div>
                             </td>
@@ -299,14 +300,14 @@
                                 <table width="100%" cellpadding="0" cellspacing="0">
                                     <tr>
                                         <td>
-                                            <div style="padding:5px;">
+                                            <div style="padding:5px;" class="interestDetails">
                                                 Condition<br />
                                                 Quantity<br />
                                                 Remarks
                                             </div>
                                         </td>
                                         <td valign="top" align="right">
-                                        <span>Showing</span> <div class="priceContainer" style="margin-right:7px; background-color:#b7dee8; color:#4f81bd; font-weight:bold; padding:5px; text-align:center; vertical-align:middle;">00.0000</div>
+                                        <span>Showing</span> <div class="priceContainer priceShowing" style="margin-right:7px; background-color:#b7dee8; color:#4f81bd; font-weight:bold; padding:5px; text-align:center; vertical-align:middle;">00.0000</div>
                                         </td>
                                     </tr>
                                 </table>                                
@@ -326,7 +327,7 @@
                                                 Order: <b>None</b>
                                             </td>
                                             <td align="right">
-                                                <a href="#" onclick="return false;" class="btn btn-primary" style="visibility:hidden;">Fill Order</a>
+                                                <a href="#" onclick="return false;" class="btn btn-primary fillOrderButton" style="visibility:hidden;">Fill Order</a>
                                             </td>
                                         </tr>
                                     </table>                                    
@@ -335,10 +336,10 @@
                         </tr>
                         <tr>
                             <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;" colspan="3">
-                                <a href="#" onclick="return false;" class="btn btn-cancel">X</a>
+                                <a href="#" onclick="return false;" class="btn btn-cancel closeWindowButton">X</a>
                                 <div class="priceContainer" style="vertical-align:middle;"><input class="priceField" style="height:23px; width:50px;" placeholder="Price" type="text" /></div>
-                                <a href="#" onclick="return false;" class="btn btn-primary">Show Indic</a>
-                                <a href="#" onclick="return false;" class="btn btn-primary">Show Firm</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary showIndicButton">Show Indic</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary showFirmButton">Show Firm</a>
                             </td>
                         </tr>
                     </table>
@@ -351,11 +352,11 @@
         <div class="viewInterestFirmWindow" style="display:none;">
           <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
             <tr>
-                <td valign="top" style="font-size:10pt; border:2px solid #4f81bd;">
+                <td valign="top" style="font-size:10pt; border:2px solid #000000;">
                     <table style="width:100%; height:100%; background:#ffffff;" cellpadding="0" cellspacing="0">
                         <tr>
                             <td style=" font-weight:bold;" colspan="3">
-                                <div style="padding:5px;">
+                                <div style="padding:5px;" class="interestStatus">
                                 Status Update
                                 </div>
                             </td>
@@ -365,14 +366,14 @@
                                 <table width="100%" cellpadding="0" cellspacing="0">
                                     <tr>
                                         <td>
-                                            <div style="padding:5px;">
+                                            <div style="padding:5px;" class="interestDetails">
                                                 Condition<br />
                                                 Quantity<br />
                                                 Remarks
                                             </div>
                                         </td>
                                         <td valign="top" align="right">
-                                        <span style="font-weight:bold;">Firm</span> <div class="priceContainer" style="margin-right:7px; background-color:#b7dee8; border: 3px solid #ff0000; color:#4f81bd; font-weight:bold; padding:5px; text-align:center; vertical-align:middle;">00.0000</div>
+                                        <span style="font-weight:bold;">Firm</span> <div class="priceContainer priceShowing" style="margin-right:7px; background-color:#b7dee8; border: 3px solid #ff0000; color:#000000; font-weight:bold; padding:5px; text-align:center; vertical-align:middle;">00.0000</div>
                                         </td>
                                     </tr>
                                 </table>                                
@@ -389,11 +390,11 @@
                                     <table style="width:100%;">
                                         <tr>
                                             <td>
-                                                Order @ XX.XXX<br />
-                                                Good until AA hour BB min
+                                                <span class="interestPrice" style="font-weight:bold;">Order @ XX.XXXX</span><br />
+                                                <span class="interestExpiration" style="font-weight:bold;">Good for another AA Hr BB Min</span>
                                             </td>
                                             <td align="right">
-                                                <a href="#" onclick="return false;" class="btn btn-primary">Fill Order</a>
+                                                <a href="#" onclick="return false;" class="btn btn-primary fillOrderButton">Fill Order</a>
                                             </td>
                                         </tr>
                                     </table>                                    
@@ -401,10 +402,10 @@
                             </td>
                         </tr>
                         <tr>
-                            <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;" colspan="3">
+                            <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #000000; padding:5px;" colspan="3">
                                 <div class="priceContainer" style="vertical-align:middle;"><input class="priceField" style="height:23px; width:50px;" placeholder="Price" type="text" /></div>
-                                <a href="#" onclick="return false;" class="btn btn-primary">Update Firm</a>
-                                <a href="#" onclick="return false;" class="btn btn-primary">Off</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary showFirmButton">Update Firm</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary cancelBidsButton">Off</a>
                             </td>
                         </tr>
                     </table>
@@ -572,7 +573,7 @@
           </table>
         </div>
 
-        <div class="dealConfirmWindow" style="display:none;">
+        <div class="dealConfirmPendingWindow" style="display:none;">
           <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
             <tr>
                 <td valign="top" style="font-size:10pt; border:2px solid #4f81bd;">
@@ -615,7 +616,7 @@
                     <table style="width:100%; height:100%; background:#ffffff;" cellpadding="0" cellspacing="0">
                         <tr>
                             <td style="" colspan="3">
-                                <div style="padding:5px;">
+                                <div style="padding:5px;" class="interestDetails">
                                     Company - fName<br />
                                     BUY/SELL Product<br />
                                     Condition<br />
@@ -629,7 +630,7 @@
                         </tr>
                         <tr>
                             <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;" colspan="3">
-                                <a href="#" onclick="modals.hide();return false;" class="btn btn-primary">Close Window</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary closeWindowButton">Close Window</a>
                             </td>
                         </tr>
                     </table>
@@ -673,6 +674,33 @@
                 </td>
             </tr>
           </table>
-        </div>      
+        </div>
+
+        <div id="confirmFillOrderModal" class="lightbox default" style="display:none; width:420px;">
+            <a href="#" onclick="modals.hide();return false;" class="iconclosemodal"></a>
+            <section>
+                <header>
+                    <h2 class="modalTitle">Fill Order?</h2>
+                </header>
+                <div class="contentwrapper">              
+
+                    <section class="panel white solid">
+                        <div class="panel-body form" style=" text-align:left;">
+                            <div class="interestDetails"></div>
+                            <br />
+                            <span class="interestPrice" style="font-weight:bold; font-size:12pt;">Order Price @ XX.YY</span>
+                        </div>
+                    </section>
+                </div>
+                <div class="footerwrapper">
+                    <div class="footer centered">
+                        <div>
+                            <a href="#" onclick="modals.hide();return false;" class="btn btn-cancel">Cancel</a>
+                            <a href="#" onclick="modals.fillOrder();return false;" class="btn btn-primary">Confirm Fill</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
 </asp:Content>

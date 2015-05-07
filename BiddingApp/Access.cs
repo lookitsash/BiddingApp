@@ -252,6 +252,16 @@ namespace BiddingApp
             }
         }
 
+        public int Interest_FillOrder(int userID, string interestGUID)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Interest_FillOrder"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "InterestGUID", interestGUID);
+                return ExecuteScalar<int>(cmd);
+            }
+        }
+
         public void Interest_CancelOrder(int userID, string interestGUID)
         {
             using (SqlCommand cmd = SqlProc("STP_Interest_CancelOrder"))
@@ -281,6 +291,16 @@ namespace BiddingApp
                 SqlParam(cmd, "InterestGUID", interestGUID);
                 SqlParam(cmd, "BidTypeID", (int)bidType);
                 if (price > 0) SqlParam(cmd, "Price", price);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
+        public void Bid_Cancel(int userID, string interestGUID)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Bid_Cancel"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "InterestGUID", interestGUID);
                 ExecuteNonQuery(cmd);
             }
         }

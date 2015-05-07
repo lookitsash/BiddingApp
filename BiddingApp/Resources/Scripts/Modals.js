@@ -367,6 +367,39 @@ var modals = (function () {
 
         showNoAdvanceContactsModal: function () {
             modals.show('noAdvanceContactsModal');
+        },
+
+        showFillOrderModal: function (interestGUID) {
+            currentEditingGUID = interestGUID;
+
+            var interest = bidding.getInterest(interestGUID);
+            if (interest == null) return;
+
+            var contact = bidding.getContactByGUID(interest.ContactGUID);
+            if (contact == null) return;
+
+            $('#confirmFillOrderModal .interestDetails').html(contact.Company + ' - ' + contact.FirstName + '<br/>Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks);
+            $('#confirmFillOrderModal .interestPrice').html('Order Price @ ' + interest.Price);
+            modals.show('confirmFillOrderModal');
+        },
+
+        fillOrder: function () {
+            var interest = bidding.getInterest(currentEditingGUID);
+            if (interest == null) return;
+            modals.hide();
+            modals.toggleWaitingModal(true, 'Please wait...');
+            resources.ajaxPost('Receiver', 'FillOrder', { guid: defaultPage.sessionGUID(), interestGUID: currentEditingGUID }, function (data) {
+                modals.hide();
+                if (data.Success) {
+                    interest.DealConfirmed = true;
+                    bidding.interests = data.Interests;
+                    bidding.refreshInterests();
+                    bidding.showInterestWindow(null, interest);
+                }
+                else {
+                    modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('confirmFillOrderModal'); });
+                }
+            });
         }
 
     };

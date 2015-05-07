@@ -405,7 +405,7 @@ a { text-decoration:none; }
 
 .viewInterestFirmWindow .ui-widget-header
 {
-    border:4px solid #ffffff;
+    border:4px solid #000000;
 }
 
 .dealConfirmWindow .ui-widget-header
