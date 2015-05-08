@@ -43,7 +43,6 @@ var bidding = (function () {
 
             bidding.getData();
 
-            var biddingHub = $.connection.biddingHub;
             $.connection.biddingHub.client.chatReceived = function (data) {
                 data = JSON.parse(data);
                 bidding.showChatWindow_Incoming(data);
@@ -52,7 +51,7 @@ var bidding = (function () {
                 data = JSON.parse(data);
                 var interest = data.Interest;
                 if (interest != null) {
-                    resources.replaceObjectInArray(bidding.interests, interest, function (a, b) { return resources.stringEqual(a.InterestGUID,b.InterestGUID); }, true);
+                    resources.replaceObjectInArray(bidding.interests, interest, function (a, b) { return resources.stringEqual(a.InterestGUID, b.InterestGUID); }, true);
                     bidding.refreshInterests();
                     var windowObj = windows.getWindowByID(interest.InterestGUID);
                     if (windowObj != null) bidding.showInterestWindow(null, interest);
@@ -64,49 +63,12 @@ var bidding = (function () {
                 var interest = bidding.getInterest(interestGUID);
                 if (interest != null) {
                     var windowObj = windows.getWindowByID(interestGUID);
-                    if (windowObj != null) windows.closeWindow(windowObj);
-                    resources.removeObjectInArray(bidding.interests, interestGUID, function (a, b) { return resources.stringEqual(a.InterestGUID,b); });
+                    if (windowObj != null) bidding.showInterestWindow(interestGUID, null, WINDOWTYPE_INTERESTINACTIVE);
+                    resources.removeObjectInArray(bidding.interests, interestGUID, function (a, b) { return resources.stringEqual(a.InterestGUID, b); });
                     bidding.refreshInterests();
                 }
             };
-            $.connection.hub.url = "signalr";
-            $.connection.hub.start().done(function () {
-                console.log('hub registerClient1');
-                $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID());
-            }).fail(function (error) {
-                //console.error(error);
-            });
 
-            /*
-            $.connection.hub.disconnected(function () {
-            console.log('hub disconnection');
-            setTimeout(function () {
-            $.connection.hub.start().done(function () {
-            console.log('hub registerClient');
-            $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID());
-            });
-            }, 5000); // Restart connection after 5 seconds.
-            });
-            */
-
-            $.connection.hub.reconnecting(function () {
-                //console.log("reconnecting");
-            });
-
-            $.connection.hub.reconnected(function () {
-                //console.log("We have been reconnected");
-                $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID());
-            });
-
-            $.connection.hub.disconnected(function () {
-                //console.log("We are disconnected!");
-                setTimeout(function () {
-                    $.connection.hub.start().done(function () {
-                        console.log('hub registerClient2');
-                        $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID());
-                    });
-                }, 5000); // Restart connection after 5 seconds.
-            });
             setTimeout(bidding.onTick, 1000);
         },
 
@@ -215,13 +177,13 @@ var bidding = (function () {
             });
         },
 
-        showInterestWindow: function (interestGUID, interest) {
+        showInterestWindow: function (interestGUID, interest, interestWindowType) {
             if (interest == null) interest = bidding.getInterest(interestGUID);
             else interestGUID = interest.InterestGUID;
 
             if (interest == null) return;
 
-            var interestWindowType = bidding.getInterestWindowType(interest);
+            if (interestWindowType == null) interestWindowType = bidding.getInterestWindowType(interest);
             if (interestWindowType == WINDOWTYPE_VIEWINTERESTNOORDERFIRM) interestWindowType = WINDOWTYPE_VIEWINTERESTFIRM;
             var windowPos = null;
             var windowObj = windows.getWindowByID(interestGUID);
@@ -391,6 +353,11 @@ var bidding = (function () {
                     var statusDateStr = resources.getCalendarDate(true, statusDate) + ' ' + resources.getClockTime(statusDate, true);
                     $('.interestDetails', windowObj.dialog).html(contact.Company + ' - ' + contact.FirstName + '<br/>Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks + '<br/><br/>Counterparty: ' + bidding.userData.Company + ' - ' + bidding.userData.FirstName + ' ' + bidding.userData.LastName + '<br/>Price: ' + interest.Price);
                 }
+            }
+            else if (interestWindowType == WINDOWTYPE_INTERESTINACTIVE) {
+                $('.closeWindowButton', windowObj.dialog).bind('click.bidding', function (e) {
+                    $(windowObj.dialog[0]).dialog('close');
+                });
             }
         },
 

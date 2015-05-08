@@ -112,6 +112,7 @@ var modals = (function () {
                     if (data.Success) {
                         $.session.set('SessionGUID', data.SessionGUID);
                         defaultPage.refreshSession();
+                        defaultPage.initializeSignalR();
                     }
                     else {
                         modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('loginModal'); });

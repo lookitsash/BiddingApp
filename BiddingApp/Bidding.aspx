@@ -579,6 +579,7 @@
           </table>
         </div>
 
+        <!-- WINDOWTYPE_DEALCOMPLETE -->
         <div class="dealCompleteWindow" style="display:none;">
           <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
             <tr>
@@ -609,11 +610,33 @@
             </tr>
           </table>
         </div>  
+
+        <div class="interestInactiveWindow" style="display:none;">
+          <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td valign="top" style="font-size:10pt; border:2px solid #747474;">
+                    <table style="width:100%; height:100%; background:#bcbcbc;" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td valign="middle" style="height:154px; text-align:center; font-weight:bold; font-size:14pt;">
+                                Interest is no longer live
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #747474; padding:5px;" colspan="3">
+                                <a href="#" onclick="return false;" class="btn btn-primary closeWindowButton">Close Window</a>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                </td>
+            </tr>
+          </table>
+        </div>
         
         <div class="fillOrderConfirmWindow" style="display:none;">
           <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
             <tr>
-                <td valign="top" style="font-size:10pt; border:2px solid #4f81bd;">
+                <td valign="top" style="font-size:10pt; border:2px solid #747474;">
                     <table style="width:100%; height:100%; background:#ffffff;" cellpadding="0" cellspacing="0">
                         <tr>
                             <td>

@@ -27,6 +27,9 @@ namespace BiddingApp
                 string sessionGUID = Statics.Access.Login(email, password, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
                 if (String.IsNullOrEmpty(sessionGUID)) throw new NotifyException("Incorrect username/password, please try again");
 
+                int userID = Statics.Access.GetUserID(sessionGUID);
+                SyncForceLogout(userID);
+
                 return JsonConvert.SerializeObject(new { Success = true, SessionGUID = sessionGUID });
             }
             catch (Exception ex)
@@ -484,6 +487,24 @@ namespace BiddingApp
             catch (Exception ex)
             {
                 Log("SyncInterestUpdate Exception", ex);
+            }
+        }
+
+        private void SyncForceLogout(int userID)
+        {
+            try
+            {
+                if (userID == 0) return;
+                BiddingClient client = BiddingHub.GetBiddingClient(userID);
+                if (client != null)
+                {
+                    var hub = GlobalHost.ConnectionManager.GetHubContext<BiddingHub>();
+                    hub.Clients.Client(client.ConnectionID).forceLogout(JsonConvert.SerializeObject(new { }));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("SyncForceLogout Exception", ex);
             }
         }
         #endregion

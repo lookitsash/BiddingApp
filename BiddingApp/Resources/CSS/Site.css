@@ -437,3 +437,8 @@ a { text-decoration:none; }
 {
     background-color:#248fc1;
 }
+
+.interestInactiveWindow .ui-widget-header
+{
+    border:4px solid #747474;
+}

@@ -11,6 +11,7 @@ var WINDOWTYPE_CHAT = 'chatWindow';
 var WINDOWTYPE_DEALCOMPLETE = 'dealCompleteWindow';
 var WINDOWTYPE_FILLORDERCONFIRM = 'fillOrderConfirmWindow';
 var WINDOWTYPE_DEALCONFIRM = 'dealConfirmWindow';
+var WINDOWTYPE_INTERESTINACTIVE = 'interestInactiveWindow'
 
 var MEMBERSHIPTYPE_NOTSIGNEDUP = 0;
 var MEMBERSHIPTYPE_BASIC = 1;

@@ -14,6 +14,40 @@ var defaultPage = (function () {
                 if (evt.which == 17) defaultPage.ctrlPressed = false;
                 else if (evt.which == 16) defaultPage.shiftPressed = false;
             });
+            defaultPage.initializeSignalR();
+        },
+
+        initializeSignalR: function () {
+            if (!resources.stringNullOrEmpty(defaultPage.sessionGUID())) {
+                $.connection.biddingHub.client.forceLogout = function (data) {
+                    $.session.clear();
+                    defaultPage.validateSession();
+                };
+                $.connection.hub.url = "signalr";
+                $.connection.hub.start().done(function () {
+                    $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID());
+                }).fail(function (error) {
+                    //console.error(error);
+                });
+
+                $.connection.hub.reconnecting(function () {
+                    //console.log("reconnecting");
+                });
+
+                $.connection.hub.reconnected(function () {
+                    //console.log("We have been reconnected");
+                    $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID());
+                });
+
+                $.connection.hub.disconnected(function () {
+                    //console.log("We are disconnected!");
+                    setTimeout(function () {
+                        $.connection.hub.start().done(function () {
+                            $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID());
+                        });
+                    }, 5000); // Restart connection after 5 seconds.
+                });
+            }
         },
 
         sessionGUID: function () {
