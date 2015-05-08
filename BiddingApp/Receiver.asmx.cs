@@ -439,6 +439,10 @@ namespace BiddingApp
                 int bidID = Statics.Access.Interest_FillOrder(userID, interestGUID);
                 if (bidID == 0) throw new NotifyException("Order already filled by another user");
 
+                int interestUserID = Statics.Access.GetUserID(interestGUID, GUIDTypes.Interest);
+                string contactGUID = Statics.Access.Contact_GetGUID(interestUserID, userID);
+                SyncOrderFilled(interestUserID, interestGUID, contactGUID);
+
                 return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
             }
             catch (Exception ex)
@@ -543,6 +547,24 @@ namespace BiddingApp
             catch (Exception ex)
             {
                 Log("SyncInterestUpdate Exception", ex);
+            }
+        }
+
+        private void SyncOrderFilled(int userID, string interestGUID, string contactGUID)
+        {
+            try
+            {
+                if (userID == 0) return;
+                BiddingClient client = BiddingHub.GetBiddingClient(userID);
+                if (client != null)
+                {
+                    var hub = GlobalHost.ConnectionManager.GetHubContext<BiddingHub>();
+                    hub.Clients.Client(client.ConnectionID).orderFilled(JsonConvert.SerializeObject(new { InterestGUID = interestGUID, ContactGUID = contactGUID }));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("SyncConfirmDeal Exception", ex);
             }
         }
 

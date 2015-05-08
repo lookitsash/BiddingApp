@@ -116,6 +116,16 @@ namespace BiddingApp
             }
         }
 
+        public string Contact_GetGUID(int userID, int contactUserID)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Contact_GetGUID"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "ContactUserID", contactUserID);
+                return ExecuteScalar<string>(cmd);
+            }
+        }
+
         public List<ContactData> Contact_Get(int userID)
         {
             List<ContactData> contacts = new List<ContactData>();

@@ -69,6 +69,19 @@ var bidding = (function () {
                 }
             };
 
+            $.connection.biddingHub.client.orderFilled = function (data) {
+                data = JSON.parse(data);
+                var interest = bidding.getInterest(data.InterestGUID);
+                if (interest != null) {
+                    interest.DealConfirmed = true;
+                    interest.OrderFilled = true;
+                    interest.ContactGUID = data.ContactGUID;
+                    bidding.showInterestWindow(null, interest);
+                    resources.removeObjectInArray(bidding.interests, interest.InterestGUID, function (a, b) { return resources.stringEqual(a.InterestGUID, b); });
+                    bidding.refreshInterests();
+                }
+            };
+
             $.connection.biddingHub.client.confirmDeal = function (data) {
                 data = JSON.parse(data);
                 var interest = bidding.getInterest(data.InterestGUID);
@@ -79,7 +92,7 @@ var bidding = (function () {
                         interest.BidGUID = data.BidGUID;
                         bidding.showInterestWindow(null, interest);
                         resources.removeObjectInArray(bidding.interests, interest.InterestGUID, function (a, b) { return resources.stringEqual(a.InterestGUID, b); });
-                        bidding.refreshInterests();                        
+                        bidding.refreshInterests();
                     }
                     else bidding.showInterestWindow(data.InterestGUID, null, WINDOWTYPE_DEALCONFIRMPENDING);
                 }
@@ -374,6 +387,8 @@ var bidding = (function () {
                     $(windowObj.dialog[0]).dialog('close');
                 });
 
+                //console.log('interest.ContactGUID: ' + interest.ContactGUID);
+                //console.log('interest.OrderFilled: ' + interest.OrderFilled);
                 if (resources.stringNullOrEmpty(interest.ContactGUID)) {
                     var bid = bidding.getBid(interest.BidGUID);
                     if (bid != null) {
@@ -390,7 +405,8 @@ var bidding = (function () {
                     if (contact != null) {
                         var statusDate = bidding.convertDateToLocal(interest.StatusDate);
                         var statusDateStr = resources.getCalendarDate(true, statusDate) + ' ' + resources.getClockTime(statusDate, true);
-                        $('.interestDetails', windowObj.dialog).html(contact.Company + ' - ' + contact.FirstName + '<br/>Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks + '<br/><br/>Counterparty: ' + bidding.userData.Company + ' - ' + bidding.userData.FirstName + ' ' + bidding.userData.LastName + '<br/>Price: ' + interest.PriceShowing);
+                        if (interest.OrderFilled) $('.interestDetails', windowObj.dialog).html(bidding.userData.Company + ' - ' + bidding.userData.FirstName + '<br/>Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks + '<br/><br/>Counterparty: ' + contact.Company + ' - ' + contact.FirstName + ' ' + contact.LastName + '<br/>Price: ' + interest.Price);
+                        else $('.interestDetails', windowObj.dialog).html(contact.Company + ' - ' + contact.FirstName + '<br/>Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks + '<br/><br/>Counterparty: ' + bidding.userData.Company + ' - ' + bidding.userData.FirstName + ' ' + bidding.userData.LastName + '<br/>Price: ' + interest.PriceShowing);
                     }
                 }
             }

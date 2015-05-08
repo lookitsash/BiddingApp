@@ -393,6 +393,7 @@ var modals = (function () {
                 modals.hide();
                 if (data.Success) {
                     interest.DealConfirmed = true;
+                    interest.PriceShowing = interest.Price;
                     bidding.interests = data.Interests;
                     bidding.refreshInterests();
                     bidding.showInterestWindow(null, interest);
