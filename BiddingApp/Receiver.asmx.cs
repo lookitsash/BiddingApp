@@ -44,7 +44,7 @@ namespace BiddingApp
                 JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
                 UserData signupData = JsonConvert.DeserializeObject<UserData>(jToken.Value<JToken>("formData").ToString());
 
-                if (Statics.Access.GetUserID(null, signupData.Email, null) > 0) throw new NotifyException("Email already registered");
+                if (Statics.Access.GetUserID(null, signupData.Email, null, null) > 0) throw new NotifyException("Email already registered");
                 
                 Statics.Access.Signup(signupData);
                 string sessionGUID = Statics.Access.Login(signupData.Email, signupData.Password, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
@@ -215,6 +215,13 @@ namespace BiddingApp
                 int goodUntilMins = jToken.Value<int>("minutes");
                 Statics.Access.Interest_PlaceOrder(userID, interestGUID, price, goodUntilHours, goodUntilMins);
 
+                List<ContactData> allContacts = Statics.Access.Contact_Get(userID);
+                foreach (ContactData contact in allContacts)
+                {
+                    int contactUserID = Statics.Access.GetUserID(null, null, null, contact.GUID);
+                    SyncInterestUpdate(contactUserID, interestGUID);
+                }
+
                 return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
             }
             catch (Exception ex)
@@ -234,6 +241,13 @@ namespace BiddingApp
                 string interestGUID = jToken.Value<string>("interestGUID");
                 Statics.Access.Interest_CancelOrder(userID, interestGUID);
 
+                List<ContactData> allContacts = Statics.Access.Contact_Get(userID);
+                foreach (ContactData contact in allContacts)
+                {
+                    int contactUserID = Statics.Access.GetUserID(null, null, null, contact.GUID);
+                    SyncInterestUpdate(contactUserID, interestGUID);
+                }
+
                 return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
             }
             catch (Exception ex)
@@ -252,6 +266,13 @@ namespace BiddingApp
                 int userID = GetUserID(jToken);
                 string interestGUID = jToken.Value<string>("interestGUID");
                 Statics.Access.Interest_Delete(userID, interestGUID);
+
+                List<ContactData> allContacts = Statics.Access.Contact_Get(userID);
+                foreach (ContactData contact in allContacts)
+                {
+                    int contactUserID = Statics.Access.GetUserID(null, null, null, contact.GUID);
+                    SyncInterestDelete(contactUserID, interestGUID);
+                }
 
                 return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
             }
@@ -274,10 +295,21 @@ namespace BiddingApp
                 List<string> contactGUIDs = jToken.Value<JToken>("contactGUIDs") != null ? JsonConvert.DeserializeObject<List<string>>(jToken.Value<JToken>("contactGUIDs").ToString()) : null;
 
                 Access access = Statics.Access;
-                List<ContactData> contacts = access.Contact_Get(userID);
-                foreach (ContactData contact in contacts)
+                List<ContactData> allContacts = access.Contact_Get(userID);
+                List<ContactData> selectedContacts = new List<ContactData>();
+                foreach (ContactData contact in allContacts)
                 {
-                    if (contact.MembershipTypeID == MembershipTypes.Advance && (contactGUIDs == null || contactGUIDs.Contains(contact.GUID))) access.Bid_Create(0, interestGUID, contact.GUID, bidType, 0);
+                    if (contact.MembershipTypeID == MembershipTypes.Advance && (contactGUIDs == null || contactGUIDs.Contains(contact.GUID)))
+                    {
+                        access.Bid_Create(0, interestGUID, contact.GUID, bidType, 0);
+                        selectedContacts.Add(contact);
+                    }
+                }
+
+                foreach (ContactData contact in selectedContacts)
+                {
+                    int contactUserID = Statics.Access.GetUserID(null, null, null, contact.GUID);
+                    SyncInterestUpdate(contactUserID, interestGUID);
                 }
 
                 return JsonConvert.SerializeObject(new { Success = true });
@@ -302,24 +334,8 @@ namespace BiddingApp
 
                 Statics.Access.Bid_Create(userID, interestGUID, null, bidType, price);
 
-                try
-                {
-                    int interestUserID = Statics.Access.GetUserID(null, null, interestGUID);
-                    BiddingClient client = BiddingHub.GetBiddingClient(interestUserID);
-                    if (client != null)
-                    {
-                        InterestData interest = Statics.Access.Interest_Get(interestUserID).First(a => a.InterestGUID == interestGUID);
-                        if (interest != null)
-                        {
-                            var hub = GlobalHost.ConnectionManager.GetHubContext<BiddingHub>();
-                            hub.Clients.Client(client.ConnectionID).interestUpdated(JsonConvert.SerializeObject(new { Interest = interest }));
-                        }
-                    }
-                }
-                catch (Exception exc)
-                {
-                    Log("ShowPrice SignalR Exception", exc);
-                }
+                int interestUserID = Statics.Access.GetUserID(null, null, interestGUID, null);
+                SyncInterestUpdate(interestUserID, interestGUID);
 
                 return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
             }
@@ -340,6 +356,9 @@ namespace BiddingApp
                 string interestGUID = jToken.Value<string>("interestGUID");
 
                 Statics.Access.Bid_Cancel(userID, interestGUID);
+
+                int interestUserID = Statics.Access.GetUserID(null, null, interestGUID, null);
+                SyncInterestUpdate(interestUserID, interestGUID);
 
                 return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
             }
@@ -426,6 +445,48 @@ namespace BiddingApp
 
         private void Log(string str) { Statics.GetLogger("Receiver").Log(str); }
         private void Log(string str, Exception ex) { Statics.GetLogger("Receiver").Log(str, ex); }
+
+        #region SignalR synchronization methods
+        private void SyncInterestDelete(int userID, string interestGUID)
+        {
+            try
+            {
+                if (userID == 0) return;
+                BiddingClient client = BiddingHub.GetBiddingClient(userID);
+                if (client != null)
+                {
+                    var hub = GlobalHost.ConnectionManager.GetHubContext<BiddingHub>();
+                    hub.Clients.Client(client.ConnectionID).interestDeleted(JsonConvert.SerializeObject(new { InterestGUID = interestGUID }));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("SyncInterestDelete Exception", ex);
+            }
+        }
+
+        private void SyncInterestUpdate(int userID, string interestGUID)
+        {
+            try
+            {
+                if (userID == 0) return;
+                BiddingClient client = BiddingHub.GetBiddingClient(userID);
+                if (client != null)
+                {
+                    InterestData interest = Statics.Access.Interest_Get(userID).First(a => a.InterestGUID == interestGUID);
+                    if (interest != null)
+                    {
+                        var hub = GlobalHost.ConnectionManager.GetHubContext<BiddingHub>();
+                        hub.Clients.Client(client.ConnectionID).interestUpdated(JsonConvert.SerializeObject(new { Interest = interest }));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("SyncInterestUpdate Exception", ex);
+            }
+        }
+        #endregion
     }
 
     public class UserData

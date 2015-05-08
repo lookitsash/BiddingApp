@@ -52,10 +52,21 @@ var bidding = (function () {
                 data = JSON.parse(data);
                 var interest = data.Interest;
                 if (interest != null) {
-                    if (resources.replaceObjectInArray(bidding.interests, interest, function (a, b) { return a.InterestGUID == b.InterestGUID; })) {
-                        var windowObj = windows.getWindowByID(interest.InterestGUID);
-                        if (windowObj != null) bidding.showInterestWindow(null, interest);
-                    }
+                    resources.replaceObjectInArray(bidding.interests, interest, function (a, b) { return resources.stringEqual(a.InterestGUID,b.InterestGUID); }, true);
+                    bidding.refreshInterests();
+                    var windowObj = windows.getWindowByID(interest.InterestGUID);
+                    if (windowObj != null) bidding.showInterestWindow(null, interest);
+                }
+            };
+            $.connection.biddingHub.client.interestDeleted = function (data) {
+                data = JSON.parse(data);
+                var interestGUID = data.InterestGUID;
+                var interest = bidding.getInterest(interestGUID);
+                if (interest != null) {
+                    var windowObj = windows.getWindowByID(interestGUID);
+                    if (windowObj != null) windows.closeWindow(windowObj);
+                    resources.removeObjectInArray(bidding.interests, interestGUID, function (a, b) { return resources.stringEqual(a.InterestGUID,b); });
+                    bidding.refreshInterests();
                 }
             };
             $.connection.hub.url = "signalr";
@@ -68,13 +79,13 @@ var bidding = (function () {
 
             /*
             $.connection.hub.disconnected(function () {
-                console.log('hub disconnection');
-                setTimeout(function () {
-                    $.connection.hub.start().done(function () {
-                        console.log('hub registerClient');
-                        $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID());
-                    });
-                }, 5000); // Restart connection after 5 seconds.
+            console.log('hub disconnection');
+            setTimeout(function () {
+            $.connection.hub.start().done(function () {
+            console.log('hub registerClient');
+            $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID());
+            });
+            }, 5000); // Restart connection after 5 seconds.
             });
             */
 

@@ -124,13 +124,16 @@
             return -1;
         },
 
-        replaceObjectInArray: function (arr, value, compareFunction) {
+        replaceObjectInArray: function (arr, value, compareFunction, appendIfNotFound) {
             var pos = resources.indexOfObject(arr, value, compareFunction);
             if (pos >= 0) {
                 arr[pos] = value;
                 return true;
             }
-            else return false;
+            else {
+                if (appendIfNotFound) arr.push(value);
+                return false;
+            }
         },
 
         removeObjectInArray: function (arr, value, compareFunction) {
