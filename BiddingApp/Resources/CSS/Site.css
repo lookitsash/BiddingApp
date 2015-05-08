@@ -442,3 +442,13 @@ a { text-decoration:none; }
 {
     border:4px solid #747474;
 }
+
+.dealConfirmPendingWindow .ui-widget-header
+{
+    border:4px solid #4f6228;
+}
+
+.dealConfirmPendingWindow .ui-dialog-titlebar-close
+{
+    display:none;
+}

@@ -25,6 +25,7 @@ namespace BiddingApp
         }
         private T SqlParamGet<T>(SqlCommand cmd, string paramName) { return ValueConverter.Get<T>(cmd.Parameters[paramName].Value); }
 
+        /*
         public int GetUserID(string sessionGUID) { return GetUserID(sessionGUID, null, null, null); }
         public int GetUserID(string sessionGUID, string email, string interestGUID, string contactGUID)
         {
@@ -34,6 +35,19 @@ namespace BiddingApp
                 if (!String.IsNullOrEmpty(email)) SqlParam(cmd, "Email", email);
                 if (!String.IsNullOrEmpty(interestGUID)) SqlParam(cmd, "InterestGUID", interestGUID);
                 if (!String.IsNullOrEmpty(contactGUID)) SqlParam(cmd, "ContactGUID", contactGUID);
+                return ExecuteScalar<int>(cmd);
+            }
+        }
+        */
+        public int GetUserID(string guid, GUIDTypes guidType)
+        {
+            using (SqlCommand cmd = SqlProc("STP_User_Get"))
+            {
+                if (guidType == GUIDTypes.Session) SqlParam(cmd, "SessionGUID", guid);
+                else if (guidType == GUIDTypes.Email) SqlParam(cmd, "Email", guid);
+                else if (guidType == GUIDTypes.Interest) SqlParam(cmd, "InterestGUID", guid);
+                else if (guidType == GUIDTypes.Contact) SqlParam(cmd, "ContactGUID", guid);
+                else if (guidType == GUIDTypes.Bid) SqlParam(cmd, "BidGUID", guid);
                 return ExecuteScalar<int>(cmd);
             }
         }
@@ -238,7 +252,8 @@ namespace BiddingApp
                                 StatusDate = dra.Get<string>("StatusDate"),
                                 StatusDescription = dra.Get<string>("StatusDescription"),
                                 PriceShowing = dra.Get<decimal>("PriceShowing"),
-                                BidType = (BidTypes)dra.Get<int>("BidTypeID")
+                                BidType = (BidTypes)dra.Get<int>("BidTypeID"),
+                                BidGUID = dra.Get<string>("BidGUID")
                             };
                             interests.Add(interestData);
                         }
@@ -252,6 +267,7 @@ namespace BiddingApp
                                 {
                                     InterestGUID = interestGUID,
                                     ContactGUID = dra.Get<string>("ContactGUID"),
+                                    BidGUID = dra.Get<string>("BidGUID"),
                                     BidType = (BidTypes)dra.Get<int>("BidTypeID"),
                                     Price = dra.Get<decimal>("Price"),
                                     CreationDate = dra.Get<string>("CreationDate")
@@ -326,6 +342,26 @@ namespace BiddingApp
             {
                 SqlParam(cmd, "UserID", userID);
                 SqlParam(cmd, "InterestGUID", interestGUID);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
+        public bool Bid_Confirm(int userID, string bidGUID)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Bid_Confirm"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "BidGUID", bidGUID);
+                return ExecuteScalar<bool>(cmd);
+            }
+        }
+
+        public void Bid_ConfirmCancel(int userID, string bidGUID)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Bid_ConfirmCancel"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "BidGUID", bidGUID);
                 ExecuteNonQuery(cmd);
             }
         }

@@ -114,26 +114,8 @@
                     </table>
                     
                 </td>
-                <td valign="top" style="width:130px;font-size:10pt; background-color:#b7dee8; border-top: 2px solid #4f81bd; border-right: 2px solid #4f81bd; border-bottom: 2px solid #4f81bd;">
-                    <div style="max-height:<% =biddingWindowUserScrollHeight %>px; overflow:auto;">
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                        <div style=" padding:4px; text-align:center; border-bottom:2px solid #4f81bd;">user1</div>
-                    </div>
+                <td valign="top" class="bidList" style="width:130px;font-size:10pt; background-color:#b7dee8; border-top: 2px solid #4f81bd; border-right: 2px solid #4f81bd; border-bottom: 2px solid #4f81bd;">
+                    <div class="bidItems" style="max-height:<% =biddingWindowUserScrollHeight %>px; overflow:auto;"></div>
                 </td>
             </tr>
           </table>
@@ -543,6 +525,7 @@
           </table>
         </div>
 
+        <!-- WINDOWTYPE_DEALCONFIRMPENDING -->
         <div class="dealConfirmPendingWindow" style="display:none;">
           <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
             <tr>
@@ -550,7 +533,7 @@
                     <table style="width:100%; height:100%; background:#ffffff;" cellpadding="0" cellspacing="0">
                         <tr>
                             <td>
-                                <div style="padding:5px;">
+                                <div style="padding:5px;" class="interestDetails">
                                     Company - fName<br />
                                     BUY/SELL Product<br />
                                     Condition<br />
@@ -561,15 +544,15 @@
                         </tr>
                         <tr>
                             <td>
-                                <div style="padding:5px; text-align:center; font-weight:bold; margin-bottom:12px; font-size:15pt;">
+                                <div class="interestPrice" style="padding:5px; text-align:center; font-weight:bold; margin-bottom:12px; font-size:15pt;">
                                 DEAL @ XX.YYYY
                                 </div>
                             </td>
                         </tr>
                         <tr>
                             <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;">
-                                <a href="#" onclick="return false;" class="btn btn-cancel">Off (4)</a>
-                                <a href="#" onclick="return false;" class="btn btn-primary">Confirm</a>
+                                <a href="#" onclick="return false;" class="btn btn-cancel cancelDealButton">Off (4)</a>
+                                <a href="#" onclick="return false;" class="btn btn-primary confirmDealButton">Confirm</a>
                             </td>
                         </tr>
                     </table>

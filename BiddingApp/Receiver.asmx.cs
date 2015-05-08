@@ -27,7 +27,7 @@ namespace BiddingApp
                 string sessionGUID = Statics.Access.Login(email, password, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
                 if (String.IsNullOrEmpty(sessionGUID)) throw new NotifyException("Incorrect username/password, please try again");
 
-                int userID = Statics.Access.GetUserID(sessionGUID);
+                int userID = Statics.Access.GetUserID(sessionGUID, GUIDTypes.Session);
                 SyncForceLogout(userID);
 
                 return JsonConvert.SerializeObject(new { Success = true, SessionGUID = sessionGUID });
@@ -47,7 +47,7 @@ namespace BiddingApp
                 JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
                 UserData signupData = JsonConvert.DeserializeObject<UserData>(jToken.Value<JToken>("formData").ToString());
 
-                if (Statics.Access.GetUserID(null, signupData.Email, null, null) > 0) throw new NotifyException("Email already registered");
+                if (Statics.Access.GetUserID(signupData.Email, GUIDTypes.Email) > 0) throw new NotifyException("Email already registered");
                 
                 Statics.Access.Signup(signupData);
                 string sessionGUID = Statics.Access.Login(signupData.Email, signupData.Password, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
@@ -221,7 +221,7 @@ namespace BiddingApp
                 List<ContactData> allContacts = Statics.Access.Contact_Get(userID);
                 foreach (ContactData contact in allContacts)
                 {
-                    int contactUserID = Statics.Access.GetUserID(null, null, null, contact.GUID);
+                    int contactUserID = Statics.Access.GetUserID(contact.GUID, GUIDTypes.Contact);
                     SyncInterestUpdate(contactUserID, interestGUID);
                 }
 
@@ -247,7 +247,7 @@ namespace BiddingApp
                 List<ContactData> allContacts = Statics.Access.Contact_Get(userID);
                 foreach (ContactData contact in allContacts)
                 {
-                    int contactUserID = Statics.Access.GetUserID(null, null, null, contact.GUID);
+                    int contactUserID = Statics.Access.GetUserID(contact.GUID, GUIDTypes.Contact);
                     SyncInterestUpdate(contactUserID, interestGUID);
                 }
 
@@ -273,7 +273,7 @@ namespace BiddingApp
                 List<ContactData> allContacts = Statics.Access.Contact_Get(userID);
                 foreach (ContactData contact in allContacts)
                 {
-                    int contactUserID = Statics.Access.GetUserID(null, null, null, contact.GUID);
+                    int contactUserID = Statics.Access.GetUserID(contact.GUID, GUIDTypes.Contact);
                     SyncInterestDelete(contactUserID, interestGUID);
                 }
 
@@ -297,6 +297,8 @@ namespace BiddingApp
                 BidTypes bidType = (BidTypes)jToken.Value<int>("bidType");
                 List<string> contactGUIDs = jToken.Value<JToken>("contactGUIDs") != null ? JsonConvert.DeserializeObject<List<string>>(jToken.Value<JToken>("contactGUIDs").ToString()) : null;
 
+                if (!(bidType == BidTypes.RequestFirm || bidType == BidTypes.RequestIndicative)) throw new Exception("Invalid bid type specified - " + bidType);
+
                 Access access = Statics.Access;
                 List<ContactData> allContacts = access.Contact_Get(userID);
                 List<ContactData> selectedContacts = new List<ContactData>();
@@ -311,8 +313,8 @@ namespace BiddingApp
 
                 foreach (ContactData contact in selectedContacts)
                 {
-                    int contactUserID = Statics.Access.GetUserID(null, null, null, contact.GUID);
-                    SyncInterestUpdate(contactUserID, interestGUID);
+                    int contactUserID = Statics.Access.GetUserID(contact.GUID, GUIDTypes.Contact);
+                    SyncInterestUpdate(contactUserID, interestGUID, true);
                 }
 
                 return JsonConvert.SerializeObject(new { Success = true });
@@ -337,8 +339,8 @@ namespace BiddingApp
 
                 Statics.Access.Bid_Create(userID, interestGUID, null, bidType, price);
 
-                int interestUserID = Statics.Access.GetUserID(null, null, interestGUID, null);
-                SyncInterestUpdate(interestUserID, interestGUID);
+                int interestUserID = Statics.Access.GetUserID(interestGUID, GUIDTypes.Interest);
+                SyncInterestUpdate(interestUserID, interestGUID, true);
 
                 return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
             }
@@ -360,14 +362,67 @@ namespace BiddingApp
 
                 Statics.Access.Bid_Cancel(userID, interestGUID);
 
-                int interestUserID = Statics.Access.GetUserID(null, null, interestGUID, null);
-                SyncInterestUpdate(interestUserID, interestGUID);
+                int interestUserID = Statics.Access.GetUserID(interestGUID, GUIDTypes.Interest);
+                SyncInterestUpdate(interestUserID, interestGUID, true);
 
                 return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
             }
             catch (Exception ex)
             {
                 Log("CancelBids Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string ConfirmBid(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string interestGUID = jToken.Value<string>("interestGUID");
+                string bidGUID = jToken.Value<string>("bidGUID");
+
+                bool success = Statics.Access.Bid_Confirm(userID, bidGUID);
+                if (!success) throw new Exception("Unable to confirm bid - userID: " + userID + ", bidGUID: " + bidGUID);
+
+                int bidUserID = Statics.Access.GetUserID(bidGUID, GUIDTypes.Bid);
+                if (bidUserID == userID)
+                {
+                    int interestUserID = Statics.Access.GetUserID(interestGUID, GUIDTypes.Interest);
+                    SyncConfirmDeal(interestUserID, interestGUID, bidGUID);
+                }
+                else SyncConfirmDeal(bidUserID, interestGUID, bidGUID);
+
+                return JsonConvert.SerializeObject(new { Success = true });
+            }
+            catch (Exception ex)
+            {
+                Log("ConfirmBid Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string ConfirmCancelBid(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string interestGUID = jToken.Value<string>("interestGUID");
+                string bidGUID = jToken.Value<string>("bidGUID");
+
+                Statics.Access.Bid_ConfirmCancel(userID, bidGUID);
+                int interestUserID = Statics.Access.GetUserID(interestGUID, GUIDTypes.Interest);
+                SyncConfirmCancelDeal(interestUserID, interestGUID, bidGUID);
+
+                return JsonConvert.SerializeObject(new { Success = true });
+            }
+            catch (Exception ex)
+            {
+                Log("ConfirmCancelBid Exception", ex);
                 return JsonError(ex);
             }
         }
@@ -388,7 +443,7 @@ namespace BiddingApp
             }
             catch (Exception ex)
             {
-                Log("CancelBids Exception", ex);
+                Log("FillOrder Exception", ex);
                 return JsonError(ex);
             }
         }
@@ -431,7 +486,7 @@ namespace BiddingApp
         private int GetUserID(JToken jToken)
         {
             string sessionGUID = jToken.Value<string>("guid");
-            int userID = Statics.Access.GetUserID(sessionGUID);
+            int userID = Statics.Access.GetUserID(sessionGUID, GUIDTypes.Session);
             if (userID > 0) return userID;
             else throw new Exception("Could not retrieve UserID from sessionGUID " + sessionGUID);
         }
@@ -468,7 +523,8 @@ namespace BiddingApp
             }
         }
 
-        private void SyncInterestUpdate(int userID, string interestGUID)
+        private void SyncInterestUpdate(int userID, string interestGUID) { SyncInterestUpdate(userID, interestGUID, false); }
+        private void SyncInterestUpdate(int userID, string interestGUID, bool openWindow)
         {
             try
             {
@@ -480,13 +536,49 @@ namespace BiddingApp
                     if (interest != null)
                     {
                         var hub = GlobalHost.ConnectionManager.GetHubContext<BiddingHub>();
-                        hub.Clients.Client(client.ConnectionID).interestUpdated(JsonConvert.SerializeObject(new { Interest = interest }));
+                        hub.Clients.Client(client.ConnectionID).interestUpdated(JsonConvert.SerializeObject(new { Interest = interest, OpenWindow = openWindow }));
                     }
                 }
             }
             catch (Exception ex)
             {
                 Log("SyncInterestUpdate Exception", ex);
+            }
+        }
+
+        private void SyncConfirmDeal(int userID, string interestGUID, string bidGUID)
+        {
+            try
+            {
+                if (userID == 0) return;
+                BiddingClient client = BiddingHub.GetBiddingClient(userID);
+                if (client != null)
+                {
+                    var hub = GlobalHost.ConnectionManager.GetHubContext<BiddingHub>();
+                    hub.Clients.Client(client.ConnectionID).confirmDeal(JsonConvert.SerializeObject(new { InterestGUID = interestGUID, BidGUID = bidGUID }));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("SyncConfirmDeal Exception", ex);
+            }
+        }
+
+        private void SyncConfirmCancelDeal(int userID, string interestGUID, string bidGUID)
+        {
+            try
+            {
+                if (userID == 0) return;
+                BiddingClient client = BiddingHub.GetBiddingClient(userID);
+                if (client != null)
+                {
+                    var hub = GlobalHost.ConnectionManager.GetHubContext<BiddingHub>();
+                    hub.Clients.Client(client.ConnectionID).confirmCancelDeal(JsonConvert.SerializeObject(new { InterestGUID = interestGUID, BidGUID = bidGUID }));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("SyncConfirmCancelDeal Exception", ex);
             }
         }
 
@@ -529,7 +621,7 @@ namespace BiddingApp
     public class InterestData
     {
         public InterestTypes InterestType;
-        public string Product, Condition, Quantity, Remarks, InterestGUID, ContactGUID, ExpirationDate, StatusDate, StatusDescription;
+        public string Product, Condition, Quantity, Remarks, InterestGUID, ContactGUID, ExpirationDate, StatusDate, StatusDescription, BidGUID;
         public decimal Price, PriceShowing;
         public BidTypes BidType;
         public List<BidData> Bids = new List<BidData>();
@@ -537,7 +629,7 @@ namespace BiddingApp
 
     public class BidData
     {
-        public string InterestGUID, ContactGUID, CreationDate;
+        public string InterestGUID, ContactGUID, CreationDate, BidGUID;
         public BidTypes BidType;
         public decimal Price;
     }

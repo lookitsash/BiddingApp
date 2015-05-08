@@ -21,3 +21,12 @@ public enum BidTypes
     RequestFirm = 4,
     FillOrder = 5
 }
+
+public enum GUIDTypes
+{
+    Session,
+    Interest,
+    Contact,
+    Email,
+    Bid
+}

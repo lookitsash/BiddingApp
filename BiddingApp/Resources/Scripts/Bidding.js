@@ -54,7 +54,7 @@ var bidding = (function () {
                     resources.replaceObjectInArray(bidding.interests, interest, function (a, b) { return resources.stringEqual(a.InterestGUID, b.InterestGUID); }, true);
                     bidding.refreshInterests();
                     var windowObj = windows.getWindowByID(interest.InterestGUID);
-                    if (windowObj != null) bidding.showInterestWindow(null, interest);
+                    if (windowObj != null || data.OpenWindow) bidding.showInterestWindow(null, interest);
                 }
             };
             $.connection.biddingHub.client.interestDeleted = function (data) {
@@ -67,6 +67,31 @@ var bidding = (function () {
                     resources.removeObjectInArray(bidding.interests, interestGUID, function (a, b) { return resources.stringEqual(a.InterestGUID, b); });
                     bidding.refreshInterests();
                 }
+            };
+
+            $.connection.biddingHub.client.confirmDeal = function (data) {
+                data = JSON.parse(data);
+                var interest = bidding.getInterest(data.InterestGUID);
+                if (interest != null) {
+                    if (resources.stringNullOrEmpty(interest.ContactGUID)) {
+                        modals.hide();
+                        interest.DealConfirmed = true;
+                        interest.BidGUID = data.BidGUID;
+                        bidding.showInterestWindow(null, interest);
+                        resources.removeObjectInArray(bidding.interests, interest.InterestGUID, function (a, b) { return resources.stringEqual(a.InterestGUID, b); });
+                        bidding.refreshInterests();                        
+                    }
+                    else bidding.showInterestWindow(data.InterestGUID, null, WINDOWTYPE_DEALCONFIRMPENDING);
+                }
+            };
+
+            $.connection.biddingHub.client.confirmCancelDeal = function (data) {
+                data = JSON.parse(data);
+                modals.hide();
+                var bid = bidding.getBid(data.BidGUID);
+                if (bid != null) bid.BidType = BIDTYPE_INDICATIVE;
+                bidding.showInterestWindow(data.InterestGUID);
+                modals.showNotificationModal('Deal has been cancelled.  User has moved their price.');
             };
 
             setTimeout(bidding.onTick, 1000);
@@ -233,6 +258,8 @@ var bidding = (function () {
                 $('.cancelOrderButton', windowObj.dialog).bind('click.bidding', function (e) {
                     bidding.cancelOrder(interestGUID);
                 });
+
+                bidding.refreshWindowBids(windowObj, interest);
             }
             else if (interestWindowType == WINDOWTYPE_VIEWINTEREST) {
                 $('.closeWindowButton', windowObj.dialog).bind('click.bidding', function (e) {
@@ -347,17 +374,114 @@ var bidding = (function () {
                     $(windowObj.dialog[0]).dialog('close');
                 });
 
-                var contact = bidding.getContactByGUID(interest.ContactGUID);
-                if (contact != null) {
-                    var statusDate = bidding.convertDateToLocal(interest.StatusDate);
-                    var statusDateStr = resources.getCalendarDate(true, statusDate) + ' ' + resources.getClockTime(statusDate, true);
-                    $('.interestDetails', windowObj.dialog).html(contact.Company + ' - ' + contact.FirstName + '<br/>Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks + '<br/><br/>Counterparty: ' + bidding.userData.Company + ' - ' + bidding.userData.FirstName + ' ' + bidding.userData.LastName + '<br/>Price: ' + interest.Price);
+                if (resources.stringNullOrEmpty(interest.ContactGUID)) {
+                    var bid = bidding.getBid(interest.BidGUID);
+                    if (bid != null) {
+                        var contact = bidding.getContactByGUID(bid.ContactGUID);
+                        if (contact != null) {
+                            var statusDate = bidding.convertDateToLocal(interest.StatusDate);
+                            var statusDateStr = resources.getCalendarDate(true, statusDate) + ' ' + resources.getClockTime(statusDate, true);
+                            $('.interestDetails', windowObj.dialog).html(bidding.userData.Company + ' - ' + bidding.userData.FirstName + '<br/>Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks + '<br/><br/>Counterparty: ' + contact.Company + ' - ' + contact.FirstName + ' ' + contact.LastName + '<br/>Price: ' + bid.Price);
+                        }
+                    }
+                }
+                else {
+                    var contact = bidding.getContactByGUID(interest.ContactGUID);
+                    if (contact != null) {
+                        var statusDate = bidding.convertDateToLocal(interest.StatusDate);
+                        var statusDateStr = resources.getCalendarDate(true, statusDate) + ' ' + resources.getClockTime(statusDate, true);
+                        $('.interestDetails', windowObj.dialog).html(contact.Company + ' - ' + contact.FirstName + '<br/>Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks + '<br/><br/>Counterparty: ' + bidding.userData.Company + ' - ' + bidding.userData.FirstName + ' ' + bidding.userData.LastName + '<br/>Price: ' + interest.PriceShowing);
+                    }
                 }
             }
             else if (interestWindowType == WINDOWTYPE_INTERESTINACTIVE) {
                 $('.closeWindowButton', windowObj.dialog).bind('click.bidding', function (e) {
                     $(windowObj.dialog[0]).dialog('close');
                 });
+            }
+            else if (interestWindowType == WINDOWTYPE_DEALCONFIRMPENDING) {
+                $('.cancelDealButton', windowObj.dialog).bind('click.bidding', function (e) {
+                    var formData = { guid: defaultPage.sessionGUID(), interestGUID: interestGUID, bidGUID: interest.BidGUID };
+                    resources.ajaxPost('Receiver', 'ConfirmCancelBid', formData, function (data) {
+                    });
+                    interest.BidType = BIDTYPE_INDICATIVE;
+                    $(windowObj.dialog[0]).dialog('close');
+                    bidding.refreshInterests();
+                    bidding.showInterestWindow(interestGUID);
+                });
+
+                $('.confirmDealButton', windowObj.dialog).bind('click.bidding', function (e) {
+                    var formData = { guid: defaultPage.sessionGUID(), interestGUID: interestGUID, bidGUID: interest.BidGUID };
+                    modals.toggleWaitingModal(true, 'Please wait...');
+                    resources.ajaxPost('Receiver', 'ConfirmBid', formData, function (data) {
+                        modals.hide();
+                        $(windowObj.dialog[0]).dialog('close');
+                        if (data.Success) {
+                            interest.DealConfirmed = true;
+                            resources.removeObjectInArray(bidding.interests, interestGUID, function (a, b) { return resources.stringEqual(a.InterestGUID, b); });
+                            bidding.refreshInterests();
+                            bidding.showInterestWindow(null, interest);
+                        }
+                        else {
+                            modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { });
+                            bidding.showInterestWindow(interestGUID);
+                        }
+                    });
+                });
+
+                var contact = bidding.getContactByGUID(interest.ContactGUID);
+                if (contact != null) {
+                    $('.interestDetails', windowObj.dialog).html(contact.Company + ' - ' + contact.FirstName + '<br/>Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks);
+                    $('.interestPrice', windowObj.dialog).html('DEAL @ ' + interest.PriceShowing);
+                }
+            }
+        },
+
+        selectBid: function (bidGUID) {
+            var bid = bidding.getBid(bidGUID);
+            if (bid == null) return;
+
+            var interest = bidding.getInterest(bid.InterestGUID);
+            if (interest == null) return;
+
+            var contact = bidding.getContactByGUID(bid.ContactGUID);
+            if (contact == null) return;
+
+            var bidDate = bidding.convertDateToLocal(bid.CreationDate);
+            var bidDetails = resources.getCalendarDate(true, bidDate) + ' ' + resources.getClockTime(bidDate, true) + '<br/>' + contact.FirstName + ' @ ' + bid.Price;
+            if (bid.BidType == BIDTYPE_FIRM) {
+                bidDetails = '<b>' + bidDetails + '</b>';
+                modals.showConfirmModal(bidDetails, function (success) {
+                    if (success) {
+                        modals.toggleWaitingModal(true, 'Confirming price with advance user...');
+                        var formData = { guid: defaultPage.sessionGUID(), interestGUID: interest.InterestGUID, bidGUID: bidGUID };
+                        resources.ajaxPost('Receiver', 'ConfirmBid', formData, function (data) {
+                            if (data.Success) {
+                            }
+                            else {
+                                modals.hide();
+                                modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { });
+                            }
+                        });
+                    }
+                }, ((interest.InterestType == INTERESTTYPE_BUY) ? 'BUY' : 'SELL'), 'X');
+            }
+            else if (bid.BidType == BIDTYPE_INDICATIVE) {
+                modals.showConfirmModal(bidDetails, function (success) {
+                    if (success) {
+                        modals.toggleWaitingModal(true, 'Please wait...');
+                        var formData = { guid: defaultPage.sessionGUID(), interestGUID: interest.InterestGUID, bidType: BIDTYPE_REQUESTFIRM, contactGUIDs: [bid.ContactGUID] };
+                        resources.ajaxPost('Receiver', 'CheckPrices', formData, function (data) {
+                            modals.hide();
+                            if (data.Success) {
+
+                            }
+                            else {
+                                modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('checkPricesModal'); });
+                            }
+                        });
+                    }
+                }, 'Call for FIRM', 'X');
             }
         },
 
@@ -367,7 +491,7 @@ var bidding = (function () {
             resources.arrayEnum(interest.Bids, function (bid) {
                 var contact = bidding.getContactByGUID(bid.ContactGUID);
                 if (contact != null) {
-                    var html = '<div style="padding:4px; text-align:center; border-bottom:2px solid #4f81bd;' + ((bid.BidType == BIDTYPE_FIRM) ? 'font-weight:bold;' : '') + '">' + contact.FirstName + ' @ ' + bid.Price + '</div>';
+                    var html = '<div onclick="bidding.selectBid(\'' + bid.BidGUID + '\')" style="cursor:pointer; padding:4px; text-align:center; border-bottom:2px solid #4f81bd;' + ((bid.BidType == BIDTYPE_FIRM) ? 'font-weight:bold;' : '') + '">' + contact.FirstName + ' @ ' + bid.Price + '</div>';
                     htmlArr.push(html);
                 }
             });
@@ -434,6 +558,15 @@ var bidding = (function () {
 
         getInterest: function (interestGUID) {
             return resources.getArrayItem(bidding.interests, function (a) { return resources.stringEqual(a.InterestGUID, interestGUID); });
+        },
+
+        getBid: function (bidGUID) {
+            var bid = null;
+            resources.arrayEnum(bidding.interests, function (interest) {
+                bid = resources.getArrayItem(interest.Bids, function (a) { return resources.stringEqual(a.BidGUID, bidGUID); });
+                if (bid != null) return true;
+            });
+            return bid;
         },
 
         getInterestWindowType: function (interest) {
