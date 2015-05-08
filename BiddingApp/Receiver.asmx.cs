@@ -6,6 +6,7 @@ using System.Web.Services;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Web.Script.Services;
+using Microsoft.AspNet.SignalR;
 
 namespace BiddingApp
 {
@@ -43,7 +44,7 @@ namespace BiddingApp
                 JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
                 UserData signupData = JsonConvert.DeserializeObject<UserData>(jToken.Value<JToken>("formData").ToString());
 
-                if (Statics.Access.GetUserID(null, signupData.Email) > 0) throw new NotifyException("Email already registered");
+                if (Statics.Access.GetUserID(null, signupData.Email, null) > 0) throw new NotifyException("Email already registered");
                 
                 Statics.Access.Signup(signupData);
                 string sessionGUID = Statics.Access.Login(signupData.Email, signupData.Password, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
@@ -300,6 +301,25 @@ namespace BiddingApp
                 decimal price = jToken.Value<decimal>("price");
 
                 Statics.Access.Bid_Create(userID, interestGUID, null, bidType, price);
+
+                try
+                {
+                    int interestUserID = Statics.Access.GetUserID(null, null, interestGUID);
+                    BiddingClient client = BiddingHub.GetBiddingClient(interestUserID);
+                    if (client != null)
+                    {
+                        InterestData interest = Statics.Access.Interest_Get(interestUserID).First(a => a.InterestGUID == interestGUID);
+                        if (interest != null)
+                        {
+                            var hub = GlobalHost.ConnectionManager.GetHubContext<BiddingHub>();
+                            hub.Clients.Client(client.ConnectionID).interestUpdated(JsonConvert.SerializeObject(new { Interest = interest }));
+                        }
+                    }
+                }
+                catch (Exception exc)
+                {
+                    Log("ShowPrice SignalR Exception", exc);
+                }
 
                 return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
             }

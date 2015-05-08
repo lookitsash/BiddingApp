@@ -43,18 +43,59 @@ var bidding = (function () {
 
             bidding.getData();
 
-            var chatHub = $.connection.chatHub;
-            $.connection.chatHub.client.chatReceived = function (data) {
+            var biddingHub = $.connection.biddingHub;
+            $.connection.biddingHub.client.chatReceived = function (data) {
                 data = JSON.parse(data);
                 bidding.showChatWindow_Incoming(data);
             };
+            $.connection.biddingHub.client.interestUpdated = function (data) {
+                data = JSON.parse(data);
+                var interest = data.Interest;
+                if (interest != null) {
+                    if (resources.replaceObjectInArray(bidding.interests, interest, function (a, b) { return a.InterestGUID == b.InterestGUID; })) {
+                        var windowObj = windows.getWindowByID(interest.InterestGUID);
+                        if (windowObj != null) bidding.showInterestWindow(null, interest);
+                    }
+                }
+            };
             $.connection.hub.url = "signalr";
             $.connection.hub.start().done(function () {
-                $.connection.chatHub.server.registerClient(defaultPage.sessionGUID());
+                console.log('hub registerClient1');
+                $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID());
             }).fail(function (error) {
                 //console.error(error);
             });
 
+            /*
+            $.connection.hub.disconnected(function () {
+                console.log('hub disconnection');
+                setTimeout(function () {
+                    $.connection.hub.start().done(function () {
+                        console.log('hub registerClient');
+                        $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID());
+                    });
+                }, 5000); // Restart connection after 5 seconds.
+            });
+            */
+
+            $.connection.hub.reconnecting(function () {
+                //console.log("reconnecting");
+            });
+
+            $.connection.hub.reconnected(function () {
+                //console.log("We have been reconnected");
+                $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID());
+            });
+
+            $.connection.hub.disconnected(function () {
+                //console.log("We are disconnected!");
+                setTimeout(function () {
+                    $.connection.hub.start().done(function () {
+                        console.log('hub registerClient2');
+                        $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID());
+                    });
+                }, 5000); // Restart connection after 5 seconds.
+            });
             setTimeout(bidding.onTick, 1000);
         },
 
@@ -79,13 +120,16 @@ var bidding = (function () {
             setTimeout(bidding.onTick, 1000);
         },
 
-        showPrice: function (interestGUID, bidType, price) {
-            modals.toggleWaitingModal(true, 'Please wait...');
+        showPrice: function (interestGUID, bidType, price, silentUpdate, callback) {
+            if (!silentUpdate) modals.toggleWaitingModal(true, 'Please wait...');
             resources.ajaxPost('Receiver', 'ShowPrice', { guid: defaultPage.sessionGUID(), interestGUID: interestGUID, bidType: bidType, price: price }, function (data) {
-                modals.hide();
-                bidding.interests = data.Interests;
-                bidding.refreshInterests();
-                bidding.showInterestWindow(interestGUID);
+                if (!silentUpdate) modals.hide();
+                if (data.Success) {
+                    bidding.interests = data.Interests;
+                    bidding.refreshInterests();
+                    bidding.showInterestWindow(interestGUID);
+                }
+                if (callback != null) callback(data.Success);
             });
         },
 
@@ -262,7 +306,11 @@ var bidding = (function () {
                     var price = resources.toDecimal($('.priceField', windowObj.dialog).val());
                     if (price <= 0) modals.showNotificationModal('Please enter a valid price');
                     else {
-                        bidding.showPrice(interestGUID, BIDTYPE_INDICATIVE, price);
+                        $('.showIndicButton', windowObj.dialog).hide();
+                        $('.showIndicButton', windowObj.dialog).after($('<img src="Resources/Images/spinner.gif" style="margin-left:39px;margin-right:39px;" />'));
+                        bidding.showPrice(interestGUID, BIDTYPE_INDICATIVE, price, true, function () {
+
+                        });
                     }
                 });
 
@@ -270,7 +318,11 @@ var bidding = (function () {
                     var price = resources.toDecimal($('.priceField', windowObj.dialog).val());
                     if (price <= 0) modals.showNotificationModal('Please enter a valid price');
                     else {
-                        bidding.showPrice(interestGUID, BIDTYPE_FIRM, price);
+                        $('.showFirmButton', windowObj.dialog).hide();
+                        $('.showFirmButton', windowObj.dialog).after($('<img src="Resources/Images/spinner.gif" style="margin-left:39px;margin-right:39px;" />'));
+                        bidding.showPrice(interestGUID, BIDTYPE_FIRM, price, true, function () {
+
+                        });
                     }
                 });
 
@@ -598,7 +650,7 @@ var bidding = (function () {
                             chatContent.append($(html));
                             chatContent.scrollTop(chatContent.prop("scrollHeight"));
 
-                            $.connection.chatHub.server.postChat(JSON.stringify({ emailTo: emailTo, message: message }));
+                            $.connection.biddingHub.server.postChat(JSON.stringify({ emailTo: emailTo, message: message }));
                             /*
                             resources.ajaxPost('Receiver', 'Chat', { guid: defaultPage.sessionGUID(), emailTo: emailTo, message: message }, function (data) {
                             if (data.Success) {

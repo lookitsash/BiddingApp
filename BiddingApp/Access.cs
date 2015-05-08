@@ -25,13 +25,14 @@ namespace BiddingApp
         }
         private T SqlParamGet<T>(SqlCommand cmd, string paramName) { return ValueConverter.Get<T>(cmd.Parameters[paramName].Value); }
 
-        public int GetUserID(string sessionGUID) { return GetUserID(sessionGUID, null); }
-        public int GetUserID(string sessionGUID, string email)
+        public int GetUserID(string sessionGUID) { return GetUserID(sessionGUID, null, null); }
+        public int GetUserID(string sessionGUID, string email, string interestGUID)
         {
             using (SqlCommand cmd = SqlProc("STP_User_Get"))
             {
                 if (!String.IsNullOrEmpty(sessionGUID)) SqlParam(cmd, "SessionGUID", sessionGUID);
                 if (!String.IsNullOrEmpty(email)) SqlParam(cmd, "Email", email);
+                if (!String.IsNullOrEmpty(interestGUID)) SqlParam(cmd, "InterestGUID", interestGUID);
                 return ExecuteScalar<int>(cmd);
             }
         }

@@ -158,7 +158,7 @@
     <Compile Include="Bidding.aspx.designer.cs">
       <DependentUpon>Bidding.aspx</DependentUpon>
     </Compile>
-    <Compile Include="ChatHub.cs" />
+    <Compile Include="BiddingHub.cs" />
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

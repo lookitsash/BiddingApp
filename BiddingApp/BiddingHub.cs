@@ -9,9 +9,9 @@ using Newtonsoft.Json.Linq;
 
 namespace BiddingApp
 {
-    public class ChatHub : Hub
+    public class BiddingHub : Hub
     {
-        private static Dictionary<string, ChatClient> ClientLookup = new Dictionary<string, ChatClient>();
+        private static Dictionary<string, BiddingClient> ClientLookup = new Dictionary<string, BiddingClient>();
 
         public override Task OnConnected()
         {
@@ -35,7 +35,7 @@ namespace BiddingApp
                 UserData userData = Statics.Access.GetUserData(0, sessionGUID, true);
                 if (userData != null)
                 {
-                    if (!ClientLookup.ContainsKey(userData.Email.ToLower())) ClientLookup.Add(userData.Email.ToLower(), new ChatClient() { ConnectionID = Context.ConnectionId, UserData = userData });
+                    if (!ClientLookup.ContainsKey(userData.Email.ToLower())) ClientLookup.Add(userData.Email.ToLower(), new BiddingClient() { ConnectionID = Context.ConnectionId, UserData = userData });
                     else ClientLookup[userData.Email.ToLower()].ConnectionID = Context.ConnectionId;
                 }
             }
@@ -52,10 +52,10 @@ namespace BiddingApp
                 JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
                 string emailTo = jToken.Value<string>("emailTo");
                 string message = jToken.Value<string>("message");
-                ChatClient clientFrom = GetChatClient_Current();
+                BiddingClient clientFrom = GetBiddingClient_Current();
                 Statics.Access.Chat(clientFrom.UserData.ID, emailTo, message);
 
-                ChatClient clientTo = GetChatClient(emailTo);
+                BiddingClient clientTo = GetBiddingClient(emailTo);
                 if (clientTo != null)
                 {
                     Clients.Client(clientTo.ConnectionID).chatReceived(JsonConvert.SerializeObject(new { FirstName = clientFrom.UserData.FirstName, LastName = clientFrom.UserData.LastName, Email = clientFrom.UserData.Email, Message = message }));
@@ -89,26 +89,35 @@ namespace BiddingApp
             Clients.Group(group).newMessageReceived(message);
         }
 
-        private ChatClient GetChatClient_Current()
+        private BiddingClient GetBiddingClient_Current()
         {
-            foreach (ChatClient client in ClientLookup.Values)
+            foreach (BiddingClient client in ClientLookup.Values)
             {
                 if (client.ConnectionID == Context.ConnectionId) return client;
             }
             return null;
         }
 
-        private ChatClient GetChatClient(string email)
+        public static BiddingClient GetBiddingClient(string email)
         {
             if (ClientLookup.ContainsKey(email.ToLower())) return ClientLookup[email.ToLower()];
             else return null;
         }
 
-        private void Log(string str) { Statics.GetLogger("ChatHub").Log(str); }
-        private void Log(string str, Exception ex) { Statics.GetLogger("ChatHub").Log(str, ex); }
+        public static BiddingClient GetBiddingClient(int userID)
+        {
+            foreach (BiddingClient client in ClientLookup.Values)
+            {
+                if (client.UserData.ID == userID) return client;
+            }
+            return null;
+        }
+
+        private void Log(string str) { Statics.GetLogger("BiddingHub").Log(str); }
+        private void Log(string str, Exception ex) { Statics.GetLogger("BiddingHub").Log(str, ex); }
     }
 
-    public class ChatClient
+    public class BiddingClient
     {
         public string ConnectionID;
         public UserData UserData;
