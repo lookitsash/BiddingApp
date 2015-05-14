@@ -20,6 +20,21 @@ namespace BiddingApp
 
         public override Task OnDisconnected()
         {
+            BiddingClient curClient = GetBiddingClient_Current();
+            if (curClient != null)
+            {
+                List<InterestData> interests = Statics.Access.Interest_Get(curClient.UserData.ID);
+                foreach (InterestData interestData in interests)
+                {
+                    if (interestData.BidType == BidTypes.Firm)
+                    {
+                        Statics.Access.Bid_Create(curClient.UserData.ID, interestData.InterestGUID, null, BidTypes.Indicative, interestData.PriceShowing);
+                        int interestUserID = Statics.Access.GetUserID(interestData.InterestGUID, GUIDTypes.Interest);
+                        Receiver.SyncInterestUpdate(interestUserID, interestData.InterestGUID, true);
+                        Receiver.SyncConfirmCancelDeal(interestUserID, interestData.InterestGUID, interestData.BidGUID);
+                    }
+                }
+            }
             return base.OnDisconnected();
         }
 

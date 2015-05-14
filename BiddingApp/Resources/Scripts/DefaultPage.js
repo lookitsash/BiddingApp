@@ -18,7 +18,7 @@ var defaultPage = (function () {
         },
 
         initializeSignalR: function () {
-            if (!resources.stringNullOrEmpty(defaultPage.sessionGUID())) {
+            if (defaultPage.isLoggedIn()) {
                 $.connection.biddingHub.client.forceLogout = function (data) {
                     $.session.clear();
                     defaultPage.validateSession();
@@ -51,7 +51,17 @@ var defaultPage = (function () {
         },
 
         sessionGUID: function () {
-            return $.session.get('SessionGUID');
+            return defaultPage.isLoggedIn() ? defaultPage.sessionData().GUID : null;
+        },
+
+        sessionData: function () {
+            var sessionDataStr = $.session.get('SessionData');
+            if (!resources.stringNullOrEmpty(sessionDataStr)) return $.parseJSON(sessionDataStr);
+            else return null;
+        },
+
+        isLoggedIn: function () {
+            return !resources.stringNullOrEmpty($.session.get('SessionData'));
         },
 
         validateSession: function () {
@@ -64,11 +74,12 @@ var defaultPage = (function () {
         refreshSession: function () {
             $('.inSession').hide();
             $('.outSession').hide();
-            if (resources.stringNullOrEmpty(defaultPage.sessionGUID())) {
+            if (!defaultPage.isLoggedIn()) {
                 $('.outSession').show();
             }
             else {
                 $('.inSession').show();
+                $('.userGreeting').html('Hello <i>' + defaultPage.sessionData().UserData.FirstName + '</i>');
             }
         }
     };

@@ -36,14 +36,17 @@
     <%
     if (BiddingApp.Statics.DevMode && !String.IsNullOrEmpty(BiddingApp.Statics.DevEmail) && !String.IsNullOrEmpty(BiddingApp.Statics.DevPassword))
     {
-        string sessionGUID = Convert.ToString(Session["SessionGUID"]) ?? "";
-        if (String.IsNullOrEmpty(sessionGUID))
+        BiddingApp.SessionData sessionData = (Session["SessionData"] == null) ? null : (BiddingApp.SessionData)Session["SessionData"];
+        if (sessionData == null)
         {
-            sessionGUID = BiddingApp.Statics.Access.Login(BiddingApp.Statics.DevEmail, BiddingApp.Statics.DevPassword, Request.UserHostAddress, Request.UserAgent); 
-            Session.Add("SessionGUID", sessionGUID);
+            string sessionGUID = BiddingApp.Statics.Access.Login(BiddingApp.Statics.DevEmail, BiddingApp.Statics.DevPassword, Request.UserHostAddress, Request.UserAgent); 
+            //Session.Add("SessionGUID", sessionGUID);
+
+            int userID = BiddingApp.Statics.Access.GetUserID(sessionGUID, GUIDTypes.Session);
+            sessionData = new BiddingApp.SessionData() { GUID = sessionGUID, UserData = BiddingApp.Statics.Access.GetUserData(userID, null, false) };
         }
     %>
-        $.session.set('SessionGUID', '<% =sessionGUID %>');
+        $.session.set('SessionData', '<% =Newtonsoft.Json.JsonConvert.SerializeObject(sessionData) %>');
     <%
     }
     %>

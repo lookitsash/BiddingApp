@@ -103,17 +103,18 @@ var bidding = (function () {
                 modals.hide();
                 var bid = bidding.getBid(data.BidGUID);
                 if (bid != null) bid.BidType = BIDTYPE_INDICATIVE;
-                bidding.showInterestWindow(data.InterestGUID);
-                modals.showNotificationModal('Deal has been cancelled.  User has moved their price.');
+                var confirmingWindowObj = windows.getWindowByTypeAndID(WINDOWTYPE_DEALCONFIRMING, data.InterestGUID);
+                if (confirmingWindowObj != null) bidding.showInterestWindow(data.InterestGUID, null, WINDOWTYPE_DEALCONFIRMCANCELLED);
+                //modals.showNotificationModal('Deal has been cancelled.  User has moved their price.');
             };
 
-            setTimeout(bidding.onTick, 1000);
+            setTimeout(bidding.onTick, 100);
         },
 
         onTick: function () {
             var openWindows = windows.getOpenWindows();
             resources.arrayEnum(openWindows, function (windowObj) {
-                if (windowObj.windowType == WINDOWTYPE_VIEWINTEREST || windowObj.windowType == WINDOWTYPE_BIDDING) {
+                if (windowObj.windowType == WINDOWTYPE_VIEWINTEREST || windowObj.windowType == WINDOWTYPE_BIDDING || windowObj.windowType == WINDOWTYPE_VIEWINTERESTFIRM) {
                     var interestGUID = windowObj.windowID;
                     var interest = bidding.getInterest(interestGUID);
                     if (interest != null) {
@@ -125,6 +126,15 @@ var bidding = (function () {
                             bidding.showInterestWindow(interestGUID);
                         }
                         $('.interestExpiration', windowObj.dialog).html(expiration.date);
+                    }
+                }
+                else if (windowObj.windowType == WINDOWTYPE_DEALCONFIRMPENDING && windowObj.autoConfirmDate != null) {
+                    var secondsToAutoConfirm = Math.ceil(resources.dateDiffMS(new Date(), windowObj.autoConfirmDate) / 1000);
+                    if (secondsToAutoConfirm < 0) secondsToAutoConfirm = 0;
+                    $('.cancelDealButton', windowObj.dialog).html('Off (' + secondsToAutoConfirm + ')');
+                    if (secondsToAutoConfirm == 0) {
+                        windowObj.autoConfirmDate = null;
+                        $('.confirmDealButton', windowObj.dialog).trigger('click.bidding');
                     }
                 }
             });
@@ -377,8 +387,16 @@ var bidding = (function () {
                     var statusDateStr = resources.getCalendarDate(true, statusDate) + ' ' + resources.getClockTime(statusDate, true);
                     $('.interestStatus', windowObj.dialog).html(statusDateStr + ' - ' + interest.StatusDescription);
                     $('.interestDetails', windowObj.dialog).html(contact.Company + ' - ' + contact.FirstName + '<br/>Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks);
-                    $('.interestPrice', windowObj.dialog).html('Order @ ' + interest.Price);
-                    $('.interestExpiration', windowObj.dialog).html(bidding.getInterestExpirationDesc(interest).date);
+                    if (interest.Price > 0) {
+                        $('.interestPrice', windowObj.dialog).html('<b>Order @ ' + interest.Price + '</b>');
+                        $('.interestExpiration', windowObj.dialog).html(bidding.getInterestExpirationDesc(interest).date);
+                        $('.fillOrderButton', windowObj.dialog).show();
+                    }
+                    else {
+                        $('.interestPrice', windowObj.dialog).html('Order: <b>None</b>');
+                        $('.interestExpiration', windowObj.dialog).html('');
+                        $('.fillOrderButton', windowObj.dialog).hide();
+                    }
                     $('.priceShowing', windowObj.dialog).html((interest.PriceShowing == 0) ? '-' : interest.PriceShowing);
                 }
             }
@@ -450,6 +468,15 @@ var bidding = (function () {
                     $('.interestDetails', windowObj.dialog).html(contact.Company + ' - ' + contact.FirstName + '<br/>Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks);
                     $('.interestPrice', windowObj.dialog).html('DEAL @ ' + interest.PriceShowing);
                 }
+
+                var secondsToAutoConfirm = 4;
+                windowObj.autoConfirmDate = resources.dateAddMs(new Date(), secondsToAutoConfirm * 1000);
+                $('.cancelDealButton', windowObj.dialog).html('Off (' + secondsToAutoConfirm + ')');
+            }
+            else if (interestWindowType == WINDOWTYPE_DEALCONFIRMCANCELLED) {
+                $('.okButton', windowObj.dialog).bind('click.bidding', function (e) {
+                    bidding.showInterestWindow(interestGUID);
+                });
             }
         },
 
@@ -469,7 +496,8 @@ var bidding = (function () {
                 bidDetails = '<b>' + bidDetails + '</b>';
                 modals.showConfirmModal(bidDetails, function (success) {
                     if (success) {
-                        modals.toggleWaitingModal(true, 'Confirming price with advance user...');
+                        //modals.toggleWaitingModal(true, 'Confirming price with advance user...');
+                        bidding.showInterestWindow(bid.InterestGUID, null, WINDOWTYPE_DEALCONFIRMING);
                         var formData = { guid: defaultPage.sessionGUID(), interestGUID: interest.InterestGUID, bidGUID: bidGUID };
                         resources.ajaxPost('Receiver', 'ConfirmBid', formData, function (data) {
                             if (data.Success) {

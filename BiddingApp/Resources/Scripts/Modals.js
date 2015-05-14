@@ -110,7 +110,7 @@ var modals = (function () {
                 resources.ajaxPost('Receiver', 'Login', loginData, function (data) {
                     modals.hide();
                     if (data.Success) {
-                        $.session.set('SessionGUID', data.SessionGUID);
+                        $.session.set('SessionData', JSON.stringify(data.SessionData));
                         defaultPage.refreshSession();
                         defaultPage.initializeSignalR();
                     }
@@ -155,7 +155,7 @@ var modals = (function () {
                 resources.ajaxPost('Receiver', 'Signup', { formData: formData }, function (data) {
                     modals.hide();
                     if (data.Success) {
-                        $.session.set('SessionGUID', data.SessionGUID);
+                        $.session.set('SessionData', JSON.stringify(data.SessionData));
                         defaultPage.refreshSession();
                     }
                     else {

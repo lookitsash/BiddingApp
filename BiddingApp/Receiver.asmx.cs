@@ -30,7 +30,9 @@ namespace BiddingApp
                 int userID = Statics.Access.GetUserID(sessionGUID, GUIDTypes.Session);
                 SyncForceLogout(userID);
 
-                return JsonConvert.SerializeObject(new { Success = true, SessionGUID = sessionGUID });
+                SessionData sessionData = new SessionData() { GUID = sessionGUID, UserData = Statics.Access.GetUserData(userID, null, false) };
+
+                return JsonConvert.SerializeObject(new { Success = true, SessionData = sessionData });
             }
             catch (Exception ex)
             {
@@ -53,7 +55,10 @@ namespace BiddingApp
                 string sessionGUID = Statics.Access.Login(signupData.Email, signupData.Password, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
                 if (String.IsNullOrEmpty(sessionGUID)) throw new Exception("Unable to get session GUID");
 
-                return JsonConvert.SerializeObject(new { Success = true, SessionGUID = sessionGUID });
+                int userID = Statics.Access.GetUserID(sessionGUID, GUIDTypes.Session);
+                SessionData sessionData = new SessionData() { GUID = sessionGUID, UserData = Statics.Access.GetUserData(userID, null, false) };
+
+                return JsonConvert.SerializeObject(new { Success = true, SessionData = sessionData});
             }
             catch (Exception ex)
             {
@@ -527,8 +532,8 @@ namespace BiddingApp
             }
         }
 
-        private void SyncInterestUpdate(int userID, string interestGUID) { SyncInterestUpdate(userID, interestGUID, false); }
-        private void SyncInterestUpdate(int userID, string interestGUID, bool openWindow)
+        public static void SyncInterestUpdate(int userID, string interestGUID) { SyncInterestUpdate(userID, interestGUID, false); }
+        public static void SyncInterestUpdate(int userID, string interestGUID, bool openWindow)
         {
             try
             {
@@ -546,7 +551,7 @@ namespace BiddingApp
             }
             catch (Exception ex)
             {
-                Log("SyncInterestUpdate Exception", ex);
+                Statics.GetLogger("Receiver").Log("SyncInterestUpdate Exception", ex);
             }
         }
 
@@ -586,7 +591,7 @@ namespace BiddingApp
             }
         }
 
-        private void SyncConfirmCancelDeal(int userID, string interestGUID, string bidGUID)
+        public static void SyncConfirmCancelDeal(int userID, string interestGUID, string bidGUID)
         {
             try
             {
@@ -600,7 +605,7 @@ namespace BiddingApp
             }
             catch (Exception ex)
             {
-                Log("SyncConfirmCancelDeal Exception", ex);
+                Statics.GetLogger("Receiver").Log("SyncConfirmCancelDeal Exception", ex);
             }
         }
 
@@ -622,6 +627,12 @@ namespace BiddingApp
             }
         }
         #endregion
+    }
+
+    public class SessionData
+    {
+        public string GUID;
+        public UserData UserData;
     }
 
     public class UserData

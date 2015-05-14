@@ -23,8 +23,9 @@
                 <td class="outSession">
                     <a href="#" onclick="modals.showSignupModal();return false;" class="btn btn-primary">SIGN UP</a>
                 </td>
-                <td class="inSession">
-                    <a href="#" onclick="modals.logout();return false;"><img src="Resources/Images/logout.png" /></a>
+                <td class="inSession" style="white-space:nowrap;">
+                    <div class="userGreeting" style="display:inline; font-size:11pt;"></div>
+                    <a href="#" onclick="modals.logout();return false;"><img style="vertical-align:middle;" src="Resources/Images/logout.png" /></a>
                 </td>
                 <td class="inSession">
                     <a href="Settings.aspx"><img src="Resources/Images/gear.png" /></a>

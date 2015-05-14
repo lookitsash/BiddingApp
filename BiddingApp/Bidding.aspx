@@ -5,6 +5,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             bidding.initialize();
+            defaultPage.refreshSession();
         });
 
         function toggleContactSearch(isVisible) {
@@ -54,12 +55,12 @@
                         </ul></li>
                     </ul>
                 </td>
-                <td style="text-align:center;font-size:25pt; font-weight:bold;">
-                    <a href="Settings.aspx"><img src="Resources/Images/gear.png" /></a>
+                <td style="text-align:center;font-size:25pt; font-weight:bold;white-space:nowrap;">
+                    <div class="userGreeting" style="display:inline; font-size:11pt; font-weight:normal;"></div>&nbsp;<a href="#" onclick="modals.logout();return false;"><img style="vertical-align:middle;" src="Resources/Images/logout.png" /></a>
                     <span style="margin-left:60px;"></span>
                     <a href="Default.aspx" style="color:#000000;"><span style="font-size:25pt;"><b>Bidding</b><i>App</i></span></a>
                     <span style="margin-left:60px;"></span>
-                    <a href="#" onclick="modals.logout();return false;"><img src="Resources/Images/logout.png" /></a>
+                    <a href="Settings.aspx"><img style="vertical-align:middle;" src="Resources/Images/gear.png" /></a>
                 </td>
                 <td style="width:120px">
                     <ul id="Ul1" class="menu menuContacts">
@@ -342,7 +343,7 @@
                                     <table style="width:100%;">
                                         <tr>
                                             <td>
-                                                <span class="interestPrice" style="font-weight:bold;">Order @ XX.XXXX</span><br />
+                                                <span class="interestPrice">Order @ XX.XXXX</span><br />
                                                 <span class="interestExpiration" style="font-weight:bold;">Good for another AA Hr BB Min</span>
                                             </td>
                                             <td align="right">
@@ -553,6 +554,53 @@
                             <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;">
                                 <a href="#" onclick="return false;" class="btn btn-cancel cancelDealButton">Off (4)</a>
                                 <a href="#" onclick="return false;" class="btn btn-primary confirmDealButton">Confirm</a>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- WINDOWTYPE_DEALCONFIRMCANCELLED -->
+        <div class="dealConfirmCancelledWindow" style="display:none;">
+          <table style="min-width:435px; left:-10px; height:100px;" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td valign="top" style="font-size:10pt; border:2px solid #4f81bd;">
+                    <table style="width:100%; height:100%; background:#ffffff;" cellpadding="0" cellspacing="0">
+                        <tr style="height:126px;">
+                            <td>
+                                <div style="padding:5px; text-align:center; font-weight:bold; color:#ff0000;">
+                                    Deal has been cancelled.  User has moved their price.
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="height:50px;">
+                            <td style="white-space:nowrap; text-align:center; background-color:#ffffff; border-top: 2px solid #4f81bd; padding:5px;">
+                                <a href="#" onclick="return false;" class="btn btn-primary okButton">OK</a>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- WINDOWTYPE_DEALCONFIRMING -->
+        <div class="dealConfirmingWindow" style="display:none;">
+          <table style="min-width:435px; left:-10px; height:100px;" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td valign="top" style="font-size:10pt; border:2px solid #4f81bd;">
+                    <table style="width:100%; height:100%; background:#ffffff;" cellpadding="0" cellspacing="0">
+                        <tr style="height:149px;">
+                            <td>
+                                <div style="padding:5px; text-align:center; font-weight:bold;">
+                                    Confirming price with advance user...<br />
+                                    <br />
+                                    <img src="Resources/Images/spinner.gif" />
+                                </div>
                             </td>
                         </tr>
                     </table>
