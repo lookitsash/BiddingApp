@@ -205,7 +205,8 @@ var modals = (function () {
                 resources.ajaxPost('Receiver', 'AddContact', { guid: defaultPage.sessionGUID(), formData: formData }, function (data) {
                     modals.hide();
                     if (data.Success) {
-                        if (modalCallback != null) modalCallback(data.Contacts);
+                        if (data.IsBlocked) modals.showNotificationModal('Unable to add an inactive contact');
+                        else if (modalCallback != null) modalCallback(data.Contacts);
                     }
                     else {
                         modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('createContactModal'); });

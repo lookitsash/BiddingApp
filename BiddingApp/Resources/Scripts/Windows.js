@@ -10,6 +10,10 @@ var windows = (function () {
     var actualWindowSize = { width: 425, height: 250 };
 
     return {
+        isChatWindow: function (windowType) {
+            return (windowType == WINDOWTYPE_CHAT || windowType == WINDOWTYPE_CHATCONTACTREQUEST);
+        },
+
         getOpenWindows: function () {
             return biddingWindows;
         },
@@ -29,7 +33,7 @@ var windows = (function () {
             var maxWidth = $(window).width();
             var maxHeight = $(window).height();
             var curPos = { x: 5 + (windowOffset * 30), y: yOffset + (windowOffset * 30) };
-            if (windowType == WINDOWTYPE_CHAT) {
+            if (windows.isChatWindow(windowType)) {
                 curPos.x += 20;
                 curPos.y += 20;
             }
@@ -41,7 +45,7 @@ var windows = (function () {
                 curPos.x += (actualWindowSize.width + windowXPadding);
                 if (curPos.x > (maxWidth - actualWindowSize.width)) {
                     curPos.x = 5 + (windowOffset * 30);
-                    if (windowType == WINDOWTYPE_CHAT) {
+                    if (windows.isChatWindow(windowType)) {
                         curPos.x += 20;
                     }
                     curPos.y += actualWindowSize.height + windowYPadding;
@@ -59,7 +63,7 @@ var windows = (function () {
             var pos = null;
 
             if (windowCollection == null) {
-                if (windowType == WINDOWTYPE_CHAT) windowCollection = chatWindows;
+                if (windows.isChatWindow(windowType)) windowCollection = chatWindows;
                 else windowCollection = biddingWindows;
             }
 
@@ -88,7 +92,7 @@ var windows = (function () {
                 windowOffset++;
             }
             if (pos == null) {
-                if (windowType == WINDOWTYPE_CHAT) pos = { left: 20, top: 50 };
+                if (windows.isChatWindow(windowType)) pos = { left: 20, top: 50 };
                 else pos = { left: 5, top: 40 };
             }
             return pos;
@@ -152,7 +156,7 @@ var windows = (function () {
         },
 
         getWindowCollection: function (windowType) {
-            if (windowType == WINDOWTYPE_CHAT) return chatWindows;
+            if (windows.isChatWindow(windowType)) return chatWindows;
             else return biddingWindows;
         },
 

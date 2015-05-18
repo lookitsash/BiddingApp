@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Web.Script.Services;
 using Microsoft.AspNet.SignalR;
+using Foundation;
 
 namespace BiddingApp
 {
@@ -96,9 +97,26 @@ namespace BiddingApp
                 int userID = GetUserID(jToken);
                 ContactData signupData = JsonConvert.DeserializeObject<ContactData>(jToken.Value<JToken>("formData").ToString());
 
-                Statics.Access.Contact_Add(userID, signupData.Email);
+                UserData userData = Statics.Access.GetUserData(userID, null, false);
+                bool isBlocked = false;
+                int contactUserID = Statics.Access.GetUserID(signupData.Email, GUIDTypes.Email);
+                if (contactUserID > 0) isBlocked = Statics.Access.Contact_IsBlocked(contactUserID, userData.Email);
+                
+                if (!isBlocked)
+                {
+                    DataRowAdapter dra = Statics.Access.Contact_Add(userID, signupData.Email);
+                    if (dra != null)
+                    {
+                        //contactUserID = dra.Get<int>("ContactUserID");
+                        string leaveHelloMessage = dra.Get<string>("LeaveHelloMessage");
+                        if (contactUserID > 0 && !String.IsNullOrEmpty(leaveHelloMessage))
+                        {
+                            SyncChat(userID, contactUserID, leaveHelloMessage, true);
+                        }
+                    }
+                }
 
-                return JsonConvert.SerializeObject(new { Success = true, Contacts = Statics.Access.Contact_Get(userID) });
+                return JsonConvert.SerializeObject(new { Success = true, IsBlocked = isBlocked, Contacts = Statics.Access.Contact_Get(userID) });
             }
             catch (Exception ex)
             {
@@ -117,7 +135,7 @@ namespace BiddingApp
                 string contactGUID = jToken.Value<string>("contactGUID");
                 bool blockContact = jToken.Value<bool>("blockContact");
 
-                if (blockContact) Statics.Access.Contact_Block(userID, contactGUID);
+                if (blockContact) Statics.Access.Contact_Block(userID, contactGUID, null);
                 else Statics.Access.Contact_Delete(userID, contactGUID);
 
                 return JsonConvert.SerializeObject(new { Success = true, Contacts = Statics.Access.Contact_Get(userID) });
@@ -125,6 +143,26 @@ namespace BiddingApp
             catch (Exception ex)
             {
                 Log("DeleteContact Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string BlockContact(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string contactEmail = jToken.Value<string>("contactEmail");
+
+                Statics.Access.Contact_Block(userID, null, contactEmail);
+
+                return JsonConvert.SerializeObject(new { Success = true, Contacts = Statics.Access.Contact_Get(userID) });
+            }
+            catch (Exception ex)
+            {
+                Log("BlockContact Exception", ex);
                 return JsonError(ex);
             }
         }
@@ -514,6 +552,27 @@ namespace BiddingApp
         private void Log(string str, Exception ex) { Statics.GetLogger("Receiver").Log(str, ex); }
 
         #region SignalR synchronization methods
+        private void SyncChat(int sourceUserID, int targetUserID, string chatMessage, bool newContactRequest)
+        {
+            try
+            {
+                BiddingClient client = BiddingHub.GetBiddingClient(targetUserID);
+                if (client != null)
+                {
+                    UserData sourceUser = Statics.Access.GetUserData(sourceUserID, null, false);
+                    if (sourceUser != null)
+                    {
+                        var hub = GlobalHost.ConnectionManager.GetHubContext<BiddingHub>();
+                        hub.Clients.Client(client.ConnectionID).chatReceived(JsonConvert.SerializeObject(new { FirstName = sourceUser.FirstName, LastName = sourceUser.LastName, Email = sourceUser.Email, Message = chatMessage, NewContactRequest = newContactRequest }));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("SyncChat Exception", ex);
+            }
+        }
+
         private void SyncInterestDelete(int userID, string interestGUID)
         {
             try

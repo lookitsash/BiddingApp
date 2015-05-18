@@ -106,13 +106,13 @@ namespace BiddingApp
             }
         }
 
-        public void Contact_Add(int userID, string contactEmail)
+        public DataRowAdapter Contact_Add(int userID, string contactEmail)
         {
             using (SqlCommand cmd = SqlProc("STP_Contact_Add"))
             {
                 SqlParam(cmd, "UserID", userID);
                 SqlParam(cmd, "ContactEmail", contactEmail);
-                ExecuteNonQuery(cmd);
+                return GetTopRow(cmd);
             }
         }
 
@@ -162,12 +162,13 @@ namespace BiddingApp
             }
         }
 
-        public void Contact_Block(int userID, string contactGUID)
+        public void Contact_Block(int userID, string contactGUID, string contactEmail)
         {
             using (SqlCommand cmd = SqlProc("STP_Contact_Block"))
             {
                 SqlParam(cmd, "UserID", userID);
-                SqlParam(cmd, "ContactGUID", contactGUID);
+                if (!String.IsNullOrEmpty(contactGUID)) SqlParam(cmd, "ContactGUID", contactGUID);
+                if (!String.IsNullOrEmpty(contactEmail)) SqlParam(cmd, "ContactEmail", contactEmail);
                 ExecuteNonQuery(cmd);
             }
         }
@@ -179,6 +180,16 @@ namespace BiddingApp
                 SqlParam(cmd, "UserID", userID);
                 SqlParam(cmd, "ContactGUID", contactGUID);
                 ExecuteNonQuery(cmd);
+            }
+        }
+
+        public bool Contact_IsBlocked(int userID, string contactEmail)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Contact_IsBlocked"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "ContactEmail", contactEmail);
+                return ExecuteScalar<bool>(cmd);
             }
         }
 

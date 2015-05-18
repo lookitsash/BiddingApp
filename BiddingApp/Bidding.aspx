@@ -526,6 +526,22 @@
           </table>
         </div>
 
+        <div class="chatWindowContactRequest" style="display:none;">
+          <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td valign="bottom" style="background-color:#ffffff;font-size:10pt; border:3px solid #4f6228; padding:5px; height:110px;">
+                    <div class="chatContent" style="overflow:auto; max-height:106px;">
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td style="background-color:#4f6228; height:50px; padding:5px;">
+                    <div style="color:#ffffff;"><span class="email"></span> - <a href="#" class="addToContacts" style="color:#ffffff;"><u>Add to contacts</u></a> to start chatting or <a href="#" class="blockUser" style="color:#ffffff;"><u>Block this user</u></a></div><div onclick="" style="cursor:pointer; position:absolute; right:50px; top:-30px;"><img src="Resources/images/eye-on.png" style="height:16px;" /></div>
+                </td>
+            </tr>
+          </table>
+        </div>
+
         <!-- WINDOWTYPE_DEALCONFIRMPENDING -->
         <div class="dealConfirmPendingWindow" style="display:none;">
           <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">

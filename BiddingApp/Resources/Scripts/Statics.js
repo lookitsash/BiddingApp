@@ -8,6 +8,7 @@ var WINDOWTYPE_VIEWINTERESTFIRM = 'viewInterestFirmWindow';
 var WINDOWTYPE_VIEWINTERESTNOORDERFIRM = 'viewInterestNoOrderFirmWindow';
 var WINDOWTYPE_DEALCONFIRMPENDING = 'dealConfirmPendingWindow';
 var WINDOWTYPE_CHAT = 'chatWindow';
+var WINDOWTYPE_CHATCONTACTREQUEST = 'chatWindowContactRequest';
 var WINDOWTYPE_DEALCOMPLETE = 'dealCompleteWindow';
 var WINDOWTYPE_FILLORDERCONFIRM = 'fillOrderConfirmWindow';
 var WINDOWTYPE_DEALCONFIRM = 'dealConfirmWindow';
