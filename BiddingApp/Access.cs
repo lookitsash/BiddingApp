@@ -247,6 +247,21 @@ namespace BiddingApp
             }
         }
 
+        public List<ChatData> Chat_GetNewContactRequests(int userID)
+        {
+            List<ChatData> chatItems = new List<ChatData>();
+            using (SqlCommand cmd = SqlProc("STP_Chat_GetNewContactRequests"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                foreach (DataRowAdapter dra in DataRowAdapter.Create(GetTable(cmd)))
+                {
+                    ChatData chatData = new ChatData() { ID = dra.Get<int>("ChatID"), FirstName = dra.Get<string>("FirstName"), LastName = dra.Get<string>("LastName"), Email = dra.Get<string>("Email"), Message = dra.Get<string>("Message"), NewContactRequest = true };
+                    chatItems.Add(chatData);
+                }
+            }
+            return chatItems;
+        }
+
         public List<ChatData> Chat_Get(int userID, string emailTo, int lastChatID)
         {
             List<ChatData> chatItems = new List<ChatData>();

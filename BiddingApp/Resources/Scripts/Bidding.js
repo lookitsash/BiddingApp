@@ -47,6 +47,11 @@ var bidding = (function () {
                 data = JSON.parse(data);
                 bidding.showChatWindow_Incoming(data);
             };
+            $.connection.biddingHub.client.contactsUpdated = function (data) {
+                data = JSON.parse(data);
+                bidding.contacts = data.Contacts;
+                bidding.refreshContacts();
+            };
             $.connection.biddingHub.client.interestUpdated = function (data) {
                 data = JSON.parse(data);
                 var interest = data.Interest;
@@ -167,7 +172,7 @@ var bidding = (function () {
         },
 
         getData: function (options, callback, hideSaveModal) {
-            if (options == null) options = { contacts: true, userData: true, interests: true };
+            if (options == null) options = { contacts: true, userData: true, interests: true, newContactRequests: true };
             options.guid = defaultPage.sessionGUID();
             if (!hideSaveModal) modals.toggleWaitingModal(true, 'Loading, please wait...');
             resources.ajaxPost('Receiver', 'GetData', options, function (data) {
@@ -186,6 +191,11 @@ var bidding = (function () {
                     if (data.Interests != null) {
                         bidding.interests = data.Interests;
                         bidding.refreshInterests();
+                    }
+                    if (data.NewContactRequests != null) {
+                        resources.arrayEnum(data.NewContactRequests, function (chatItem) {
+                            bidding.showChatWindow_Incoming(chatItem);
+                        });
                     }
                     if (callback != null) callback(true);
                 }
@@ -687,11 +697,25 @@ var bidding = (function () {
             var _refreshContacts = function () {
                 var htmlArray = new Array();
                 resources.arrayEnum(bidding.contacts, function (contact) {
-                    if (!contact.Block && contact.MembershipTypeID != MEMBERSHIPTYPE_NOTSIGNEDUP) {
-                        var messageCount = '';
-                        if (contact.UnreadMessages.length > 0) messageCount = '<b>(' + contact.UnreadMessages.length + ')</b> ';
-                        var html = '<li><div onclick="bidding.showChatWindow_Outgoing(\'' + contact.GUID + '\')" style="background-color:white; cursor:pointer; white-space:nowrap;"><table width="100%"><tr><td>' + messageCount + contact.FirstName + ' ' + contact.LastName + '</td><td align="right"><img src="Resources/Images/green_light_16.png" /></td></tr></table></div></li>';
-                        htmlArray.push(html);
+                    if (!contact.Block) {
+                        if (contact.MembershipTypeID != MEMBERSHIPTYPE_NOTSIGNEDUP) {
+                            var notSignedUpChatWindow = windows.getWindowByTypeAndID(WINDOWTYPE_CHATCONTACTNOTSIGNEDUP, contact.Email);
+                            if (notSignedUpChatWindow != null) {
+                                var windowPos = $(notSignedUpChatWindow.dialog[0]).dialog('option', 'position');
+                                windows.closeWindow(notSignedUpChatWindow);
+                                var chatWindow = bidding.showChatWindow_Outgoing(contact.GUID);
+                                $(chatWindow.dialog[0]).dialog('option', 'position', windowPos)
+                            }
+
+                            var messageCount = '';
+                            if (contact.UnreadMessages.length > 0) messageCount = '<b>(' + contact.UnreadMessages.length + ')</b> ';
+                            var html = '<li><div onclick="bidding.showChatWindow_Outgoing(\'' + contact.GUID + '\')" style="background-color:white; cursor:pointer; white-space:nowrap;"><table width="100%"><tr><td>' + messageCount + contact.FirstName + ' ' + contact.LastName + '</td><td align="right"><img src="Resources/Images/green_light_16.png" /></td></tr></table></div></li>';
+                            htmlArray.push(html);
+                        }
+                        else {
+                            var html = '<li><div onclick="bidding.showChatWindow_Outgoing(\'' + contact.GUID + '\')" style="background-color:white; cursor:pointer; white-space:nowrap;"><table width="100%"><tr><td><i>' + contact.Email + '</i></td><td align="right">&nbsp;</td></tr></table></div></li>';
+                            htmlArray.push(html);
+                        }
                     }
                 });
                 $('.menuContacts .menuContactsDropdown').html(htmlArray.join(''));
@@ -730,9 +754,15 @@ var bidding = (function () {
 
         showChatWindow: function (firstName, lastName, email, windowType) {
             if (windowType == null) windowType = WINDOWTYPE_CHAT;
-            var chatWindow = windows.spawnWindow(windowType, firstName + ' ' + lastName, email, null);
 
-            if (windowType == WINDOWTYPE_CHATCONTACTREQUEST) {
+            var windowTitle = firstName + ' ' + lastName;
+            if (windowType == WINDOWTYPE_CHATCONTACTNOTSIGNEDUP) windowTitle = email;
+            var chatWindow = windows.spawnWindow(windowType, windowTitle, email, null);
+
+            if (windowType == WINDOWTYPE_CHATCONTACTNOTSIGNEDUP) {
+                //$('.email', chatWindow.dialog).html(email);
+            }
+            else if (windowType == WINDOWTYPE_CHATCONTACTREQUEST) {
                 $('.email', chatWindow.dialog).html(email);
                 $('.addToContacts', chatWindow.dialog).bind('click', function (e) {
                     modals.toggleWaitingModal(true, 'Please wait...');
@@ -901,16 +931,25 @@ var bidding = (function () {
         },
 
         showChatWindow_Outgoing: function (contactGUID) {
+            var windowType = WINDOWTYPE_CHAT;
             var contact = bidding.getContactByGUID(contactGUID);
             if (contact != null) {
-                var chatWindow = windows.getWindowByTypeAndID(WINDOWTYPE_CHAT, contact.Email);
+                if (contact.MembershipTypeID == MEMBERSHIPTYPE_NOTSIGNEDUP) windowType = WINDOWTYPE_CHATCONTACTNOTSIGNEDUP;
+                var chatWindow = windows.getWindowByTypeAndID(windowType, contact.Email);
 
                 if (chatWindow == null) {
-                    chatWindow = bidding.showChatWindow(contact.FirstName, contact.LastName, contact.Email);
+                    chatWindow = bidding.showChatWindow(contact.FirstName, contact.LastName, contact.Email, windowType);
                 }
                 else $(chatWindow.dialog[0]).dialog('moveToTop');
 
+                return chatWindow;
             }
+            return null;
         }
     };
 })();
+
+$(document).ready(function () {
+    bidding.initialize();
+    defaultPage.refreshSession();
+});

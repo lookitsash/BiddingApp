@@ -443,6 +443,16 @@ a { text-decoration:none; }
     color: #000000;
 }
 
+.chatWindowContactNotSignedUp .ui-widget-header
+{
+    border:4px solid #4f6228; background-color:#92d050; background-image: none;
+}
+
+.chatWindowContactNotSignedUp .ui-dialog-title
+{
+    color: #000000;
+}
+
 .hoverSimple:hover
 {
     background-color:#248fc1;

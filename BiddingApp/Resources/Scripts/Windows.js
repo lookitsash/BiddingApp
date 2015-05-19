@@ -11,7 +11,7 @@ var windows = (function () {
 
     return {
         isChatWindow: function (windowType) {
-            return (windowType == WINDOWTYPE_CHAT || windowType == WINDOWTYPE_CHATCONTACTREQUEST);
+            return (windowType == WINDOWTYPE_CHAT || windowType == WINDOWTYPE_CHATCONTACTREQUEST || windowType == WINDOWTYPE_CHATCONTACTNOTSIGNEDUP);
         },
 
         getOpenWindows: function () {

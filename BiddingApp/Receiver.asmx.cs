@@ -59,6 +59,12 @@ namespace BiddingApp
                 int userID = Statics.Access.GetUserID(sessionGUID, GUIDTypes.Session);
                 SessionData sessionData = new SessionData() { GUID = sessionGUID, UserData = Statics.Access.GetUserData(userID, null, false) };
 
+                foreach (DataRowAdapter dra in DataRowAdapter.Create(Statics.Access.GetTable("select UserID from TBL_Contact where ContactUserID = " + userID + " and DeletionDate is null")))
+                {
+                    int targetUserID = dra.Get<int>("UserID");
+                    SyncContacts(targetUserID);
+                }
+
                 return JsonConvert.SerializeObject(new { Success = true, SessionData = sessionData});
             }
             catch (Exception ex)
@@ -542,7 +548,13 @@ namespace BiddingApp
                     interests = Statics.Access.Interest_Get(userID);
                 }
 
-                return JsonConvert.SerializeObject(new { Success = true, Contacts = contacts, UserData = userData, Interests = interests, ServerDate = Statics.Access.GetSqlDateTime().ToString() });
+                List<ChatData> newContactRequests = null;
+                if (jToken.Value<bool>("newContactRequests"))
+                {
+                    newContactRequests = Statics.Access.Chat_GetNewContactRequests(userID);
+                }
+
+                return JsonConvert.SerializeObject(new { Success = true, Contacts = contacts, UserData = userData, Interests = interests, NewContactRequests = newContactRequests, ServerDate = Statics.Access.GetSqlDateTime().ToString() });
             }
             catch (Exception ex)
             {
@@ -573,6 +585,23 @@ namespace BiddingApp
         private void Log(string str, Exception ex) { Statics.GetLogger("Receiver").Log(str, ex); }
 
         #region SignalR synchronization methods
+        private void SyncContacts(int userID)
+        {
+            try
+            {
+                BiddingClient client = BiddingHub.GetBiddingClient(userID);
+                if (client != null)
+                {
+                    var hub = GlobalHost.ConnectionManager.GetHubContext<BiddingHub>();
+                    hub.Clients.Client(client.ConnectionID).contactsUpdated(JsonConvert.SerializeObject(new { Contacts = Statics.Access.Contact_Get(userID) }));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("SyncContacts Exception", ex);
+            }
+        }
+
         private void SyncChat(int sourceUserID, int targetUserID, string chatMessage, bool newContactRequest)
         {
             try
@@ -757,6 +786,6 @@ namespace BiddingApp
     {
         public int ID;
         public string Email, FirstName, LastName, Message;
-        public bool Outgoing;
+        public bool Outgoing, NewContactRequest;
     }
 }

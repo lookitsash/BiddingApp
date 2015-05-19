@@ -6,6 +6,14 @@ var settingsPage = (function () {
     return {
         contacts: null,
 
+        initialize: function () {
+            $.connection.biddingHub.client.contactsUpdated = function (data) {
+                data = JSON.parse(data);
+                settingsPage.contacts = data.Contacts;
+                settingsPage.refreshContacts();
+            };
+        },
+
         refreshContacts: function (newContacts, refreshCache) {
             var _refreshContacts = function () {
                 $('.contactItem').remove();
@@ -101,3 +109,7 @@ var settingsPage = (function () {
         }
     };
 })();
+
+$(document).ready(function () {
+    settingsPage.initialize();
+});
