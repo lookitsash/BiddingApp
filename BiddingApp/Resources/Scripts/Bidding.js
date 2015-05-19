@@ -52,6 +52,22 @@ var bidding = (function () {
                 bidding.contacts = data.Contacts;
                 bidding.refreshContacts();
             };
+            $.connection.biddingHub.client.toggleContactOnlineStatus = function (data) {
+                data = JSON.parse(data);
+                var contact = bidding.getContactByEmail(data.Email);
+                if (contact != null) contact.IsOnline = data.IsOnline;
+                bidding.refreshContacts();
+
+                var windowObj = windows.getWindowByTypeAndID(WINDOWTYPE_CHAT, data.Email);
+                if (windowObj != null) {
+                    var notificationMessage = data.FirstName + ' is no longer online';
+                    if (data.IsOnline) notificationMessage = data.FirstName + ' has just come online';
+                    var html = '<div class="chatMessage"><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + notificationMessage + ' - ' + resources.getClockTime(new Date(), true) + '</i></div>';
+                    var chatContent = $('.chatContent', windowObj.dialog);
+                    chatContent.append($(html));
+                    chatContent.scrollTop(chatContent.prop("scrollHeight"));
+                }
+            };
             $.connection.biddingHub.client.interestUpdated = function (data) {
                 data = JSON.parse(data);
                 var interest = data.Interest;
@@ -709,7 +725,7 @@ var bidding = (function () {
 
                             var messageCount = '';
                             if (contact.UnreadMessages.length > 0) messageCount = '<b>(' + contact.UnreadMessages.length + ')</b> ';
-                            var html = '<li><div onclick="bidding.showChatWindow_Outgoing(\'' + contact.GUID + '\')" style="background-color:white; cursor:pointer; white-space:nowrap;"><table width="100%"><tr><td>' + messageCount + contact.FirstName + ' ' + contact.LastName + '</td><td align="right"><img src="Resources/Images/green_light_16.png" /></td></tr></table></div></li>';
+                            var html = '<li><div onclick="bidding.showChatWindow_Outgoing(\'' + contact.GUID + '\')" style="background-color:white; cursor:pointer; white-space:nowrap;"><table width="100%"><tr><td>' + messageCount + contact.FirstName + ' ' + contact.LastName + '</td><td align="right"><img src="Resources/Images/' + (contact.IsOnline ? 'green_light_16.png' : 'red_light_16.png') + '" /></td></tr></table></div></li>';
                             htmlArray.push(html);
                         }
                         else {

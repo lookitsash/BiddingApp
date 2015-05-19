@@ -34,6 +34,8 @@ namespace BiddingApp
                         Receiver.SyncConfirmCancelDeal(interestUserID, interestData.InterestGUID, interestData.BidGUID);
                     }
                 }
+                ToggleContactOnlineStatus(curClient.UserData.ID, false);
+                ClientLookup.Remove(curClient.UserData.Email.ToLower());
             }
             return base.OnDisconnected();
         }
@@ -41,6 +43,35 @@ namespace BiddingApp
         public override Task OnReconnected()
         {
             return base.OnReconnected();
+        }
+
+        public void Logout()
+        {
+            OnDisconnected();
+        }
+
+        private void ToggleContactOnlineStatus(int userID, bool isOnline)
+        {
+            try
+            {
+                BiddingClient curClient = GetBiddingClient_Current();
+                if (curClient != null)
+                {
+                    List<ContactData> contacts = Statics.Access.Contact_Get(userID);
+                    foreach (ContactData contact in contacts)
+                    {
+                        BiddingClient client = GetBiddingClient(contact.Email);
+                        if (client != null)
+                        {
+                            Clients.Client(client.ConnectionID).toggleContactOnlineStatus(JsonConvert.SerializeObject(new { Email = curClient.UserData.Email, FirstName = curClient.UserData.FirstName, IsOnline = isOnline }));
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("ToggleContactOnlineStatus Exception", ex);
+            }
         }
 
         public void RegisterClient(string sessionGUID)
@@ -52,6 +83,7 @@ namespace BiddingApp
                 {
                     if (!ClientLookup.ContainsKey(userData.Email.ToLower())) ClientLookup.Add(userData.Email.ToLower(), new BiddingClient() { ConnectionID = Context.ConnectionId, UserData = userData });
                     else ClientLookup[userData.Email.ToLower()].ConnectionID = Context.ConnectionId;
+                    ToggleContactOnlineStatus(userData.ID, true);
                 }
             }
             catch (Exception ex)

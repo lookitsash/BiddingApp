@@ -66,6 +66,7 @@ var defaultPage = (function () {
 
         validateSession: function () {
             if (resources.stringNullOrEmpty(defaultPage.sessionGUID())) {
+                $.connection.biddingHub.server.logout();
                 if (resources.stringContains(document.location.href, 'default.aspx')) defaultPage.refreshSession();
                 else document.location = 'Default.aspx';
             }

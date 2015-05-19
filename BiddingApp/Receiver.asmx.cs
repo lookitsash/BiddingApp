@@ -533,7 +533,7 @@ namespace BiddingApp
                 List<ContactData> contacts = null;
                 if (jToken.Value<bool>("contacts"))
                 {
-                    contacts = Statics.Access.Contact_Get(userID);
+                    contacts = SetContactOnlineStatus(Statics.Access.Contact_Get(userID));
                 }
 
                 UserData userData = null;
@@ -583,6 +583,15 @@ namespace BiddingApp
 
         private void Log(string str) { Statics.GetLogger("Receiver").Log(str); }
         private void Log(string str, Exception ex) { Statics.GetLogger("Receiver").Log(str, ex); }
+
+        private List<ContactData> SetContactOnlineStatus(List<ContactData> contacts)
+        {
+            foreach (ContactData contact in contacts)
+            {
+                contact.IsOnline = (BiddingHub.GetBiddingClient(contact.Email) != null);
+            }
+            return contacts;
+        }
 
         #region SignalR synchronization methods
         private void SyncContacts(int userID)
@@ -756,7 +765,7 @@ namespace BiddingApp
     {
         public int ID, RecentChatID;
         public string GUID, Email, FirstName, LastName, Company;
-        public bool AllowBid, Block, AppearOnline;
+        public bool AllowBid, Block, AppearOnline, IsOnline;
         public MembershipTypes MembershipTypeID;
         public List<ChatData> UnreadMessages = new List<ChatData>();
     }
