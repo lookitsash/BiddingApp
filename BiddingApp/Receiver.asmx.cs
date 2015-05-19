@@ -230,6 +230,27 @@ namespace BiddingApp
         }
 
         [WebMethod]
+        public string MarkChatRead(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string emailFrom = jToken.Value<string>("emailFrom");
+
+                int userIDFrom = Statics.Access.GetUserID(emailFrom, GUIDTypes.Email);
+                if (userIDFrom > 0) Statics.Access.Chat_MarkRead(userID, userIDFrom);
+
+                return JsonConvert.SerializeObject(new { Success = true });
+            }
+            catch (Exception ex)
+            {
+                Log("MarkChatRead Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
         public string GetChatHistory(string json)
         {
             try
@@ -708,6 +729,7 @@ namespace BiddingApp
         public string GUID, Email, FirstName, LastName, Company;
         public bool AllowBid, Block, AppearOnline;
         public MembershipTypes MembershipTypeID;
+        public List<ChatData> UnreadMessages = new List<ChatData>();
     }
 
     public class InterestData
@@ -734,7 +756,7 @@ namespace BiddingApp
     public class ChatData
     {
         public int ID;
-        public string FirstName, Message;
+        public string Email, FirstName, LastName, Message;
         public bool Outgoing;
     }
 }

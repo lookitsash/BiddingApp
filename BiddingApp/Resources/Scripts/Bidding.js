@@ -688,7 +688,9 @@ var bidding = (function () {
                 var htmlArray = new Array();
                 resources.arrayEnum(bidding.contacts, function (contact) {
                     if (!contact.Block && contact.MembershipTypeID != MEMBERSHIPTYPE_NOTSIGNEDUP) {
-                        var html = '<li><div onclick="bidding.showChatWindow_Outgoing(\'' + contact.GUID + '\')" style="background-color:white; cursor:pointer; white-space:nowrap;"><table width="100%"><tr><td>' + contact.FirstName + ' ' + contact.LastName + '</td><td align="right"><img src="Resources/Images/green_light_16.png" /></td></tr></table></div></li>';
+                        var messageCount = '';
+                        if (contact.UnreadMessages.length > 0) messageCount = '<b>(' + contact.UnreadMessages.length + ')</b> ';
+                        var html = '<li><div onclick="bidding.showChatWindow_Outgoing(\'' + contact.GUID + '\')" style="background-color:white; cursor:pointer; white-space:nowrap;"><table width="100%"><tr><td>' + messageCount + contact.FirstName + ' ' + contact.LastName + '</td><td align="right"><img src="Resources/Images/green_light_16.png" /></td></tr></table></div></li>';
                         htmlArray.push(html);
                     }
                 });
@@ -809,6 +811,15 @@ var bidding = (function () {
                 var lastChatID = 0;
                 var existingContact = bidding.getContactByEmail(email);
                 if (existingContact != null) {
+                    if (existingContact.UnreadMessages.length > 0) {
+                        resources.arrayEnum(existingContact.UnreadMessages, function (chatData) {
+                            bidding.logChat(chatData);
+                        });
+                        existingContact.UnreadMessages = new Array();
+                        bidding.refreshContacts();
+                        resources.ajaxPost('Receiver', 'MarkChatRead', { guid: defaultPage.sessionGUID(), emailFrom: email }, function (data) { });
+                    }
+
                     lastChatID = existingContact.RecentChatID;
                     if (chatHistoryMinChatIDLookup[email.toLowerCase()] != null) {
                         lastChatID = Math.min(chatHistoryMinChatIDLookup[email.toLowerCase()], lastChatID);
@@ -885,6 +896,8 @@ var bidding = (function () {
             var chatContent = $('.chatContent', chatWindow.dialog);
             chatContent.append($(html));
             chatContent.scrollTop(chatContent.prop("scrollHeight"));
+
+            resources.ajaxPost('Receiver', 'MarkChatRead', { guid: defaultPage.sessionGUID(), emailFrom: data.Email }, function (data) { });
         },
 
         showChatWindow_Outgoing: function (contactGUID) {

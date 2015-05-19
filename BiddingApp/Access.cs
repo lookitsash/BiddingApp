@@ -132,21 +132,43 @@ namespace BiddingApp
             using (SqlCommand cmd = SqlProc("STP_Contact_Get"))
             {
                 SqlParam(cmd, "UserID", userID);
-                foreach (DataRowAdapter dra in DataRowAdapter.Create(GetTable(cmd)))
+                DataSet ds = GetSet(cmd);
+                for (int i = 0; i < ds.Tables.Count; i++)
                 {
-                    contacts.Add(new ContactData()
+                    foreach (DataRowAdapter dra in DataRowAdapter.Create(ds.Tables[i].Rows))
                     {
-                        Email = dra.Get<string>("Email"),
-                        FirstName = dra.Get<string>("FirstName"),
-                        LastName = dra.Get<string>("LastName"),
-                        GUID = dra.Get<string>("GUID"),
-                        AllowBid = dra.Get<bool>("AllowBid"),
-                        Block = dra.Get<bool>("Block"),
-                        AppearOnline = dra.Get<bool>("AppearOnline"),
-                        MembershipTypeID = (MembershipTypes)dra.Get<int>("MembershipTypeID"),
-                        RecentChatID = dra.Get<int>("RecentChatID"),
-                        Company = dra.Get<string>("Company")
-                    });
+                        if (i == 0)
+                        {
+                            contacts.Add(new ContactData()
+                            {
+                                Email = dra.Get<string>("Email"),
+                                FirstName = dra.Get<string>("FirstName"),
+                                LastName = dra.Get<string>("LastName"),
+                                GUID = dra.Get<string>("GUID"),
+                                AllowBid = dra.Get<bool>("AllowBid"),
+                                Block = dra.Get<bool>("Block"),
+                                AppearOnline = dra.Get<bool>("AppearOnline"),
+                                MembershipTypeID = (MembershipTypes)dra.Get<int>("MembershipTypeID"),
+                                RecentChatID = dra.Get<int>("RecentChatID"),
+                                Company = dra.Get<string>("Company")
+                            });
+                        }
+                        else if (i == 1)
+                        {
+                            ContactData contact = contacts.First(c => c.GUID == dra.Get<string>("ContactGUID"));
+                            if (contact != null)
+                            {
+                                contact.UnreadMessages.Add(new ChatData()
+                                {
+                                    ID = dra.Get<int>("ChatID"),
+                                    Email = dra.Get<string>("Email"),
+                                    FirstName = dra.Get<string>("FirstName"),
+                                    LastName = dra.Get<string>("LastName"),
+                                    Message = dra.Get<string>("Message")
+                                });
+                            }
+                        }
+                    }
                 }
             }
             return contacts;
@@ -211,6 +233,16 @@ namespace BiddingApp
                 SqlParam(cmd, "UserIDFrom", userID);
                 SqlParam(cmd, "EmailTo", emailTo);
                 SqlParam(cmd, "Message", message);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
+        public void Chat_MarkRead(int userID, int userIDFrom)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Chat_MarkRead"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "UserIDFrom", userIDFrom);
                 ExecuteNonQuery(cmd);
             }
         }
