@@ -122,13 +122,18 @@ namespace BiddingApp
                     }
                 }
 
-                return JsonConvert.SerializeObject(new { Success = true, IsBlocked = isBlocked, Contacts = Statics.Access.Contact_Get(userID) });
+                return JsonConvert.SerializeObject(new { Success = true, IsBlocked = isBlocked, Contacts = GetContacts(userID) });
             }
             catch (Exception ex)
             {
                 Log("AddContact Exception", ex);
                 return JsonError(ex);
             }
+        }
+
+        private List<ContactData> GetContacts(int userID)
+        {
+            return SetContactOnlineStatus(userID, Statics.Access.Contact_Get(userID));
         }
 
         [WebMethod]
@@ -141,10 +146,15 @@ namespace BiddingApp
                 string contactGUID = jToken.Value<string>("contactGUID");
                 bool blockContact = jToken.Value<bool>("blockContact");
 
-                if (blockContact) Statics.Access.Contact_Block(userID, contactGUID, null);
+                if (blockContact)
+                {
+                    Statics.Access.Contact_Block(userID, contactGUID, null);
+                    int contactUserID = Statics.Access.GetUserID(contactGUID, GUIDTypes.Contact);
+                    if (contactUserID > 0) SyncBlock(userID, contactUserID);
+                }
                 else Statics.Access.Contact_Delete(userID, contactGUID);
 
-                return JsonConvert.SerializeObject(new { Success = true, Contacts = Statics.Access.Contact_Get(userID) });
+                return JsonConvert.SerializeObject(new { Success = true, Contacts = GetContacts(userID) });
             }
             catch (Exception ex)
             {
@@ -164,7 +174,10 @@ namespace BiddingApp
 
                 Statics.Access.Contact_Block(userID, null, contactEmail);
 
-                return JsonConvert.SerializeObject(new { Success = true, Contacts = Statics.Access.Contact_Get(userID) });
+                int contactUserID = Statics.Access.GetUserID(contactEmail, GUIDTypes.Email);
+                if (contactUserID > 0) SyncBlock(userID, contactUserID);
+
+                return JsonConvert.SerializeObject(new { Success = true, Contacts = GetContacts(userID) });
             }
             catch (Exception ex)
             {
@@ -184,7 +197,7 @@ namespace BiddingApp
 
                 Statics.Access.Contact_Unblock(userID, contactGUID);
 
-                return JsonConvert.SerializeObject(new { Success = true, Contacts = Statics.Access.Contact_Get(userID) });
+                return JsonConvert.SerializeObject(new { Success = true, Contacts = GetContacts(userID) });
             }
             catch (Exception ex)
             {
@@ -205,7 +218,7 @@ namespace BiddingApp
 
                 Statics.Access.Contact_Update(userID, contactGUID, allowBid);
 
-                return JsonConvert.SerializeObject(new { Success = true, Contacts = Statics.Access.Contact_Get(userID) });
+                return JsonConvert.SerializeObject(new { Success = true, Contacts = GetContacts(userID) });
             }
             catch (Exception ex)
             {
@@ -288,7 +301,7 @@ namespace BiddingApp
                 int goodUntilMins = jToken.Value<int>("minutes");
                 Statics.Access.Interest_PlaceOrder(userID, interestGUID, price, goodUntilHours, goodUntilMins);
 
-                List<ContactData> allContacts = Statics.Access.Contact_Get(userID);
+                List<ContactData> allContacts = GetContacts(userID);
                 foreach (ContactData contact in allContacts)
                 {
                     int contactUserID = Statics.Access.GetUserID(contact.GUID, GUIDTypes.Contact);
@@ -314,7 +327,7 @@ namespace BiddingApp
                 string interestGUID = jToken.Value<string>("interestGUID");
                 Statics.Access.Interest_CancelOrder(userID, interestGUID);
 
-                List<ContactData> allContacts = Statics.Access.Contact_Get(userID);
+                List<ContactData> allContacts = GetContacts(userID);
                 foreach (ContactData contact in allContacts)
                 {
                     int contactUserID = Statics.Access.GetUserID(contact.GUID, GUIDTypes.Contact);
@@ -340,7 +353,7 @@ namespace BiddingApp
                 string interestGUID = jToken.Value<string>("interestGUID");
                 Statics.Access.Interest_Delete(userID, interestGUID);
 
-                List<ContactData> allContacts = Statics.Access.Contact_Get(userID);
+                List<ContactData> allContacts = GetContacts(userID);
                 foreach (ContactData contact in allContacts)
                 {
                     int contactUserID = Statics.Access.GetUserID(contact.GUID, GUIDTypes.Contact);
@@ -533,7 +546,7 @@ namespace BiddingApp
                 List<ContactData> contacts = null;
                 if (jToken.Value<bool>("contacts"))
                 {
-                    contacts = SetContactOnlineStatus(Statics.Access.Contact_Get(userID));
+                    contacts = GetContacts(userID);
                 }
 
                 UserData userData = null;
@@ -584,16 +597,36 @@ namespace BiddingApp
         private void Log(string str) { Statics.GetLogger("Receiver").Log(str); }
         private void Log(string str, Exception ex) { Statics.GetLogger("Receiver").Log(str, ex); }
 
-        private List<ContactData> SetContactOnlineStatus(List<ContactData> contacts)
+        private List<ContactData> SetContactOnlineStatus(int userID, List<ContactData> contacts)
         {
+            List<string> appearOnlineEmails = Statics.Access.Contact_GetAppearOnlineList(userID);
             foreach (ContactData contact in contacts)
             {
-                contact.IsOnline = (BiddingHub.GetBiddingClient(contact.Email) != null);
+                BiddingClient client = BiddingHub.GetBiddingClient(contact.Email);
+                contact.IsOnline = (client != null && client.IsOnline && appearOnlineEmails.Contains(contact.Email.ToLower()));
             }
             return contacts;
         }
 
         #region SignalR synchronization methods
+        private void SyncBlock(int userID, int contactUserID)
+        {
+            try
+            {
+                BiddingClient client = BiddingHub.GetBiddingClient(contactUserID);
+                if (client != null)
+                {
+                    UserData userData = Statics.Access.GetUserData(userID, null, false);
+                    var hub = GlobalHost.ConnectionManager.GetHubContext<BiddingHub>();
+                    hub.Clients.Client(client.ConnectionID).contactBlocked(JsonConvert.SerializeObject(new { Email = userData.Email, FirstName = userData.FirstName, IsOnline = false, Contacts = Statics.Access.Contact_Get(contactUserID) }));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("SyncBlock Exception", ex);
+            }
+        }
+
         private void SyncContacts(int userID)
         {
             try

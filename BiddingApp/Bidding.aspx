@@ -3,6 +3,8 @@
     <script type="text/javascript" src="Resources/Scripts/Windows.js"></script>
     <script type="text/javascript" src="Resources/Scripts/Bidding.js"></script>
     <script type="text/javascript">
+        defaultPage.isOnline = true;
+
         function toggleContactSearch(isVisible) {
             if (isVisible) {
                 $('.contactsButton').hide();
@@ -516,7 +518,7 @@
             </tr>
             <tr>
                 <td style="background-color:#4f6228; height:50px; padding:5px;">
-                    <textarea class="chatField" style="margin-left:2px; font-size:8pt; width:379px; height:40px;"></textarea><div onclick="" style="cursor:pointer; position:absolute; right:50px; top:-30px;"><img src="Resources/images/eye-on.png" style="height:16px;" /></div>
+                    <textarea class="chatField" style="margin-left:2px; font-size:8pt; width:379px; height:40px;"></textarea><div class="toggleOnlineStatus" style="cursor:pointer; position:absolute; right:50px; top:-30px;"><img src="Resources/images/eye-on.png" style="height:16px;" /></div>
                 </td>
             </tr>
           </table>

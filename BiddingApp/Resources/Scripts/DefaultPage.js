@@ -4,6 +4,7 @@ var defaultPage = (function () {
     return {
         ctrlPressed: false,
         shiftPressed: false,
+        isOnline: false,
 
         initialize: function () {
             // Monitor special key press combinations
@@ -25,7 +26,7 @@ var defaultPage = (function () {
                 };
                 $.connection.hub.url = "signalr";
                 $.connection.hub.start().done(function () {
-                    $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID());
+                    $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID(), defaultPage.isOnline);
                 }).fail(function (error) {
                     //console.error(error);
                 });
@@ -36,14 +37,14 @@ var defaultPage = (function () {
 
                 $.connection.hub.reconnected(function () {
                     //console.log("We have been reconnected");
-                    $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID());
+                    $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID(), defaultPage.isOnline);
                 });
 
                 $.connection.hub.disconnected(function () {
                     //console.log("We are disconnected!");
                     setTimeout(function () {
                         $.connection.hub.start().done(function () {
-                            $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID());
+                            $.connection.biddingHub.server.registerClient(defaultPage.sessionGUID(), defaultPage.isOnline);
                         });
                     }, 5000); // Restart connection after 5 seconds.
                 });
@@ -66,7 +67,6 @@ var defaultPage = (function () {
 
         validateSession: function () {
             if (resources.stringNullOrEmpty(defaultPage.sessionGUID())) {
-                $.connection.biddingHub.server.logout();
                 if (resources.stringContains(document.location.href, 'default.aspx')) defaultPage.refreshSession();
                 else document.location = 'Default.aspx';
             }

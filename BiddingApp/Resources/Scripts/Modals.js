@@ -124,6 +124,7 @@ var modals = (function () {
         logout: function () {
             modals.showConfirmModal('Are you sure you want to log out?', function (success) {
                 if (success) {
+                    $.connection.biddingHub.server.logout();
                     $.session.clear();
                     defaultPage.validateSession();
                 }

@@ -126,6 +126,17 @@ namespace BiddingApp
             }
         }
 
+        public void Contact_SetOnlineStatus(int userID, string contactGUID, bool isOnline)
+        {
+            using (SqlCommand cmd = SqlProc("STP_Contact_SetOnlineStatus"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "ContactGUID", contactGUID);
+                SqlParam(cmd, "IsOnline", isOnline);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
         public List<ContactData> Contact_Get(int userID)
         {
             List<ContactData> contacts = new List<ContactData>();
@@ -432,6 +443,20 @@ namespace BiddingApp
                 SqlParam(cmd, "BidGUID", bidGUID);
                 ExecuteNonQuery(cmd);
             }
+        }
+
+        public List<string> Contact_GetAppearOnlineList(int userID)
+        {
+            List<string> emails = new List<string>();
+            using (SqlCommand cmd = SqlProc("STP_Contact_GetAppearOnlineList"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                foreach (DataRowAdapter dra in DataRowAdapter.Create(GetTable(cmd)))
+                {
+                    emails.Add(dra.Get<string>("Email").ToLower());
+                }
+            }
+            return emails;
         }
 
         public DateTime GetSqlDateTime()

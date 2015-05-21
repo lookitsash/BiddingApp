@@ -52,10 +52,23 @@ var bidding = (function () {
                 bidding.contacts = data.Contacts;
                 bidding.refreshContacts();
             };
+            $.connection.biddingHub.client.contactBlocked = function (data) {
+                console.log('contactBlocked: ' + data);
+                data = JSON.parse(data);
+                bidding.contacts = data.Contacts;
+                bidding.refreshContacts();
+                //$.connection.biddingHub.client.toggleContactOnlineStatus(data);
+            };
             $.connection.biddingHub.client.toggleContactOnlineStatus = function (data) {
                 data = JSON.parse(data);
                 var contact = bidding.getContactByEmail(data.Email);
-                if (contact != null) contact.IsOnline = data.IsOnline;
+                if (contact != null) {
+                    if (contact.IsOnline == data.IsOnline) {
+                        bidding.refreshContacts();
+                        return;
+                    }
+                    contact.IsOnline = data.IsOnline;
+                }
                 bidding.refreshContacts();
 
                 var windowObj = windows.getWindowByTypeAndID(WINDOWTYPE_CHAT, data.Email);
@@ -433,8 +446,6 @@ var bidding = (function () {
                     $(windowObj.dialog[0]).dialog('close');
                 });
 
-                //console.log('interest.ContactGUID: ' + interest.ContactGUID);
-                //console.log('interest.OrderFilled: ' + interest.OrderFilled);
                 if (resources.stringNullOrEmpty(interest.ContactGUID)) {
                     var bid = bidding.getBid(interest.BidGUID);
                     if (bid != null) {
@@ -816,6 +827,19 @@ var bidding = (function () {
                 });
             }
             else if (windowType == WINDOWTYPE_CHAT) {
+                $('.toggleOnlineStatus', chatWindow.dialog).bind('click', function (e) {
+                    var toggleOnlineStatus = $(this);
+                    var emailTo = toggleOnlineStatus.attr('data-id');
+                    var contact = bidding.getContactByEmail(emailTo);
+                    if (contact != null) {
+                        contact.AppearOnline = !contact.AppearOnline;
+                        if (contact.AppearOnline) $('img', toggleOnlineStatus).attr('src', 'Resources/images/eye-on.png');
+                        else $('img', toggleOnlineStatus).attr('src', 'Resources/images/eye-off.png');
+
+                        $.connection.biddingHub.server.toggleContactOnlineStatus(JSON.stringify({ isOnline: contact.AppearOnline, contactGUID: contact.GUID }));
+                    }
+                });
+
                 $('.loadEarlierMessages', chatWindow.dialog).bind('click', function (e) {
                     var loadEarlierMessages = $(this);
                     var loadingMessages = $('.loadingMessages', loadEarlierMessages.parent());
@@ -872,8 +896,12 @@ var bidding = (function () {
                         chatHistoryMinChatIDLookup[email.toLowerCase()] = lastChatID;
                     }
                     else chatHistoryMinChatIDLookup[email.toLowerCase()] = lastChatID;
+
+                    if (existingContact.AppearOnline) $('.toggleOnlineStatus img', chatWindow.dialog).attr('src', 'Resources/images/eye-on.png');
+                    else $('.toggleOnlineStatus img', chatWindow.dialog).attr('src', 'Resources/images/eye-off.png');
                 }
 
+                $('.toggleOnlineStatus', chatWindow.dialog).attr('data-id', email);
                 $('.loadEarlierMessages', chatWindow.dialog).attr('data-id', email);
                 $('.loadEarlierMessages', chatWindow.dialog).attr('data-lastchatid', lastChatID);
                 $('.loadingMessages', chatWindow.dialog).hide();

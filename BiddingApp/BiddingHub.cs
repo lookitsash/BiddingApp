@@ -34,7 +34,7 @@ namespace BiddingApp
                         Receiver.SyncConfirmCancelDeal(interestUserID, interestData.InterestGUID, interestData.BidGUID);
                     }
                 }
-                ToggleContactOnlineStatus(curClient.UserData.ID, false);
+                ToggleContactOnlineStatus(curClient.UserData.ID, false, null);
                 ClientLookup.Remove(curClient.UserData.Email.ToLower());
             }
             return base.OnDisconnected();
@@ -50,7 +50,23 @@ namespace BiddingApp
             OnDisconnected();
         }
 
-        private void ToggleContactOnlineStatus(int userID, bool isOnline)
+        public void ToggleContactOnlineStatus(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                bool isOnline= jToken.Value<bool>("isOnline");
+                string contactGUID = jToken.Value<string>("contactGUID");
+                BiddingClient curClient = GetBiddingClient_Current();
+                if (curClient != null) ToggleContactOnlineStatus(curClient.UserData.ID, isOnline, contactGUID);
+            }
+            catch (Exception ex)
+            {
+                Log("ToggleContactOnlineStatus Exception", ex);
+            }
+        }
+
+        private void ToggleContactOnlineStatus(int userID, bool isOnline, string specificContactGUID)
         {
             try
             {
@@ -58,12 +74,25 @@ namespace BiddingApp
                 if (curClient != null)
                 {
                     List<ContactData> contacts = Statics.Access.Contact_Get(userID);
+                    if (!String.IsNullOrEmpty(specificContactGUID))
+                    {
+                        Statics.Access.Contact_SetOnlineStatus(userID, specificContactGUID, isOnline);
+                        
+                        ContactData contact = contacts.First(c => c.GUID.ToLower() == specificContactGUID.ToLower());
+                        contacts = new List<ContactData>();
+                        if (contact != null)
+                        {
+                            contact.AppearOnline = isOnline;
+                            contacts.Add(contact);
+                        }
+                    }
                     foreach (ContactData contact in contacts)
                     {
+                        if (contact.Block) continue;
                         BiddingClient client = GetBiddingClient(contact.Email);
                         if (client != null)
                         {
-                            Clients.Client(client.ConnectionID).toggleContactOnlineStatus(JsonConvert.SerializeObject(new { Email = curClient.UserData.Email, FirstName = curClient.UserData.FirstName, IsOnline = isOnline }));
+                            Clients.Client(client.ConnectionID).toggleContactOnlineStatus(JsonConvert.SerializeObject(new { Email = curClient.UserData.Email, FirstName = curClient.UserData.FirstName, IsOnline = (isOnline && contact.AppearOnline) }));
                         }
                     }
                 }
@@ -74,7 +103,7 @@ namespace BiddingApp
             }
         }
 
-        public void RegisterClient(string sessionGUID)
+        public void RegisterClient(string sessionGUID, bool isOnline)
         {
             try
             {
@@ -83,7 +112,14 @@ namespace BiddingApp
                 {
                     if (!ClientLookup.ContainsKey(userData.Email.ToLower())) ClientLookup.Add(userData.Email.ToLower(), new BiddingClient() { ConnectionID = Context.ConnectionId, UserData = userData });
                     else ClientLookup[userData.Email.ToLower()].ConnectionID = Context.ConnectionId;
-                    ToggleContactOnlineStatus(userData.ID, true);
+
+                    BiddingClient curClient = GetBiddingClient_Current();
+                    if (curClient != null) curClient.IsOnline = isOnline;
+
+                    if (true) //isOnline)
+                    {
+                        ToggleContactOnlineStatus(userData.ID, isOnline, null);
+                    }
                 }
             }
             catch (Exception ex)
@@ -100,12 +136,17 @@ namespace BiddingApp
                 string emailTo = jToken.Value<string>("emailTo");
                 string message = jToken.Value<string>("message");
                 BiddingClient clientFrom = GetBiddingClient_Current();
-                Statics.Access.Chat(clientFrom.UserData.ID, emailTo, message);
-
-                BiddingClient clientTo = GetBiddingClient(emailTo);
-                if (clientTo != null)
+                
+                int userIDTo = Statics.Access.GetUserID(emailTo, GUIDTypes.Email);
+                if (userIDTo > 0 && !Statics.Access.Contact_IsBlocked(userIDTo, clientFrom.UserData.Email))
                 {
-                    Clients.Client(clientTo.ConnectionID).chatReceived(JsonConvert.SerializeObject(new { FirstName = clientFrom.UserData.FirstName, LastName = clientFrom.UserData.LastName, Email = clientFrom.UserData.Email, Message = message }));
+                    Statics.Access.Chat(clientFrom.UserData.ID, emailTo, message);
+
+                    BiddingClient clientTo = GetBiddingClient(emailTo);
+                    if (clientTo != null)
+                    {
+                        Clients.Client(clientTo.ConnectionID).chatReceived(JsonConvert.SerializeObject(new { FirstName = clientFrom.UserData.FirstName, LastName = clientFrom.UserData.LastName, Email = clientFrom.UserData.Email, Message = message }));
+                    }
                 }
             }
             catch (Exception ex)
@@ -167,6 +208,7 @@ namespace BiddingApp
     public class BiddingClient
     {
         public string ConnectionID;
+        public bool IsOnline;
         public UserData UserData;
     }
 }
