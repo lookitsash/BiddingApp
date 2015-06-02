@@ -797,19 +797,29 @@
 
             var errorFields = new Array();
             $('[class*=\'data-\']', parent).each(function () {
-                var hasError = false;
-                if ($(this).hasClass('validateRequired')) {
-                    var dataValue = $(this).val();
-                    if (resources.stringNullOrEmpty(dataValue)) {
-                        errorFields.push($(this));
-                        hasError = true;
+                if (resources.uiIsVisible($(this))) {
+                    var hasError = false;
+                    if ($(this).hasClass('validateRequired')) {
+                        if ($(this).is('select')) {
+                            if ($(this).prop('selectedIndex') <= 0) {
+                                errorFields.push($(this));
+                                hasError = true;
+                            }
+                        }
+                        else {
+                            var dataValue = $(this).val();
+                            if (resources.stringNullOrEmpty(dataValue)) {
+                                errorFields.push($(this));
+                                hasError = true;
+                            }
+                        }
                     }
-                }
-                if (!hasError && $(this).hasClass('validateEmail')) {
-                    var dataValue = $(this).val();
-                    if (!resources.stringNullOrEmpty(dataValue) && !resources.isValidEmail(dataValue)) {
-                        errorFields.push($(this));
-                        hasError = true;
+                    if (!hasError && $(this).hasClass('validateEmail')) {
+                        var dataValue = $(this).val();
+                        if (!resources.stringNullOrEmpty(dataValue) && !resources.isValidEmail(dataValue)) {
+                            errorFields.push($(this));
+                            hasError = true;
+                        }
                     }
                 }
             });
@@ -831,6 +841,18 @@
             var val = parseFloat(str);
             if (isNaN(val)) val = 0;
             return val;
+        },
+
+        getQuerystringParam: function (sParam) {
+            var sPageURL = window.location.search.substring(1);
+            var sURLVariables = sPageURL.split('&');
+            for (var i = 0; i < sURLVariables.length; i++) {
+                var sParameterName = sURLVariables[i].split('=');
+                if (resources.stringEqual(sParameterName[0],sParam)) {
+                    return sParameterName[1];
+                }
+            }
+            return null;
         }
     };
 })();

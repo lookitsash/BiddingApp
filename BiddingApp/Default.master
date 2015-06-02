@@ -68,7 +68,7 @@
                         <input type="password" style="width:250px;" class="data-password validateRequired" placeholder="Password"/><br />
                         <br />
                         <a href="#">Forgot your password?</a><br />
-                        <a href="#">Don't have an account?  Create one.</a>
+                        <a href="Default.aspx?Action=Signup">Don't have an account?  Create one.</a>
                     </div>
                 </section>
             </div>
@@ -383,7 +383,7 @@
                         </table>
 
                         <br />
-                        <a href="#">Already have an account? Login here.</a>
+                        <a href="Default.aspx?Action=Login">Already have an account? Login here.</a>
                     </div>
                 </section>
             </div>

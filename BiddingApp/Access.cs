@@ -445,6 +445,48 @@ namespace BiddingApp
             }
         }
 
+        public void ContactUs(ContactUsData contactUsData)
+        {
+            using (SqlCommand cmd = SqlProc("STP_ContactUs"))
+            {
+                SqlParam(cmd, "Name", contactUsData.Name);
+                SqlParam(cmd, "Email", contactUsData.Email);
+                if (contactUsData.UserID > 0) SqlParam(cmd, "UserID", contactUsData.UserID);
+                SqlParam(cmd, "Topic", contactUsData.Topic);
+                SqlParam(cmd, "Message", contactUsData.Message);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
+        public bool User_ValidateEmail(ValidateEmailData validateEmailData)
+        {
+            using (SqlCommand cmd = SqlProc("STP_User_VerifyEmail"))
+            {
+                SqlParam(cmd, "Email", validateEmailData.Email);
+                SqlParam(cmd, "Token", validateEmailData.Token);
+                return ExecuteScalar<bool>(cmd);
+            }
+        }
+
+        public string User_GetEmailValidationToken(string email)
+        {
+            using (SqlCommand cmd = SqlProc("STP_User_GetVerificationToken"))
+            {
+                SqlParam(cmd, "Email", email);
+                return ExecuteScalar<string>(cmd);
+            }
+        }
+
+        public EmailVerificationStatuses User_GetVerificationStatus(string email, string password)
+        {
+            using (SqlCommand cmd = SqlProc("STP_User_GetVerificationStatus"))
+            {
+                SqlParam(cmd, "Email", email);
+                SqlParam(cmd, "Password", password);
+                return (EmailVerificationStatuses)ExecuteScalar<int>(cmd);
+            }
+        }
+
         public List<string> Contact_GetAppearOnlineList(int userID)
         {
             List<string> emails = new List<string>();

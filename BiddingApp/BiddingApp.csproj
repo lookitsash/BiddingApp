@@ -81,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Bidding.aspx" />
+    <Content Include="ContactUs.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="Foundation.dll" />
     <Content Include="Global.asax" />
@@ -94,6 +95,7 @@
     <Content Include="Resources\Images\green_light_16.png" />
     <Content Include="Resources\Images\red_light_16.png" />
     <Content Include="Resources\Scripts\Bidding.js" />
+    <Content Include="Resources\Scripts\ContactUs.js" />
     <Content Include="Resources\Scripts\hoverIntent.js" />
     <Content Include="Resources\Scripts\jquery-ui\images\ui-bg_diagonals-thick_18_b81900_40x40.png" />
     <Content Include="Resources\Scripts\jquery-ui\images\ui-bg_diagonals-thick_20_666666_40x40.png" />
@@ -129,6 +131,7 @@
     <Content Include="Resources\Scripts\Resources.js" />
     <Content Include="Resources\Scripts\SettingsPage.js" />
     <Content Include="Resources\Scripts\Statics.js" />
+    <Content Include="Resources\Scripts\ValidateEmail.js" />
     <Content Include="Resources\Scripts\Windows.js" />
     <Content Include="Scripts\jquery-1.6.4-vsdoc.js" />
     <Content Include="Scripts\jquery-1.6.4.js" />
@@ -136,6 +139,7 @@
     <Content Include="Scripts\jquery.signalR-1.1.4.js" />
     <Content Include="Resources\Scripts\jquery.signalR-1.1.4.min.js" />
     <Content Include="Settings.aspx" />
+    <Content Include="ValidateEmail.aspx" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -159,6 +163,13 @@
       <DependentUpon>Bidding.aspx</DependentUpon>
     </Compile>
     <Compile Include="BiddingHub.cs" />
+    <Compile Include="ContactUs.aspx.cs">
+      <DependentUpon>ContactUs.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ContactUs.aspx.designer.cs">
+      <DependentUpon>ContactUs.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -198,6 +209,14 @@
     </Compile>
     <Compile Include="Startup.cs" />
     <Compile Include="Statics.cs" />
+    <Compile Include="Utility.cs" />
+    <Compile Include="ValidateEmail.aspx.cs">
+      <DependentUpon>ValidateEmail.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ValidateEmail.aspx.designer.cs">
+      <DependentUpon>ValidateEmail.aspx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Site.Master" />

@@ -104,15 +104,18 @@ var modals = (function () {
 
         login: function () {
             if (modals.applyValidation('loginModal')) {
-                var loginData = resources.dataFieldsToObject($('#loginModal'));
+                var formData = resources.dataFieldsToObject($('#loginModal'));
                 modals.hide();
                 modals.toggleWaitingModal(true, 'Please wait...');
-                resources.ajaxPost('Receiver', 'Login', loginData, function (data) {
+                resources.ajaxPost('Receiver', 'Login', formData, function (data) {
                     modals.hide();
                     if (data.Success) {
-                        $.session.set('SessionData', JSON.stringify(data.SessionData));
-                        defaultPage.refreshSession();
-                        defaultPage.initializeSignalR();
+                        if (data.EmailVerified) {
+                            $.session.set('SessionData', JSON.stringify(data.SessionData));
+                            defaultPage.refreshSession();
+                            defaultPage.initializeSignalR();
+                        }
+                        else document.location = 'ValidateEmail.aspx?Email=' + formData.email;
                     }
                     else {
                         modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('loginModal'); });
@@ -156,8 +159,9 @@ var modals = (function () {
                 resources.ajaxPost('Receiver', 'Signup', { formData: formData }, function (data) {
                     modals.hide();
                     if (data.Success) {
-                        $.session.set('SessionData', JSON.stringify(data.SessionData));
-                        defaultPage.refreshSession();
+                        document.location = 'ValidateEmail.aspx?Email=' + formData.email;
+                        //$.session.set('SessionData', JSON.stringify(data.SessionData));
+                        //defaultPage.refreshSession();
                     }
                     else {
                         modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('signupModal'); });

@@ -81,7 +81,16 @@ var defaultPage = (function () {
             else {
                 $('.inSession').show();
                 $('.userGreeting').html('Hello <i>' + defaultPage.sessionData().UserData.FirstName + '</i>');
+                $('.userEmail').html('<i>' + defaultPage.sessionData().UserData.Email + '</i>');
             }
         }
     };
 })();
+
+$(document).ready(function () {
+    var pageAction = resources.getQuerystringParam('Action');
+    if (pageAction != null) {
+        if (resources.stringEqual(pageAction, 'Login')) modals.showLoginModal();
+        else if (resources.stringEqual(pageAction, 'Signup')) modals.showSignupModal();
+    }
+});

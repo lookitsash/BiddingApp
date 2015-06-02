@@ -1,23 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <publishData>
   <publishProfile publishUrl="c:\Deploy\BiddingApp" deleteExistingFiles="True" ftpAnonymousLogin="False" ftpPassiveMode="True" msdeploySite="" msdeploySiteID="" msdeployRemoteSitePhysicalPath="" msdeployAllowUntrustedCertificate="False" msdeploySkipExtraFilesOnServer="True" msdeployMarkAsApp="False" profileName="Profile1" publishMethod="FileSystem" replaceMatchingFiles="False" userName="" savePWD="False" userPWD="" SelectedForPublish="True">
-    <file relUrl="Default.aspx" publishTime="04/26/2015 21:33:56" />
+    <file relUrl="Default.aspx" publishTime="05/20/2015 23:31:56" />
     <file relUrl="bin/Microsoft.AspNet.SignalR.SystemWeb.xml" publishTime="05/03/2015 19:52:30" />
     <file relUrl="Resources/Scripts/json2.js" publishTime="05/01/2015 20:33:18" />
     <file relUrl="Resources/CSS/Images/TabSeperator.png" publishTime="04/27/2015 22:33:32" />
-    <file relUrl="Resources/Images/Hamburger.png" publishTime="04/16/2015 10:24:13" />
-    <file relUrl="Default.master" publishTime="05/08/2015 11:09:37" />
+    <file relUrl="Default.master" publishTime="05/13/2015 22:33:51" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_glass_100_f6f6f6_1x400.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_diagonals-thick_20_666666_40x40.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_highlight-soft_75_ffe45c_1x100.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_glass_65_ffffff_1x400.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-icons_ffffff_256x240.png" publishTime="04/27/2015 22:22:15" />
-    <file relUrl="Web.config" publishTime="05/08/2015 16:05:48" />
+    <file relUrl="Web.config" publishTime="05/20/2015 23:44:53" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_flat_10_000000_40x100.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="bin/Microsoft.AspNet.SignalR.Owin.xml" publishTime="05/03/2015 19:52:30" />
     <file relUrl="bin/Owin.dll" publishTime="05/03/2015 19:52:30" />
     <file relUrl="Global.asax" publishTime="05/03/2015 19:53:16" />
-    <file relUrl="Scripts/jquery-1.6.4.js" publishTime="05/03/2015 19:52:31" />
+    <file relUrl="Resources/Images/Hamburger.png" publishTime="04/16/2015 10:24:13" />
     <file relUrl="bin/Microsoft.Owin.Host.SystemWeb.xml" publishTime="05/03/2015 19:52:30" />
     <file relUrl="Settings.aspx" publishTime="05/08/2015 11:16:25" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_diagonals-thick_18_b81900_40x40.png" publishTime="04/27/2015 22:22:15" />
@@ -25,56 +24,57 @@
     <file relUrl="Resources/Images/eye-on.png" publishTime="05/01/2015 11:23:29" />
     <file relUrl="Resources/Images/gear.png" publishTime="04/27/2015 21:57:48" />
     <file relUrl="Resources/Images/logout.png" publishTime="04/27/2015 21:53:37" />
-    <file relUrl="bin/BiddingApp.pdb" publishTime="05/08/2015 16:05:48" />
+    <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_highlight-soft_100_eeeeee_1x100.png" publishTime="04/27/2015 22:22:15" />
+    <file relUrl="bin/BiddingApp.pdb" publishTime="05/20/2015 23:15:50" />
     <file relUrl="Foundation.dll" publishTime="04/03/2015 14:03:04" />
-    <file relUrl="Resources/Scripts/DefaultPage.js" publishTime="05/08/2015 11:17:14" />
-    <file relUrl="Resources/Scripts/jquery-ui/jquery-ui.min.js" publishTime="04/27/2015 22:19:39" />
-    <file relUrl="Resources/Scripts/Bidding.js" publishTime="05/08/2015 16:01:17" />
-    <file relUrl="packages.config" publishTime="05/03/2015 19:52:32" />
+    <file relUrl="Resources/Scripts/DefaultPage.js" publishTime="05/19/2015 23:12:14" />
+    <file relUrl="Resources/Images/eye-off.png" publishTime="05/01/2015 11:23:29" />
+    <file relUrl="Resources/Scripts/Bidding.js" publishTime="05/20/2015 16:05:37" />
     <file relUrl="bin/Newtonsoft.Json.dll" publishTime="05/03/2015 19:48:53" />
     <file relUrl="bin/Newtonsoft.Json.xml" publishTime="05/03/2015 19:48:53" />
     <file relUrl="bin/Microsoft.Web.Infrastructure.dll" publishTime="05/03/2015 19:52:30" />
     <file relUrl="bin/Microsoft.Owin.Host.SystemWeb.dll" publishTime="05/03/2015 19:52:30" />
-    <file relUrl="Resources/Scripts/Modals.js" publishTime="05/08/2015 16:01:09" />
-    <file relUrl="bin/BiddingApp.dll" publishTime="05/08/2015 16:05:48" />
+    <file relUrl="Resources/Scripts/Modals.js" publishTime="05/19/2015 23:12:24" />
+    <file relUrl="bin/BiddingApp.dll" publishTime="05/20/2015 23:15:50" />
     <file relUrl="bin/Microsoft.AspNet.SignalR.Core.dll" publishTime="05/03/2015 19:52:30" />
-    <file relUrl="Bidding.aspx" publishTime="05/08/2015 13:40:51" />
+    <file relUrl="Bidding.aspx" publishTime="05/19/2015 23:38:37" />
     <file relUrl="Resources/CSS/Images/SelectedSides.png" publishTime="04/27/2015 22:33:32" />
     <file relUrl="Resources/Images/sprite-closemodal-flat-1.png" publishTime="04/16/2015 14:01:48" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_gloss-wave_35_f6a828_500x100.png" publishTime="04/28/2015 08:54:29" />
-    <file relUrl="Resources/Scripts/hoverIntent.js" publishTime="04/29/2015 13:48:09" />
+    <file relUrl="Resources/Scripts/jquery-ui/jquery-ui.min.js" publishTime="04/27/2015 22:19:39" />
     <file relUrl="bin/Microsoft.AspNet.SignalR.Core.xml" publishTime="05/03/2015 19:52:30" />
     <file relUrl="Resources/Scripts/dropit/dropit.css" publishTime="04/29/2015 16:52:31" />
-    <file relUrl="Resources/Scripts/Dev.js" publishTime="04/29/2015 13:28:32" />
+    <file relUrl="Resources/Scripts/Dev.js" publishTime="05/17/2015 19:41:19" />
     <file relUrl="Scripts/jquery-1.6.4.min.js" publishTime="05/03/2015 19:52:31" />
-    <file relUrl="Resources/Images/eye-off.png" publishTime="05/01/2015 11:23:29" />
     <file relUrl="Resources/Scripts/jquery.session.js" publishTime="04/27/2015 21:13:01" />
-    <file relUrl="Resources/Scripts/Statics.js" publishTime="05/08/2015 10:31:59" />
+    <file relUrl="Resources/Scripts/Statics.js" publishTime="05/19/2015 11:22:04" />
     <file relUrl="bin/Microsoft.AspNet.SignalR.SystemWeb.dll" publishTime="05/03/2015 19:52:30" />
     <file relUrl="Resources/Scripts/jquery.signalR-1.1.4.min.js" publishTime="05/03/2015 19:52:31" />
     <file relUrl="Scripts/jquery.signalR-1.1.4.js" publishTime="05/03/2015 19:52:31" />
-    <file relUrl="Resources/CSS/Site.css" publishTime="05/08/2015 13:40:05" />
+    <file relUrl="Resources/CSS/Site.css" publishTime="05/19/2015 11:29:21" />
     <file relUrl="Receiver.asmx" publishTime="04/26/2015 21:36:23" />
     <file relUrl="bin/Microsoft.AspNet.SignalR.Owin.dll" publishTime="05/03/2015 19:52:30" />
     <file relUrl="Resources/Images/spinner.gif" publishTime="04/27/2015 20:26:59" />
     <file relUrl="Resources/Images/red_light_16.png" publishTime="04/29/2015 16:47:54" />
     <file relUrl="Resources/Scripts/jquery-cmodal.js" publishTime="04/16/2015 10:04:23" />
-    <file relUrl="Site.Master" publishTime="05/08/2015 11:20:21" />
+    <file relUrl="Site.Master" publishTime="05/19/2015 23:04:42" />
+    <file relUrl="Scripts/jquery-1.6.4.js" publishTime="05/03/2015 19:52:31" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-icons_222222_256x240.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="Scripts/jquery-1.6.4-vsdoc.js" publishTime="05/03/2015 19:52:31" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_glass_100_fdf5ce_1x400.png" publishTime="04/28/2015 09:05:24" />
-    <file relUrl="Resources/Scripts/SettingsPage.js" publishTime="05/06/2015 11:56:35" />
+    <file relUrl="Resources/Scripts/Resources.js" publishTime="05/08/2015 08:09:34" />
+    <file relUrl="Resources/Scripts/SettingsPage.js" publishTime="05/19/2015 11:45:17" />
     <file relUrl="Resources/Scripts/jquery-ui/jquery-ui.min.css" publishTime="04/27/2015 22:19:45" />
     <file relUrl="Resources/Scripts/dropit/dropit.js" publishTime="04/16/2015 10:01:22" />
-    <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_highlight-soft_100_eeeeee_1x100.png" publishTime="04/27/2015 22:22:15" />
+    <file relUrl="Resources/Scripts/hoverIntent.js" publishTime="04/29/2015 13:48:09" />
     <file relUrl="Resources/CSS/Images/TabMenu.png" publishTime="04/27/2015 22:33:32" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-icons_ef8c08_256x240.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="Resources/Images/green_light_16.png" publishTime="04/29/2015 16:47:54" />
-    <file relUrl="Resources/Scripts/Resources.js" publishTime="05/08/2015 08:09:34" />
+    <file relUrl="packages.config" publishTime="05/03/2015 19:52:32" />
     <file relUrl="Resources/Scripts/jquery-1.11.0.min.js" publishTime="04/16/2015 10:04:23" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-icons_228ef1_256x240.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="bin/Foundation.dll" publishTime="04/03/2015 14:03:04" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-icons_ffd27a_256x240.png" publishTime="04/27/2015 22:22:15" />
-    <file relUrl="Resources/Scripts/Windows.js" publishTime="05/06/2015 19:15:29" />
+    <file relUrl="Resources/Scripts/Windows.js" publishTime="05/19/2015 11:31:16" />
   </publishProfile>
 </publishData>

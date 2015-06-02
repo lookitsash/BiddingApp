@@ -25,20 +25,55 @@ namespace BiddingApp
                 string email = jToken.Value<string>("email");
                 string password = jToken.Value<string>("password");
 
-                string sessionGUID = Statics.Access.Login(email, password, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
-                if (String.IsNullOrEmpty(sessionGUID)) throw new NotifyException("Incorrect username/password, please try again");
+                EmailVerificationStatuses emailVerificationStatus = Statics.Access.User_GetVerificationStatus(email, password);
 
-                int userID = Statics.Access.GetUserID(sessionGUID, GUIDTypes.Session);
-                SyncForceLogout(userID);
+                if (emailVerificationStatus == EmailVerificationStatuses.EmailNotVerified)
+                {
+                    return JsonConvert.SerializeObject(new { Success = true, EmailVerified = false });
+                }
+                else
+                {
+                    string sessionGUID = (emailVerificationStatus == EmailVerificationStatuses.EmailVerified) ? Statics.Access.Login(email, password, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent) : null;
+                    if (String.IsNullOrEmpty(sessionGUID)) throw new NotifyException("Incorrect username/password, please try again");
 
-                SessionData sessionData = new SessionData() { GUID = sessionGUID, UserData = Statics.Access.GetUserData(userID, null, false) };
+                    int userID = Statics.Access.GetUserID(sessionGUID, GUIDTypes.Session);
+                    SyncForceLogout(userID);
 
-                return JsonConvert.SerializeObject(new { Success = true, SessionData = sessionData });
+                    SessionData sessionData = new SessionData() { GUID = sessionGUID, UserData = Statics.Access.GetUserData(userID, null, false) };
+
+                    return JsonConvert.SerializeObject(new { Success = true, SessionData = sessionData, EmailVerified = true });
+                }
             }
             catch (Exception ex)
             {
                 Log("Signup Exception", ex);
                 return JsonError(ex);
+            }
+        }
+
+        private void SendValidationEmail(string email)
+        {
+            try
+            {
+                string validationToken = Statics.Access.User_GetEmailValidationToken(email);
+                string verificationURL = Statics.BaseURL + "ValidateEmail.aspx?Email=" + email + "&Token=" + validationToken;
+                if (!String.IsNullOrEmpty(validationToken))
+                {
+                    string emailBody = @"Hello, you've just created an account on BiddingApp.  Please verify your email by visiting the link below:
+
+" + verificationURL + @"
+
+Thank you,
+
+Customer Service
+BiddingApp
+";
+                    Utility.SendEmail(email, "Verify Email", Utility.ConvertToHtml(emailBody));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("SendValidationEmail Exception", ex);
             }
         }
 
@@ -53,6 +88,17 @@ namespace BiddingApp
                 if (Statics.Access.GetUserID(signupData.Email, GUIDTypes.Email) > 0) throw new NotifyException("Email already registered");
                 
                 Statics.Access.Signup(signupData);
+                SendValidationEmail(signupData.Email);
+
+                int userID = Statics.Access.GetUserID(signupData.Email, GUIDTypes.Email);
+                foreach (DataRowAdapter dra in DataRowAdapter.Create(Statics.Access.GetTable("select UserID from TBL_Contact where ContactUserID = " + userID + " and DeletionDate is null")))
+                {
+                    int targetUserID = dra.Get<int>("UserID");
+                    SyncContacts(targetUserID);
+                }
+
+                return JsonConvert.SerializeObject(new { Success = true });
+                /*
                 string sessionGUID = Statics.Access.Login(signupData.Email, signupData.Password, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent);
                 if (String.IsNullOrEmpty(sessionGUID)) throw new Exception("Unable to get session GUID");
 
@@ -66,6 +112,7 @@ namespace BiddingApp
                 }
 
                 return JsonConvert.SerializeObject(new { Success = true, SessionData = sessionData});
+                 */
             }
             catch (Exception ex)
             {
@@ -576,6 +623,54 @@ namespace BiddingApp
             }
         }
 
+        [WebMethod]
+        public string ContactUs(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                
+                ContactUsData contactUsData = JsonConvert.DeserializeObject<ContactUsData>(jToken.Value<JToken>("formData").ToString());
+                UserData userData = Statics.Access.GetUserData(0, jToken.Value<string>("guid"), true);
+                if (userData != null)
+                {
+                    contactUsData.UserID = userData.ID;
+                    contactUsData.Email = userData.Email;
+                    contactUsData.Name = userData.FirstName + " " + userData.LastName;
+                }
+
+                Statics.Access.ContactUs(contactUsData);
+
+                string emailBody = "Subject: " + contactUsData.Topic + "<br/>Name: " + contactUsData.Name + "<br/>Email: " + contactUsData.Email + "<br/>Logged In: " + ((contactUsData.UserID > 0) ? "Yes" : "No") + "<br/>Message: " + contactUsData.Message.Replace("\r", "").Replace("\n", "<br/>");
+                Utility.SendEmail(Statics.SMTP.Username, "Contact: " + contactUsData.Topic, emailBody);
+
+                return JsonConvert.SerializeObject(new { Success = true });
+            }
+            catch (Exception ex)
+            {
+                Log("ContactUs Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string ValidateEmail(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+
+                ValidateEmailData validateEmailData = JsonConvert.DeserializeObject<ValidateEmailData>(jToken.Value<JToken>("formData").ToString());
+                
+                return JsonConvert.SerializeObject(new { Success = Statics.Access.User_ValidateEmail(validateEmailData) });
+            }
+            catch (Exception ex)
+            {
+                Log("ValidateEmail Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
         private int GetUserID(JToken jToken)
         {
             string sessionGUID = jToken.Value<string>("guid");
@@ -801,6 +896,17 @@ namespace BiddingApp
         public bool AllowBid, Block, AppearOnline, IsOnline;
         public MembershipTypes MembershipTypeID;
         public List<ChatData> UnreadMessages = new List<ChatData>();
+    }
+
+    public class ContactUsData
+    {
+        public int UserID;
+        public string Name, Email, Topic, Message;
+    }
+
+    public class ValidateEmailData
+    {
+        public string Email, Token;
     }
 
     public class InterestData

@@ -30,3 +30,10 @@ public enum GUIDTypes
     Email,
     Bid
 }
+
+public enum EmailVerificationStatuses
+{
+    EmailNotFound=0,
+    EmailNotVerified=1,
+    EmailVerified=2
+}

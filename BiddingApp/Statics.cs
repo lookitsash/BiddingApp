@@ -29,5 +29,15 @@ namespace BiddingApp
         public static bool DevMode { get { return ConfigAdapter.GetAppSetting<bool>("DevMode"); } }
         public static string DevEmail { get { return ConfigAdapter.GetAppSetting("DevEmail"); } }
         public static string DevPassword { get { return ConfigAdapter.GetAppSetting("DevPassword"); } }
+
+        public static string BaseURL { get { return ConfigAdapter.GetAppSetting("BaseURL"); } }
+        
+        public static class SMTP
+        {
+            public static string Server { get { return ConfigAdapter.GetAppSetting("SMTP_Server"); } }
+            public static string Username { get { return ConfigAdapter.GetAppSetting("SMTP_Username"); } }
+            public static string Password { get { return ConfigAdapter.GetAppSetting("SMTP_Password"); } }
+            public static int Port { get { return ConfigAdapter.GetAppSetting<int>("SMTP_Port"); } }
+        }
     }
 }
