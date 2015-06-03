@@ -170,7 +170,7 @@ var bidding = (function () {
                     $('.cancelDealButton', windowObj.dialog).html('Off (' + secondsToAutoConfirm + ')');
                     if (secondsToAutoConfirm == 0) {
                         windowObj.autoConfirmDate = null;
-                        $('.confirmDealButton', windowObj.dialog).trigger('click.bidding');
+                        $('.cancelDealButton', windowObj.dialog).trigger('click.bidding');
                     }
                 }
             });

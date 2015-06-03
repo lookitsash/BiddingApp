@@ -119,8 +119,15 @@ BiddingApp
                 string guid = jToken.Value<string>("guid");
                 string resetToken = jToken.Value<string>("resetToken");
                 string password = jToken.Value<string>("password");
+                string oldPassword = jToken.Value<string>("oldPassword");
                 int userID = 0;
                 if (!String.IsNullOrEmpty(guid)) userID = Statics.Access.GetUserID(guid, GUIDTypes.Session);
+
+                if (userID > 0)
+                {
+                    if (!Statics.Access.User_IsPasswordValid(userID, oldPassword)) throw new NotifyException("Your old password is incorrect.");
+                }
+
                 Statics.Access.User_ChangePassword(userID, resetToken, password);
                 return JsonConvert.SerializeObject(new { Success = true });
             }
@@ -637,6 +644,24 @@ BiddingApp
         }
 
         [WebMethod]
+        public string UpdateNotifications(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                List<NotificationTypes> notificationTypes = JsonConvert.DeserializeObject<List<NotificationTypes>>(jToken.Value<JToken>("notificationTypes").ToString());
+                Statics.Access.User_UpdateNotifications(userID, notificationTypes);
+                return JsonConvert.SerializeObject(new { Success = true, UserData = Statics.Access.GetUserData(userID, null, false) });
+            }
+            catch (Exception ex)
+            {
+                Log("UpdateNotifications Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
         public string GetData(string json)
         {
             try
@@ -941,6 +966,7 @@ BiddingApp
         public string FirstName, LastName, Company, Country, Email, Password;
         public bool MembershipBasic, MembershipAdvance;
         public MembershipTypes MembershipType;
+        public List<NotificationTypes> NotificationTypes = new List<NotificationTypes>();
     }
 
     public class ContactData

@@ -52,28 +52,57 @@ namespace BiddingApp
             }
         }
 
+        public void User_UpdateNotifications(int userID, List<NotificationTypes> notificationTypes)
+        {
+            using (SqlCommand cmd = SqlProc("STP_User_UpdateNotifications"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "NotificationTypeIDs", string.Join(",", notificationTypes.Select(x => ((int)x).ToString()).ToArray()));
+                ExecuteNonQuery(cmd);
+            }
+        }
+
         public UserData GetUserData(int userID, string sessionGUID, bool includeUserID)
         {
             using (SqlCommand cmd = SqlProc("STP_User_GetData"))
             {
                 if (userID > 0) SqlParam(cmd, "UserID", userID);
                 if (!String.IsNullOrEmpty(sessionGUID)) SqlParam(cmd, "SessionGUID", sessionGUID);
-                DataRowAdapter dra = DataRowAdapter.Create(GetTopRow(cmd));
-                if (dra != null)
+
+                UserData userData = null;
+                DataSet ds = GetSet(cmd);
+                for (int i = 0; i < ds.Tables.Count; i++)
                 {
-                    UserData userData = new UserData()
+                    DataTable dt = ds.Tables[i];
+                    if (i == 0)
                     {
-                        FirstName = dra.Get<string>("FirstName"),
-                        LastName = dra.Get<string>("LastName"),
-                        Company = dra.Get<string>("Company"),
-                        Country = dra.Get<string>("Country"),
-                        Email = dra.Get<string>("Email"),
-                        MembershipType = (MembershipTypes)dra.Get<int>("MembershipTypeID")
-                    };
-                    if (includeUserID) userData.ID = dra.Get<int>("ID");
-                    return userData;
+                        if (dt.Rows.Count > 0)
+                        {
+                            DataRowAdapter dra = DataRowAdapter.Create(dt.Rows[0]);
+                            userData = new UserData()
+                            {
+                                FirstName = dra.Get<string>("FirstName"),
+                                LastName = dra.Get<string>("LastName"),
+                                Company = dra.Get<string>("Company"),
+                                Country = dra.Get<string>("Country"),
+                                Email = dra.Get<string>("Email"),
+                                MembershipType = (MembershipTypes)dra.Get<int>("MembershipTypeID")
+                            };
+                            if (includeUserID) userData.ID = dra.Get<int>("ID");
+                        }                        
+                    }
+                    else if (i == 1)
+                    {
+                        if (userData != null)
+                        {
+                            foreach (DataRowAdapter dra in DataRowAdapter.Create(dt.Rows))
+                            {
+                                userData.NotificationTypes.Add((NotificationTypes)dra.Get<int>("NotificationTypeID"));
+                            }
+                        }
+                    }
                 }
-                else return null;
+                return userData;
             }
         }
 
@@ -465,6 +494,16 @@ namespace BiddingApp
             {
                 SqlParam(cmd, "Email", validateEmailData.Email);
                 SqlParam(cmd, "Token", validateEmailData.Token);
+                return ExecuteScalar<bool>(cmd);
+            }
+        }
+
+        public bool User_IsPasswordValid(int userID, string password)
+        {
+            using (SqlCommand cmd = SqlProc("STP_User_IsPasswordValid"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "Password", password);
                 return ExecuteScalar<bool>(cmd);
             }
         }

@@ -37,3 +37,13 @@ public enum EmailVerificationStatuses
     EmailNotVerified=1,
     EmailVerified=2
 }
+
+public enum NotificationTypes
+{
+    ReceiveOfflineMessage = 1,
+    NewContactsAddMe = 2,
+    UserFillsOrder = 3,
+    NewInterest = 4,
+    RequestPrice = 5,
+    LeaveOrder = 6
+}
