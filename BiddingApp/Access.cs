@@ -445,7 +445,7 @@ namespace BiddingApp
             }
         }
 
-        public void ContactUs(ContactUsData contactUsData)
+        public void ContactUs(ContactUsData contactUsData, string ipAddress)
         {
             using (SqlCommand cmd = SqlProc("STP_ContactUs"))
             {
@@ -454,6 +454,7 @@ namespace BiddingApp
                 if (contactUsData.UserID > 0) SqlParam(cmd, "UserID", contactUsData.UserID);
                 SqlParam(cmd, "Topic", contactUsData.Topic);
                 SqlParam(cmd, "Message", contactUsData.Message);
+                SqlParam(cmd, "IPAddress", ipAddress);
                 ExecuteNonQuery(cmd);
             }
         }
@@ -474,6 +475,36 @@ namespace BiddingApp
             {
                 SqlParam(cmd, "Email", email);
                 return ExecuteScalar<string>(cmd);
+            }
+        }
+
+        public string User_CreatePasswordResetToken(string email, string ipAddress)
+        {
+            using (SqlCommand cmd = SqlProc("STP_User_CreatePasswordResetToken"))
+            {
+                SqlParam(cmd, "Email", email);
+                SqlParam(cmd, "IPAddress", ipAddress);
+                return ExecuteScalar<string>(cmd);
+            }
+        }
+
+        public bool User_IsPasswordResetTokenValid(string token)
+        {
+            using (SqlCommand cmd = SqlProc("STP_User_IsPasswordResetTokenValid"))
+            {
+                SqlParam(cmd, "Token", token);
+                return ExecuteScalar<bool>(cmd);
+            }
+        }
+
+        public void User_ChangePassword(int userID, string resetToken, string password)
+        {
+            using (SqlCommand cmd = SqlProc("STP_User_ChangePassword"))
+            {
+                if (!String.IsNullOrEmpty(resetToken)) SqlParam(cmd, "ResetToken", resetToken);
+                if (userID > 0) SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "Password", password);
+                ExecuteNonQuery(cmd);
             }
         }
 

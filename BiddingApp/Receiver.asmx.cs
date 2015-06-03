@@ -78,6 +78,60 @@ BiddingApp
         }
 
         [WebMethod]
+        public string ResetPassword(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                string email = jToken.Value<string>("email");
+
+                string resetToken = Statics.Access.User_CreatePasswordResetToken(email, HttpContext.Current.Request.UserHostAddress);
+
+                if (String.IsNullOrEmpty(resetToken)) throw new Exception("Could not create password reset token");
+
+                string resetURL = Statics.BaseURL + "ForgotPassword.aspx?Token=" + resetToken;
+                string emailBody = @"Hello, you've just requested a password reset on BiddingApp.  You can reset your password by visiting the link below:
+
+" + resetURL + @"
+
+Thank you,
+
+Customer Service
+BiddingApp
+";
+                Utility.SendEmail(email, "Password Reset", Utility.ConvertToHtml(emailBody));
+
+                return JsonConvert.SerializeObject(new { Success = true });
+            }
+            catch (Exception ex)
+            {
+                Log("ResetPassword Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string ChangePassword(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                string guid = jToken.Value<string>("guid");
+                string resetToken = jToken.Value<string>("resetToken");
+                string password = jToken.Value<string>("password");
+                int userID = 0;
+                if (!String.IsNullOrEmpty(guid)) userID = Statics.Access.GetUserID(guid, GUIDTypes.Session);
+                Statics.Access.User_ChangePassword(userID, resetToken, password);
+                return JsonConvert.SerializeObject(new { Success = true });
+            }
+            catch (Exception ex)
+            {
+                Log("ChangePassword Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
         public string Signup(string json)
         {
             try
@@ -639,7 +693,7 @@ BiddingApp
                     contactUsData.Name = userData.FirstName + " " + userData.LastName;
                 }
 
-                Statics.Access.ContactUs(contactUsData);
+                Statics.Access.ContactUs(contactUsData, HttpContext.Current.Request.UserHostAddress);
 
                 string emailBody = "Subject: " + contactUsData.Topic + "<br/>Name: " + contactUsData.Name + "<br/>Email: " + contactUsData.Email + "<br/>Logged In: " + ((contactUsData.UserID > 0) ? "Yes" : "No") + "<br/>Message: " + contactUsData.Message.Replace("\r", "").Replace("\n", "<br/>");
                 Utility.SendEmail(Statics.SMTP.Username, "Contact: " + contactUsData.Topic, emailBody);
