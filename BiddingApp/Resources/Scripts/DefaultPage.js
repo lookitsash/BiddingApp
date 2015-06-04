@@ -1,4 +1,5 @@
 ﻿/// <reference path="Resources.js" />
+/// <reference path="Statics.js" />
 
 var defaultPage = (function () {
     return {
@@ -73,6 +74,8 @@ var defaultPage = (function () {
         },
 
         refreshSession: function () {
+            $('.managerAccountMenu').hide();
+            $('.subscriptionAccountMenu').show();
             $('.inSession').hide();
             $('.outSession').hide();
             if (!defaultPage.isLoggedIn()) {
@@ -82,6 +85,10 @@ var defaultPage = (function () {
                 $('.inSession').show();
                 $('.userGreeting').html('Hello <i>' + defaultPage.sessionData().UserData.FirstName + '</i>');
                 $('.userEmail').html('<i>' + defaultPage.sessionData().UserData.Email + '</i>');
+                if (defaultPage.sessionData().UserData.MembershipType == MEMBERSHIPTYPE_MANAGER) {
+                    $('.managerAccountMenu').show();
+                    $('.subscriptionAccountMenu').hide();
+                }
             }
         }
     };

@@ -10,7 +10,7 @@
     <asp:ContentPlaceHolder ID="CPH_HEAD" runat="server"></asp:ContentPlaceHolder>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="CPH_CONTENT" runat="server">
-    <div>
+    <div class="subscriptionAccountMenu">
         <table border="0" style="width:100%;">
             <tr>
                 <td>
@@ -47,6 +47,29 @@
             </tr>
         </table>        
     </div>
+    <div class="managerAccountMenu">
+        <table border="0" style="width:100%;">
+            <tr>
+                <td>
+                    <a href="Default.aspx" style="color:#000000;"><span style="font-size:25pt;"><b>Bidding</b><i>App</i></span></a>
+                </td>
+                <td style="width:80%; text-align:center;font-size:25pt; font-weight:bold;"><asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server"></asp:ContentPlaceHolder></td>
+                <td class="inSession">
+                    <a href="#" onclick="return false;" class="btn btn-primary">DEAL LOG</a>
+                </td>
+                <td class="inSession">
+                    <a href="#" onclick="return false;" class="btn btn-primary">CHAT LOG</a>
+                </td>
+                <td class="inSession">
+                    <a href="Settings.aspx"><img src="Resources/Images/gear.png" /></a>
+                </td>
+                <td class="inSession" style="white-space:nowrap;">
+                    <div class="userGreeting" style="display:inline; font-size:11pt;"></div>
+                    <a href="#" onclick="modals.logout();return false;"><img style="vertical-align:middle;" src="Resources/Images/logout.png" /></a>
+                </td>
+            </tr>
+        </table>        
+    </div>
     <div>
         <asp:ContentPlaceHolder ID="CPH_CONTENT" runat="server">
         </asp:ContentPlaceHolder>
@@ -67,7 +90,7 @@
                         <br />
                         <input type="password" style="width:250px;" class="data-password validateRequired" placeholder="Password"/><br />
                         <br />
-                        <a href="#">Forgot your password?</a><br />
+                        <a href="ForgotPassword.aspx">Forgot your password?</a><br />
                         <a href="Default.aspx?Action=Signup">Don't have an account?  Create one.</a>
                     </div>
                 </section>
