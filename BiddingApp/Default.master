@@ -33,6 +33,9 @@
                 <td class="inSession">
                     <a href="Bidding.aspx" class="btn btn-primary">START BIDDING</a>
                 </td>
+                <td class="inSession">
+                    <a href="DealLog.aspx" class="btn btn-primary">DEAL LOG</a>
+                </td>
                 <td>
                     <ul id="menu1" class="menu">
                         <li><a href="#" class="btn"><img style="width:25px;" src="Resources/Images/Hamburger.png" /></a>
@@ -55,10 +58,10 @@
                 </td>
                 <td style="width:80%; text-align:center;font-size:25pt; font-weight:bold;"><asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server"></asp:ContentPlaceHolder></td>
                 <td class="inSession">
-                    <a href="#" onclick="return false;" class="btn btn-primary">DEAL LOG</a>
+                    <a href="DealLog.aspx" class="btn btn-primary">DEAL LOG</a>
                 </td>
                 <td class="inSession">
-                    <a href="#" onclick="return false;" class="btn btn-primary">CHAT LOG</a>
+                    <a href="ChatLog.aspx" class="btn btn-primary">CHAT LOG</a>
                 </td>
                 <td class="inSession">
                     <a href="Settings.aspx"><img src="Resources/Images/gear.png" /></a>

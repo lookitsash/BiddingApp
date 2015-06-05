@@ -88,7 +88,8 @@ namespace BiddingApp
                                 Email = dra.Get<string>("Email"),
                                 MembershipType = (MembershipTypes)dra.Get<int>("MembershipTypeID"),
                                 SendMonthlyDealLogTo = dra.Get<string>("SendMonthlyDealLogTo"),
-                                SendMonthlyChatLogTo = dra.Get<string>("SendMonthlyChatLogTo")
+                                SendMonthlyChatLogTo = dra.Get<string>("SendMonthlyChatLogTo"),
+                                PasswordChangeDate = dra.Get<string>("PasswordChangeDate")
                             };
                             if (includeUserID) userData.ID = dra.Get<int>("ID");
                         }                        
@@ -594,14 +595,15 @@ namespace BiddingApp
             return emails;
         }
 
-        public void User_AddManager(int userID, string managerName, string managerEmail)
+        public string User_AddManager(int userID, string managerFirstName, string managerLastName, string managerEmail)
         {
             using (SqlCommand cmd = SqlProc("STP_User_AddManager"))
             {
                 SqlParam(cmd, "UserID", userID);
-                SqlParam(cmd, "ManagerName", managerName);
+                SqlParam(cmd, "ManagerFirstName", managerFirstName);
+                SqlParam(cmd, "ManagerLastName", managerLastName);
                 SqlParam(cmd, "ManagerEmail", managerEmail);
-                ExecuteNonQuery(cmd);
+                return ExecuteScalar<string>(cmd);
             }
         }
 
@@ -613,6 +615,48 @@ namespace BiddingApp
                 SqlParam(cmd, "ManagerEmail", managerEmail);
                 ExecuteNonQuery(cmd);
             }
+        }
+
+        public List<ContactData> User_GetManagerAccounts(int userID)
+        {
+            List<ContactData> managerAccounts = new List<ContactData>();
+            using (SqlCommand cmd = SqlProc("STP_User_GetManagerAccounts"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                foreach (DataRowAdapter dra in DataRowAdapter.Create(GetTable(cmd)))
+                {
+                    managerAccounts.Add(new ContactData() { FirstName = dra.Get<string>("FirstName"), LastName = dra.Get<string>("LastName"), Company = dra.Get<string>("Company"), Email = dra.Get<string>("Email") });
+                }
+            }
+            return managerAccounts;
+        }
+
+        public List<LogDeal> Log_Deal(int userID)
+        {
+            List<LogDeal> deals = new List<LogDeal>();
+            using (SqlCommand cmd = SqlProc("STP_Log_Deal"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                foreach (DataRowAdapter dra in DataRowAdapter.Create(GetTable(cmd)))
+                {
+                    deals.Add(new LogDeal()
+                    {
+                        Date = dra.Get<string>("CreationDate"),
+                        Name1 = dra.Get<string>("Name1"),
+                        Email1 = dra.Get<string>("Email1"),
+                        Company1 = dra.Get<string>("Company1"),
+                        BuySell = dra.Get<string>("BuySell"),
+                        Name2 = dra.Get<string>("Name2"),
+                        Company2 = dra.Get<string>("Company2"),
+                        Email2 = dra.Get<string>("Email2"),
+                        Product = dra.Get<string>("Product"),
+                        Condition = dra.Get<string>("Condition"),
+                        Quantity = dra.Get<string>("Quantity"),
+                        Price = dra.Get<decimal>("Price")
+                    });
+                }
+            }
+            return deals;
         }
 
         public DateTime GetSqlDateTime()

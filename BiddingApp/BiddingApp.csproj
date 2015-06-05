@@ -82,6 +82,7 @@
   <ItemGroup>
     <Content Include="Bidding.aspx" />
     <Content Include="ContactUs.aspx" />
+    <Content Include="DealLog.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="ForgotPassword.aspx" />
     <Content Include="Foundation.dll" />
@@ -97,6 +98,7 @@
     <Content Include="Resources\Images\red_light_16.png" />
     <Content Include="Resources\Scripts\Bidding.js" />
     <Content Include="Resources\Scripts\ContactUs.js" />
+    <Content Include="Resources\Scripts\DealLog.js" />
     <Content Include="Resources\Scripts\ForgotPassword.js" />
     <Content Include="Resources\Scripts\hoverIntent.js" />
     <Content Include="Resources\Scripts\jquery-ui\images\ui-bg_diagonals-thick_18_b81900_40x40.png" />
@@ -173,6 +175,13 @@
     </Compile>
     <Compile Include="ContactUs.aspx.designer.cs">
       <DependentUpon>ContactUs.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="DealLog.aspx.cs">
+      <DependentUpon>DealLog.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="DealLog.aspx.designer.cs">
+      <DependentUpon>DealLog.aspx</DependentUpon>
     </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>

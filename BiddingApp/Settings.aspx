@@ -16,7 +16,7 @@
     <li><a href="#tabs-2" id="adminTab">Admin</a></li>
     <li><a href="#tabs-3" id="accountTab">Account</a></li>
   </ul>
-  <div id="tabs-1" style="width:870px;">
+  <div id="tabs-1" style="width:870px; display:none;">
   <div onclick="settingsPage.showNewContactModal()" class="addContactButton">+</div>
   <center>
     <table class="contactsList" cellspacing="0" style="width:800px; font-size:10pt;">
@@ -40,7 +40,7 @@
 
     </center>
   </div>
-  <div id="tabs-2">
+  <div id="tabs-2" style="display:none;">
     <center>
     <table cellspacing="0" style="width:800px; font-size:10pt;">
     <tr>
@@ -66,7 +66,7 @@
     </table>
     </center>
   </div>
-  <div id="tabs-3">
+  <div id="tabs-3" style="display:none;">
     <center>
     <table cellspacing="0" style="width:800px; font-size:10pt;">
     <tr>
@@ -116,7 +116,9 @@
             <section class="panel white solid">
                 <div class="panel-body form" style=" text-align:center;">
                     <div class="errorHeader">Please enter the required fields below</div>
-                    <input type="text" style="width:300px;" class="data-name validateRequired" placeholder="Name of Manager" />
+                    <input type="text" style="width:300px;" class="data-firstName validateRequired" placeholder="First Name of Manager" />
+                    <div style="height:5px;"></div>
+                    <input type="text" style="width:300px;" class="data-lastName validateRequired" placeholder="Last Name of Manager" />
                     <div style="height:5px;"></div>
                     <input type="text" style="width:300px;" class="data-email validateRequired validateEmail" placeholder="Email of Manager" />
                     <br />

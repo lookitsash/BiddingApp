@@ -15,6 +15,14 @@ var settingsPage = (function () {
                 settingsPage.refreshContacts();
             };
 
+            var userData = defaultPage.getUserData();
+            if (userData != null && userData.MembershipType == MEMBERSHIPTYPE_MANAGER) {
+                $('#contactsTab').parent().remove();
+                $('#adminTab').parent().remove();
+                $('#notificationTypes').remove();
+            }
+            else settingsPage.refreshContacts();
+
             $("#tabs").tabs({
                 activate: function (event, ui) {
                     if (ui.newPanel.attr('id') == 'tabs-2') { // Admin
@@ -24,9 +32,7 @@ var settingsPage = (function () {
                         settingsPage.refreshAccount();
                     }
                 }
-            });
-
-            settingsPage.refreshContacts();
+            });            
         },
 
         refreshContacts: function (newContacts, refreshCache) {

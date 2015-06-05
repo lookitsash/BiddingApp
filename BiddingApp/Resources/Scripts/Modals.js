@@ -114,6 +114,11 @@ var modals = (function () {
                             $.session.set('SessionData', JSON.stringify(data.SessionData));
                             defaultPage.refreshSession();
                             defaultPage.initializeSignalR();
+
+                            var userData = defaultPage.getUserData();
+                            if (userData != null && userData.MembershipType == MEMBERSHIPTYPE_MANAGER && resources.stringNullOrEmpty(userData.PasswordChangeDate)) {
+                                document.location = 'Settings.aspx';
+                            }
                         }
                         else document.location = 'ValidateEmail.aspx?Email=' + formData.email;
                     }
@@ -426,7 +431,7 @@ var modals = (function () {
                 }
                 modals.hide();
                 modals.toggleWaitingModal(true, 'Please wait...');
-                resources.ajaxPost('Receiver', 'AddManager', { guid: defaultPage.sessionGUID(), name: formData.name, email: formData.email }, function (data) {
+                resources.ajaxPost('Receiver', 'AddManager', { guid: defaultPage.sessionGUID(), firstName: formData.firstName, lastName: formData.lastName, email: formData.email }, function (data) {
                     modals.hide();
                     if (data.Success) {
                         defaultPage.updateUserData(data.UserData);

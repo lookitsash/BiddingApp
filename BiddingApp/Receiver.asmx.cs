@@ -714,7 +714,19 @@ BiddingApp
                     newContactRequests = Statics.Access.Chat_GetNewContactRequests(userID);
                 }
 
-                return JsonConvert.SerializeObject(new { Success = true, Contacts = contacts, UserData = userData, Interests = interests, NewContactRequests = newContactRequests, ServerDate = Statics.Access.GetSqlDateTime().ToString() });
+                List<ContactData> managerAccounts = null;
+                if (jToken.Value<bool>("managerAccounts"))
+                {
+                    managerAccounts = Statics.Access.User_GetManagerAccounts(userID);
+                }
+
+                List<LogDeal> logDeal = null;
+                if (jToken.Value<bool>("logDeal"))
+                {
+                    logDeal = Statics.Access.Log_Deal(userID);
+                }
+
+                return JsonConvert.SerializeObject(new { Success = true, Contacts = contacts, UserData = userData, Interests = interests, NewContactRequests = newContactRequests, ManagerAccounts = managerAccounts, LogDeal = logDeal, ServerDate = Statics.Access.GetSqlDateTime().ToString() });
             }
             catch (Exception ex)
             {
@@ -778,9 +790,30 @@ BiddingApp
             {
                 JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
                 int userID = GetUserID(jToken);
-                string managerName = jToken.Value<string>("name");
+                string managerFirstName = jToken.Value<string>("firstName");
+                string managerLastName = jToken.Value<string>("lastName");
                 string managerEmail = jToken.Value<string>("email");
-                Statics.Access.User_AddManager(userID, managerName, managerEmail);
+                string newManagerPassword = Statics.Access.User_AddManager(userID, managerFirstName, managerLastName, managerEmail);
+                if (!String.IsNullOrEmpty(newManagerPassword))
+                {
+                    UserData userData = Statics.Access.GetUserData(userID, null, false);
+                    string userInfo = userData.FirstName + " " + userData.LastName + " (" + userData.Email + ")";
+                    string loginURL = Statics.BaseURL + "Default.aspx?Action=Login";
+                    string emailBody = @"Hello, " + userInfo + @" has just added you as their manager on BiddingApp.  An account has already been created for you.  Please login by visiting the link below:
+
+" + loginURL + @"
+
+Your login email is: " + managerEmail + @"
+Your temporary password is: " + newManagerPassword + @"
+
+Thank you,
+
+Customer Service
+BiddingApp
+";
+                    Utility.SendEmail(managerEmail, "Manager Request", Utility.ConvertToHtml(emailBody));
+                }
+
                 return JsonConvert.SerializeObject(new { Success = true, UserData = Statics.Access.GetUserData(userID, null, false) });
             }
             catch (Exception ex)
@@ -1021,7 +1054,7 @@ BiddingApp
     public class UserData
     {
         public int ID;
-        public string FirstName, LastName, Company, Country, Email, Password, SendMonthlyDealLogTo, SendMonthlyChatLogTo;
+        public string FirstName, LastName, Company, Country, Email, Password, SendMonthlyDealLogTo, SendMonthlyChatLogTo, PasswordChangeDate;
         public bool MembershipBasic, MembershipAdvance;
         public MembershipTypes MembershipType;
         public List<NotificationTypes> NotificationTypes = new List<NotificationTypes>();
@@ -1074,5 +1107,11 @@ BiddingApp
         public int ID;
         public string Email, FirstName, LastName, Message;
         public bool Outgoing, NewContactRequest;
+    }
+
+    public class LogDeal
+    {
+        public string Date, Name1, Email1, Company1, BuySell, Name2, Company2, Email2, Product, Condition, Quantity;
+        public decimal Price;
     }
 }
