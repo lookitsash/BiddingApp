@@ -617,18 +617,49 @@ namespace BiddingApp
             }
         }
 
-        public List<ContactData> User_GetManagerAccounts(int userID)
+        public List<UserData> User_GetManagerAccounts(int userID)
         {
-            List<ContactData> managerAccounts = new List<ContactData>();
+            List<UserData> managerAccounts = new List<UserData>();
             using (SqlCommand cmd = SqlProc("STP_User_GetManagerAccounts"))
             {
                 SqlParam(cmd, "UserID", userID);
-                foreach (DataRowAdapter dra in DataRowAdapter.Create(GetTable(cmd)))
+                DataSet ds = GetSet(cmd);
+                for (int i = 0; i < ds.Tables.Count; i++)
                 {
-                    managerAccounts.Add(new ContactData() { FirstName = dra.Get<string>("FirstName"), LastName = dra.Get<string>("LastName"), Company = dra.Get<string>("Company"), Email = dra.Get<string>("Email") });
-                }
+                    DataTable dt = ds.Tables[i];
+                    foreach (DataRowAdapter dra in DataRowAdapter.Create(dt.Rows))
+                    {
+                        if (i == 0)
+                        {
+                            managerAccounts.Add(new UserData() { FirstName = dra.Get<string>("FirstName"), LastName = dra.Get<string>("LastName"), Company = dra.Get<string>("Company"), Email = dra.Get<string>("Email") });
+                        }
+                        else if (i == 1)
+                        {
+                            UserData managerAccount = managerAccounts.First(u => u.Email.ToLower() == dra.Get<string>("Email").ToLower());
+                            if (managerAccount != null)
+                            {
+                                managerAccount.Contacts.Add(new ContactData() { FirstName = dra.Get<string>("ContactFirstName"), LastName = dra.Get<string>("ContactLastName"), Company = dra.Get<string>("ContactCompany"), Email = dra.Get<string>("ContactEmail") });
+                            }
+                        }
+                    }
+                }                
             }
             return managerAccounts;
+        }
+
+        public List<LogChat> Log_Chat(string email1, string email2)
+        {
+            List<LogChat> chats = new List<LogChat>();
+            using (SqlCommand cmd = SqlProc("STP_Log_Chat"))
+            {
+                SqlParam(cmd, "Email1", email1);
+                SqlParam(cmd, "Email2", email2);
+                foreach (DataRowAdapter dra in DataRowAdapter.Create(GetTable(cmd)))
+                {
+                    chats.Add(new LogChat() { EmailFrom = dra.Get<string>("EmailFrom"), EmailTo = dra.Get<string>("EmailTo"), Message = dra.Get<string>("Message"), Date = dra.Get<string>("CreationDate"), FirstNameFrom = dra.Get<string>("FirstNameFrom"), FirstNameTo = dra.Get<string>("FirstNameTo") });
+                }
+            }            
+            return chats;
         }
 
         public List<LogDeal> Log_Deal(int userID)

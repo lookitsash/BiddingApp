@@ -714,7 +714,7 @@ BiddingApp
                     newContactRequests = Statics.Access.Chat_GetNewContactRequests(userID);
                 }
 
-                List<ContactData> managerAccounts = null;
+                List<UserData> managerAccounts = null;
                 if (jToken.Value<bool>("managerAccounts"))
                 {
                     managerAccounts = Statics.Access.User_GetManagerAccounts(userID);
@@ -726,7 +726,15 @@ BiddingApp
                     logDeal = Statics.Access.Log_Deal(userID);
                 }
 
-                return JsonConvert.SerializeObject(new { Success = true, Contacts = contacts, UserData = userData, Interests = interests, NewContactRequests = newContactRequests, ManagerAccounts = managerAccounts, LogDeal = logDeal, ServerDate = Statics.Access.GetSqlDateTime().ToString() });
+                List<LogChat> logChat = null;
+                if (jToken.Value<bool>("logChat"))
+                {
+                    string email1 = jToken.Value<string>("email1");
+                    string email2 = jToken.Value<string>("email2");
+                    logChat = Statics.Access.Log_Chat(email1, email2);
+                }
+
+                return JsonConvert.SerializeObject(new { Success = true, Contacts = contacts, UserData = userData, Interests = interests, NewContactRequests = newContactRequests, ManagerAccounts = managerAccounts, LogDeal = logDeal, LogChat = logChat, ServerDate = Statics.Access.GetSqlDateTime().ToString() });
             }
             catch (Exception ex)
             {
@@ -1059,6 +1067,7 @@ BiddingApp
         public MembershipTypes MembershipType;
         public List<NotificationTypes> NotificationTypes = new List<NotificationTypes>();
         public List<string> Managers = new List<string>();
+        public List<ContactData> Contacts = new List<ContactData>();
     }
 
     public class ContactData
@@ -1113,5 +1122,10 @@ BiddingApp
     {
         public string Date, Name1, Email1, Company1, BuySell, Name2, Company2, Email2, Product, Condition, Quantity;
         public decimal Price;
+    }
+
+    public class LogChat
+    {
+        public string EmailFrom, EmailTo, FirstNameFrom, FirstNameTo, Message, Date;
     }
 }

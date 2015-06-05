@@ -2,9 +2,7 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="CPH_HEAD" runat="server">
     <script type="text/javascript" src="Resources/Scripts/DealLog.js"></script>
 </asp:Content>
-<asp:Content ID="Content2" ContentPlaceHolderID="CPH_HEADING" runat="server">DEAL LOG</asp:Content>
-<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
-</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="CPH_HEADING2" runat="server">DEAL LOG</asp:Content>
 <asp:Content ID="Content4" ContentPlaceHolderID="CPH_CONTENT" runat="server">
 <br />
 <div class="managerAccountDiv">Select Account: <select class="managerAccounts"></select></div>

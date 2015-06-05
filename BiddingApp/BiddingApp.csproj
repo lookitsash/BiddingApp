@@ -81,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Bidding.aspx" />
+    <Content Include="ChatLog.aspx" />
     <Content Include="ContactUs.aspx" />
     <Content Include="DealLog.aspx" />
     <Content Include="Default.aspx" />
@@ -97,6 +98,7 @@
     <Content Include="Resources\Images\green_light_16.png" />
     <Content Include="Resources\Images\red_light_16.png" />
     <Content Include="Resources\Scripts\Bidding.js" />
+    <Content Include="Resources\Scripts\ChatLog.js" />
     <Content Include="Resources\Scripts\ContactUs.js" />
     <Content Include="Resources\Scripts\DealLog.js" />
     <Content Include="Resources\Scripts\ForgotPassword.js" />
@@ -169,6 +171,13 @@
       <DependentUpon>Bidding.aspx</DependentUpon>
     </Compile>
     <Compile Include="BiddingHub.cs" />
+    <Compile Include="ChatLog.aspx.cs">
+      <DependentUpon>ChatLog.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ChatLog.aspx.designer.cs">
+      <DependentUpon>ChatLog.aspx</DependentUpon>
+    </Compile>
     <Compile Include="ContactUs.aspx.cs">
       <DependentUpon>ContactUs.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

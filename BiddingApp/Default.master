@@ -56,7 +56,7 @@
                 <td>
                     <a href="Default.aspx" style="color:#000000;"><span style="font-size:25pt;"><b>Bidding</b><i>App</i></span></a>
                 </td>
-                <td style="width:80%; text-align:center;font-size:25pt; font-weight:bold;"><asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server"></asp:ContentPlaceHolder></td>
+                <td style="width:80%; text-align:center;font-size:25pt; font-weight:bold;"><asp:ContentPlaceHolder ID="CPH_HEADING2" runat="server"></asp:ContentPlaceHolder></td>
                 <td class="inSession">
                     <a href="DealLog.aspx" class="btn btn-primary">DEAL LOG</a>
                 </td>
