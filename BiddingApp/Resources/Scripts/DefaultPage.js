@@ -62,6 +62,16 @@ var defaultPage = (function () {
             else return null;
         },
 
+        getUserData: function () {
+            return defaultPage.isLoggedIn() ? defaultPage.sessionData().UserData : null;
+        },
+
+        updateUserData: function (userData) {
+            var sessionData = defaultPage.sessionData();
+            sessionData.UserData = userData;
+            $.session.set('SessionData', JSON.stringify(sessionData));
+        },
+
         isLoggedIn: function () {
             return !resources.stringNullOrEmpty($.session.get('SessionData'));
         },

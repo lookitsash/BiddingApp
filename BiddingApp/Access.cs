@@ -86,7 +86,9 @@ namespace BiddingApp
                                 Company = dra.Get<string>("Company"),
                                 Country = dra.Get<string>("Country"),
                                 Email = dra.Get<string>("Email"),
-                                MembershipType = (MembershipTypes)dra.Get<int>("MembershipTypeID")
+                                MembershipType = (MembershipTypes)dra.Get<int>("MembershipTypeID"),
+                                SendMonthlyDealLogTo = dra.Get<string>("SendMonthlyDealLogTo"),
+                                SendMonthlyChatLogTo = dra.Get<string>("SendMonthlyChatLogTo")
                             };
                             if (includeUserID) userData.ID = dra.Get<int>("ID");
                         }                        
@@ -98,6 +100,16 @@ namespace BiddingApp
                             foreach (DataRowAdapter dra in DataRowAdapter.Create(dt.Rows))
                             {
                                 userData.NotificationTypes.Add((NotificationTypes)dra.Get<int>("NotificationTypeID"));
+                            }
+                        }
+                    }
+                    else if (i == 2)
+                    {
+                        if (userData != null)
+                        {
+                            foreach (DataRowAdapter dra in DataRowAdapter.Create(dt.Rows))
+                            {
+                                userData.Managers.Add(dra.Get<string>("ManagerEmail"));
                             }
                         }
                     }
@@ -557,6 +569,17 @@ namespace BiddingApp
             }
         }
 
+        public void User_UpdateSendMonthlyLogTo(int userID, string sendMonthlyDealLogTo, string sendMonthlyChatLogTo)
+        {
+            using (SqlCommand cmd = SqlProc("STP_User_UpdateSendMonthlyLogTo"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                if (sendMonthlyDealLogTo != null) SqlParam(cmd, "SendMonthlyDealLogTo", sendMonthlyDealLogTo);
+                if (sendMonthlyChatLogTo != null) SqlParam(cmd, "SendMonthlyChatLogTo", sendMonthlyChatLogTo);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
         public List<string> Contact_GetAppearOnlineList(int userID)
         {
             List<string> emails = new List<string>();
@@ -569,6 +592,27 @@ namespace BiddingApp
                 }
             }
             return emails;
+        }
+
+        public void User_AddManager(int userID, string managerName, string managerEmail)
+        {
+            using (SqlCommand cmd = SqlProc("STP_User_AddManager"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "ManagerName", managerName);
+                SqlParam(cmd, "ManagerEmail", managerEmail);
+                ExecuteNonQuery(cmd);
+            }
+        }
+
+        public void User_RemoveManager(int userID, string managerEmail)
+        {
+            using (SqlCommand cmd = SqlProc("STP_User_RemoveManager"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                SqlParam(cmd, "ManagerEmail", managerEmail);
+                ExecuteNonQuery(cmd);
+            }
         }
 
         public DateTime GetSqlDateTime()

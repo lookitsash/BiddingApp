@@ -408,7 +408,35 @@ var modals = (function () {
                     modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('confirmFillOrderModal'); });
                 }
             });
-        }
+        },
 
+        showAddManagerModal: function () {
+            $('#addManagerModal input').val('');
+            modals.clearValidation('addManagerModal');
+            modals.show('addManagerModal');
+        },
+
+        addManager: function () {
+            if (modals.applyValidation('addManagerModal')) {
+                var formData = resources.dataFieldsToObject($('#addManagerModal'));
+                var userData = defaultPage.getUserData();
+                if (resources.arrayContainsItem(userData.Managers, formData.email, function (a, b) { return resources.stringEqual(a, b); })) {
+                    modals.showNotificationModal('You have already added this manager');
+                    return;
+                }
+                modals.hide();
+                modals.toggleWaitingModal(true, 'Please wait...');
+                resources.ajaxPost('Receiver', 'AddManager', { guid: defaultPage.sessionGUID(), name: formData.name, email: formData.email }, function (data) {
+                    modals.hide();
+                    if (data.Success) {
+                        defaultPage.updateUserData(data.UserData);
+                        settingsPage.refreshManagers();
+                    }
+                    else {
+                        modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('addManagerModal'); });
+                    }
+                });
+            }
+        }
     };
 })();

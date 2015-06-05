@@ -7,11 +7,26 @@ var settingsPage = (function () {
         contacts: null,
 
         initialize: function () {
+            defaultPage.validateSession();
+
             $.connection.biddingHub.client.contactsUpdated = function (data) {
                 data = JSON.parse(data);
                 settingsPage.contacts = data.Contacts;
                 settingsPage.refreshContacts();
             };
+
+            $("#tabs").tabs({
+                activate: function (event, ui) {
+                    if (ui.newPanel.attr('id') == 'tabs-2') { // Admin
+                        settingsPage.refreshAdmin();
+                    }
+                    else if (ui.newPanel.attr('id') == 'tabs-3') { // Account
+                        settingsPage.refreshAccount();
+                    }
+                }
+            });
+
+            settingsPage.refreshContacts();
         },
 
         refreshContacts: function (newContacts, refreshCache) {
@@ -147,42 +162,195 @@ var settingsPage = (function () {
             resources.ajaxPost('Receiver', 'UpdateNotifications', { guid: defaultPage.sessionGUID(), notificationTypes: notificationTypes }, function (data) {
                 modals.hide();
                 if (data.Success) {
-                    var sessionData = defaultPage.sessionData();
-                    sessionData.UserData = data.UserData;
-                    $.session.set('SessionData', JSON.stringify(sessionData));
-
+                    defaultPage.updateUserData(data.UserData);
                     modals.showNotificationModal('Your settings were successfully changed.');
                 }
                 else {
                     modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { });
                 }
             });
+        },
+
+        refreshAccount: function () {
+            modals.clearValidation('changePassword');
+            $('#changePassword input').val('');
+
+            var userData = defaultPage.getUserData();
+            resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_RECEIVEOFFLINEMESSAGE), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_RECEIVEOFFLINEMESSAGE));
+            resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_NEWCONTACTSADDME), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_NEWCONTACTSADDME));
+            resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_USERFILLSORDER), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_USERFILLSORDER));
+            resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_NEWINTEREST), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_NEWINTEREST));
+            resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_REQUESTPRICE), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_REQUESTPRICE));
+            resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_LEAVEORDER), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_LEAVEORDER));
+
+            $('#notificationTypes .advanceOnly').hide();
+            if (userData.MembershipType == MEMBERSHIPTYPE_ADVANCE) $('#notificationTypes .advanceOnly').show();
+        },
+
+        refreshAdmin: function () {
+            var userData = defaultPage.sessionData().UserData;
+            $('#monthlyLogs .data-deallogemails').val(userData.SendMonthlyDealLogTo);
+            $('#monthlyLogs .data-chatlogemails').val(userData.SendMonthlyChatLogTo);
+            settingsPage.toggleMonthlyLogStatus(!resources.stringNullOrEmpty(userData.SendMonthlyDealLogTo), !resources.stringNullOrEmpty(userData.SendMonthlyChatLogTo), true);
+
+            $('#monthlyLogs .data-deallog').unbind('click.settings').bind('click.settings', function (e) {
+                var isSelected = resources.uiCheckboxSelected($(this));
+                settingsPage.toggleMonthlyLogStatus(isSelected, null);
+                if (!isSelected) {
+                    $('#monthlyLogs .data-deallogemails').val('');
+                    resources.ajaxPost('Receiver', 'UpdateSendMonthlyLogTo', { guid: defaultPage.sessionGUID(), sendMonthlyDealLogTo: '' }, function (data) { });
+                }
+            });
+            $('#monthlyLogs .data-chatlog').unbind('click.settings').bind('click.settings', function (e) {
+                var isSelected = resources.uiCheckboxSelected($(this));
+                settingsPage.toggleMonthlyLogStatus(null, isSelected);
+                if (!isSelected) {
+                    $('#monthlyLogs .data-chatlogemails').val('');
+                    resources.ajaxPost('Receiver', 'UpdateSendMonthlyLogTo', { guid: defaultPage.sessionGUID(), sendMonthlyChatLogTo: '' }, function (data) { });
+                }
+            });
+
+            settingsPage.refreshManagers();
+        },
+
+        updateMonthlyLogEmails: function (dealUpdated, chatUpdated) {
+            if (dealUpdated && !$('#monthlyLogs .updateDealLogButton').hasClass('disabled2')) {
+                var dealLogEmails = $('#monthlyLogs .data-deallogemails').val();
+                if (resources.stringNullOrEmpty(dealLogEmails)) {
+                    modals.showNotificationModal('Please enter at least one email address');
+                    return;
+                }
+
+                dealLogEmails = resources.stringReplace(dealLogEmails, ';', ',');
+                var dealLogEmailArr = dealLogEmails.split(',');
+                var dealLogEmailArrValid = new Array();
+                for (var i = 0; i < dealLogEmailArr.length; i++) {
+                    var email = resources.stringTrim(dealLogEmailArr[i]);
+                    if (!resources.stringNullOrEmpty(email)) {
+                        if (!resources.isValidEmail(email)) {
+                            modals.showNotificationModal('Please enter valid email address');
+                            return;
+                        }
+                        dealLogEmailArrValid.push(email);
+                    }
+                }
+                dealLogEmails = dealLogEmailArrValid.join(', ');
+                $('#monthlyLogs .data-deallogemails').val(dealLogEmails);
+
+                modals.toggleWaitingModal(true, 'Please wait...');
+                resources.ajaxPost('Receiver', 'UpdateSendMonthlyLogTo', { guid: defaultPage.sessionGUID(), sendMonthlyDealLogTo: dealLogEmails }, function (data) {
+                    modals.hide();
+                    if (data.Success) {
+                        defaultPage.updateUserData(data.UserData);
+                        modals.showNotificationModal('Your settings were successfully changed.');
+                    }
+                    else {
+                        modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX));
+                    }
+                });
+            }
+
+            if (chatUpdated && !$('#monthlyLogs .updateChatLogButton').hasClass('disabled2')) {
+                var chatLogEmails = $('#monthlyLogs .data-chatlogemails').val();
+                if (resources.stringNullOrEmpty(chatLogEmails)) {
+                    modals.showNotificationModal('Please enter at least one email address');
+                    return;
+                }
+
+                chatLogEmails = resources.stringReplace(chatLogEmails, ';', ',');
+                var chatLogEmailArr = chatLogEmails.split(',');
+                var chatLogEmailArrValid = new Array();
+                for (var i = 0; i < chatLogEmailArr.length; i++) {
+                    var email = resources.stringTrim(chatLogEmailArr[i]);
+                    if (!resources.stringNullOrEmpty(email)) {
+                        if (!resources.isValidEmail(email)) {
+                            modals.showNotificationModal('Please enter valid email address');
+                            return;
+                        }
+                        chatLogEmailArrValid.push(email);
+                    }
+                }
+                chatLogEmails = chatLogEmailArrValid.join(', ');
+                $('#monthlyLogs .data-chatlogemails').val(chatLogEmails);
+
+                modals.toggleWaitingModal(true, 'Please wait...');
+                resources.ajaxPost('Receiver', 'UpdateSendMonthlyLogTo', { guid: defaultPage.sessionGUID(), sendMonthlyChatLogTo: chatLogEmails }, function (data) {
+                    modals.hide();
+                    if (data.Success) {
+                        defaultPage.updateUserData(data.UserData);
+                        modals.showNotificationModal('Your settings were successfully changed.');
+                    }
+                    else {
+                        modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX));
+                    }
+                });
+            }
+        },
+
+        toggleMonthlyLogStatus: function (dealEnabled, chatEnabled, toggleCheckboxes) {
+            if (dealEnabled != null) {
+                resources.uiToggleEnable($('#monthlyLogs .data-deallogemails'), false);
+                $('#monthlyLogs .updateDealLogButton').removeClass('btn-primary');
+                $('#monthlyLogs .updateDealLogButton').addClass('disabled2');
+                if (dealEnabled) {
+                    resources.uiToggleEnable($('#monthlyLogs .data-deallogemails'), true);
+                    $('#monthlyLogs .updateDealLogButton').addClass('btn-primary');
+                    $('#monthlyLogs .updateDealLogButton').removeClass('disabled2');
+                }
+                if (toggleCheckboxes) resources.uiToggleCheckbox($('#monthlyLogs .data-deallog'), dealEnabled);
+            }
+
+            if (chatEnabled != null) {
+                resources.uiToggleEnable($('#monthlyLogs .data-chatlogemails'), false);
+                $('#monthlyLogs .updateChatLogButton').removeClass('btn-primary');
+                $('#monthlyLogs .updateChatLogButton').addClass('disabled2');
+                if (chatEnabled) {
+                    resources.uiToggleEnable($('#monthlyLogs .data-chatlogemails'), true);
+                    $('#monthlyLogs .updateChatLogButton').addClass('btn-primary');
+                    $('#monthlyLogs .updateChatLogButton').removeClass('disabled2');
+                }
+                if (toggleCheckboxes) resources.uiToggleCheckbox($('#monthlyLogs .data-chatlog'), chatEnabled);
+            }
+        },
+
+        refreshManagers: function () {
+            var userData = defaultPage.getUserData();
+            var html = 'Your account is currently being monitored by:';
+            if (userData.Managers.length == 0) html += ' NO ONE';
+            else {
+                html += '<br/>';
+                resources.arrayEnum(userData.Managers, function (email, i) {
+                    html += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + email + ' (<a href="#" style="" onclick="settingsPage.removeManager(' + i + ');return false;">remove</a>)<br/>';
+                });
+            }
+            $('#managers').html(html);
+        },
+
+        removeManager: function (managerID) {
+            var userData = defaultPage.getUserData();
+            if (managerID < userData.Managers.length) {
+                modals.showConfirmModal('Are you sure you want to remove this manager?', function (success) {
+                    if (success) {
+                        var managerEmail = userData.Managers[managerID];
+                        modals.toggleWaitingModal(true, 'Please wait...');
+                        resources.ajaxPost('Receiver', 'RemoveManager', { guid: defaultPage.sessionGUID(), email: managerEmail }, function (data) {
+                            modals.hide();
+                            if (data.Success) {
+                                defaultPage.updateUserData(data.UserData);
+                                settingsPage.refreshManagers();
+                            }
+                            else {
+                                modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { });
+                            }
+                        });
+                    }
+                });
+            }
         }
     };
 })();
 
 $(document).ready(function () {
-    defaultPage.validateSession();
-    $("#tabs").tabs({
-        activate: function (event, ui) {
-            if (ui.newPanel.attr('id') == 'tabs-3') {
-                modals.clearValidation('changePassword');
-                $('#changePassword input').val('');
-
-                var userData = defaultPage.sessionData().UserData;
-                resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_RECEIVEOFFLINEMESSAGE), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_RECEIVEOFFLINEMESSAGE));
-                resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_NEWCONTACTSADDME), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_NEWCONTACTSADDME));
-                resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_USERFILLSORDER), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_USERFILLSORDER));
-                resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_NEWINTEREST), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_NEWINTEREST));
-                resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_REQUESTPRICE), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_REQUESTPRICE));
-                resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_LEAVEORDER), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_LEAVEORDER));
-
-                $('#notificationTypes .advanceOnly').hide();
-                if (userData.MembershipType == MEMBERSHIPTYPE_ADVANCE) $('#notificationTypes .advanceOnly').show();
-            }
-        }
-    });
-    settingsPage.refreshContacts();
     settingsPage.initialize();
 });
 

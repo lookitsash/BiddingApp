@@ -1,6 +1,10 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Default.master" AutoEventWireup="true" CodeBehind="Settings.aspx.cs" Inherits="BiddingApp.Settings" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="CPH_HEAD" runat="server">
     <script type="text/javascript" src="Resources/Scripts/SettingsPage.js"></script>
+    <style>
+        .hrefUnderline a { text-decoration: underline; }
+        .hrefUnderline a:visited { color:#000000; }
+    </style>
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="CPH_HEADING" runat="server">SETTINGS</asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="CPH_CONTENT" runat="server">
@@ -41,20 +45,22 @@
     <table cellspacing="0" style="width:800px; font-size:10pt;">
     <tr>
     <td>
-        <label><input type="checkbox" />Send Monthly Deal Log to:</label>
+        <div id="monthlyLogs">
+        <label><input type="checkbox" class="data-deallog" />Send Monthly Deal Log to:</label>
         <div style="height:5px;"></div>
-        <span style="margin-left:50px;">&nbsp;</span><input type="text" placeholder="Email1, email2 ..." />&nbsp;&nbsp;&nbsp;<a href="#" onclick="return false;" class="btn btn-primary" style="height:10px; padding:3px; vertical-align:initial; display:inline;"> UPDATE </a><br />
+        <span style="margin-left:50px;">&nbsp;</span><input class="data-deallogemails" type="text" style="width:350px;" placeholder="Email1, email2 ..." />&nbsp;&nbsp;&nbsp;<a href="#" onclick="settingsPage.updateMonthlyLogEmails(true, false);return false;" class="btn btn-primary updateDealLogButton" style="height:10px; padding:3px; vertical-align:initial; display:inline;"> UPDATE </a><br />
         <br />
-        <label><input type="checkbox" />Send Monthly Chat Log to:</label>
+        <label><input type="checkbox" class="data-chatlog" />Send Monthly Chat Log to:</label>
         <div style="height:5px;"></div>
-        <span style="margin-left:50px;">&nbsp;</span><input type="text" placeholder="Email1, email2 ..." />&nbsp;&nbsp;&nbsp;<a href="#" onclick="return false;" class="btn btn-primary" style="height:10px; padding:3px; vertical-align:initial; display:inline;"> UPDATE </a><br />
-        <br /><br />
-        Your account is currently being monitored by: NO ONE<br />
+        <span style="margin-left:50px;">&nbsp;</span><input class="data-chatlogemails" type="text" style="width:350px;" placeholder="Email1, email2 ..." />&nbsp;&nbsp;&nbsp;<a href="#" onclick="settingsPage.updateMonthlyLogEmails(false, true);return false;" class="btn btn-primary updateChatLogButton" style="height:10px; padding:3px; vertical-align:initial; display:inline;"> UPDATE </a><br />
+        </div>
+        <br />
+        <div id="managers" class="hrefUnderline">Your account is currently being monitored by: NO ONE</div>
         <br />
         Grand access to Manager.  He/she will have up-to-date access<br />
         of your item sales/purchases and conversations.<br />
         <br />
-        <a href="#" onclick="return false;" class="btn btn-primary">Add Manager</a>
+        <a href="#" onclick="modals.showAddManagerModal();return false;" class="btn btn-primary">Add Manager</a>
     </td>
     </tr>
     </table>
@@ -98,4 +104,33 @@
   </div>
 </div>
 </center>
+
+<div id="addManagerModal" class="lightbox default" style="display:none; width:420px;">
+    <a href="#" onclick="modals.hide();return false;" class="iconclosemodal"></a>
+    <section>
+        <header>
+            <h2 class="modalTitle">Add Manager</h2>
+        </header>
+        <div class="contentwrapper">              
+
+            <section class="panel white solid">
+                <div class="panel-body form" style=" text-align:center;">
+                    <div class="errorHeader">Please enter the required fields below</div>
+                    <input type="text" style="width:300px;" class="data-name validateRequired" placeholder="Name of Manager" />
+                    <div style="height:5px;"></div>
+                    <input type="text" style="width:300px;" class="data-email validateRequired validateEmail" placeholder="Email of Manager" />
+                    <br />
+                </div>
+            </section>
+        </div>
+        <div class="footerwrapper">
+            <div class="footer centered">
+                <div>
+                    <a href="#" onclick="modals.hide();return false;" class="btn btn-cancel">Cancel</a>
+                    <a href="#" onclick="modals.addManager();return false;" class="btn btn-primary">Grant Access</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
 </asp:Content>

@@ -662,6 +662,27 @@ BiddingApp
         }
 
         [WebMethod]
+        public string UpdateSendMonthlyLogTo(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string sendMonthlyDealLogTo = jToken.Value<string>("sendMonthlyDealLogTo");
+                string sendMonthlyChatLogTo = jToken.Value<string>("sendMonthlyChatLogTo");
+
+                Statics.Access.User_UpdateSendMonthlyLogTo(userID, sendMonthlyDealLogTo, sendMonthlyChatLogTo);
+
+                return JsonConvert.SerializeObject(new { Success = true, UserData = Statics.Access.GetUserData(userID, null, false) });
+            }
+            catch (Exception ex)
+            {
+                Log("UpdateSendMonthlyLogTo Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
         public string GetData(string json)
         {
             try
@@ -746,6 +767,43 @@ BiddingApp
             catch (Exception ex)
             {
                 Log("ValidateEmail Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string AddManager(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string managerName = jToken.Value<string>("name");
+                string managerEmail = jToken.Value<string>("email");
+                Statics.Access.User_AddManager(userID, managerName, managerEmail);
+                return JsonConvert.SerializeObject(new { Success = true, UserData = Statics.Access.GetUserData(userID, null, false) });
+            }
+            catch (Exception ex)
+            {
+                Log("AddManager Exception", ex);
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string RemoveManager(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+                int userID = GetUserID(jToken);
+                string managerEmail = jToken.Value<string>("email");
+                Statics.Access.User_RemoveManager(userID, managerEmail);
+                return JsonConvert.SerializeObject(new { Success = true, UserData = Statics.Access.GetUserData(userID, null, false) });
+            }
+            catch (Exception ex)
+            {
+                Log("RemoveManager Exception", ex);
                 return JsonError(ex);
             }
         }
@@ -963,10 +1021,11 @@ BiddingApp
     public class UserData
     {
         public int ID;
-        public string FirstName, LastName, Company, Country, Email, Password;
+        public string FirstName, LastName, Company, Country, Email, Password, SendMonthlyDealLogTo, SendMonthlyChatLogTo;
         public bool MembershipBasic, MembershipAdvance;
         public MembershipTypes MembershipType;
         public List<NotificationTypes> NotificationTypes = new List<NotificationTypes>();
+        public List<string> Managers = new List<string>();
     }
 
     public class ContactData
