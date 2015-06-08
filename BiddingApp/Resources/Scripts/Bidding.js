@@ -12,6 +12,11 @@ var bidding = (function () {
         userData: null,
         interests: null,
         serverTimeOffsetMS: 0,
+        mp3Buzzer: null,
+
+        buzz: function () {
+            bidding.mp3Buzzer.play();
+        },
 
         initialize: function () {
             defaultPage.validateSession();
@@ -40,6 +45,8 @@ var bidding = (function () {
                 }
                 return false;
             });
+
+            bidding.mp3Buzzer = new Audio('Resources/Sounds/Buzzer.mp3');
 
             bidding.getData();
 
@@ -507,6 +514,8 @@ var bidding = (function () {
                     $('.interestDetails', windowObj.dialog).html(contact.Company + ' - ' + contact.FirstName + '<br/>Condition: ' + interest.Condition + '<br/>Qty: ' + interest.Quantity + '<br/>' + interest.Remarks);
                     $('.interestPrice', windowObj.dialog).html('DEAL @ ' + interest.PriceShowing);
                 }
+
+                bidding.buzz();
 
                 var secondsToAutoConfirm = 4;
                 windowObj.autoConfirmDate = resources.dateAddMs(new Date(), secondsToAutoConfirm * 1000);

@@ -147,6 +147,23 @@ namespace BiddingApp
                     {
                         Clients.Client(clientTo.ConnectionID).chatReceived(JsonConvert.SerializeObject(new { FirstName = clientFrom.UserData.FirstName, LastName = clientFrom.UserData.LastName, Email = clientFrom.UserData.Email, Message = message }));
                     }
+                    else
+                    {
+                        string loginURL = Statics.BaseURL + "Default.aspx?Action=Login";
+                        string emailSubject = "Unread Messages from " + clientFrom.UserData.FirstName;
+                        string emailBody = @"Hello, you have some unread messages on BiddingApp from " + clientFrom.UserData.FirstName + " " + clientFrom.UserData.LastName + @".  Visit the link below to login and view them:
+
+" + loginURL + @"
+
+Thank you,
+
+Customer Service
+BiddingApp";
+                        if (Statics.Access.User_CreateNotificationEmail(userIDTo, clientFrom.UserData.ID, NotificationTypes.ReceiveOfflineMessage, emailSubject, emailBody))
+                        {
+                            Utility.SendEmail(emailTo, emailSubject, Utility.ConvertToHtml(emailBody));
+                        }
+                    }
                 }
             }
             catch (Exception ex)

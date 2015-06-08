@@ -448,15 +448,7 @@
                             <label><input type="radio" name="contactSelection" class="selectedContacts" />Selected advance contacts</label><br />
                             <div class="selectContactsDiv">
                                 <br />
-                                <table style="width:100%;">
-                                    <tr>
-                                        <td><label><input type="checkbox" />Company1 - fName1</label></td>
-                                        <td><label><input type="checkbox" />Company2 - fName2</label></td>
-                                    </tr>
-                                    <tr>
-                                        <td><label><input type="checkbox" />Company1 - fName1</label></td>
-                                        <td><label><input type="checkbox" />Company2 - fName2</label></td>
-                                    </tr>
+                                <table style="width:100%;" class="contactsList">
                                 </table>
                             </div>
                             <br />

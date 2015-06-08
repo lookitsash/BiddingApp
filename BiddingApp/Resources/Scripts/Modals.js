@@ -324,20 +324,54 @@ var modals = (function () {
             resources.uiToggleCheckbox($('#leaveOrderModal .allContacts'), true);
             $('#leaveOrderModal .selectContactsDiv').hide();
 
-            $('#leaveOrderModal .allContacts').unbind('click.bidding').bind('click.bidding', function (e) {
-                $('#leaveOrderModal .selectContactsDiv').hide();
-                windowUpdate();
+            $('#leaveOrderModal .contactsList').html('');
+            var contactRowHtml = null;
+            var advanceContactCount = 0;
+            resources.arrayEnum(bidding.contacts, function (contact) {
+                if (contact.MembershipTypeID == MEMBERSHIPTYPE_ADVANCE) {
+                    advanceContactCount++;
+                    var baseHtml = '<td><label><input class="contactField" data-id="' + contact.GUID + '" type="checkbox" />' + contact.FirstName + ' ' + contact.LastName + '</label></td>';
+                    if (resources.stringNullOrEmpty(contactRowHtml)) contactRowHtml = '<tr>' + baseHtml;
+                    else {
+                        contactRowHtml += baseHtml + '</tr>';
+                        $('#leaveOrderModal .contactsList').append(contactRowHtml);
+                        contactRowHtml = null;
+                    }
+                }
             });
-            $('#leaveOrderModal .selectedContacts').unbind('click.bidding').bind('click.bidding', function (e) {
-                $('#leaveOrderModal .selectContactsDiv').show();
-                windowUpdate();
-            });
-            $('#leaveOrderModal .hourField, #leaveOrderModal .minuteField').unbind('click.bidding').bind('click.bidding', function (e) {
-                resources.uiToggleCheckbox($('#leaveOrderModal .goodUntilCancelled'), false);
-                resources.uiToggleCheckbox($('#leaveOrderModal .goodUntilDuration'), true);
-            });
+            if (!resources.stringNullOrEmpty(contactRowHtml)) {
+                contactRowHtml += '<td>&nbsp;</td></tr>';
+                $('#leaveOrderModal .contactsList').append(contactRowHtml);
+            }
 
-            modals.show('leaveOrderModal');
+            if (advanceContactCount == 0) {
+                modals.showNoAdvanceContactsModal();
+            }
+            else {
+                $('#leaveOrderModal .allContacts').unbind('click.bidding').bind('click.bidding', function (e) {
+                    $('#leaveOrderModal .selectContactsDiv').hide();
+                    windowUpdate();
+                });
+                $('#leaveOrderModal .selectedContacts').unbind('click.bidding').bind('click.bidding', function (e) {
+                    $('#leaveOrderModal .selectContactsDiv').show();
+                    windowUpdate();
+                });
+
+                $('#leaveOrderModal .allContacts').unbind('click.bidding').bind('click.bidding', function (e) {
+                    $('#leaveOrderModal .selectContactsDiv').hide();
+                    windowUpdate();
+                });
+                $('#leaveOrderModal .selectedContacts').unbind('click.bidding').bind('click.bidding', function (e) {
+                    $('#leaveOrderModal .selectContactsDiv').show();
+                    windowUpdate();
+                });
+                $('#leaveOrderModal .hourField, #leaveOrderModal .minuteField').unbind('click.bidding').bind('click.bidding', function (e) {
+                    resources.uiToggleCheckbox($('#leaveOrderModal .goodUntilCancelled'), false);
+                    resources.uiToggleCheckbox($('#leaveOrderModal .goodUntilDuration'), true);
+                });
+
+                modals.show('leaveOrderModal');
+            }
         },
 
         getFormData: function (modalID) {
@@ -348,7 +382,21 @@ var modals = (function () {
 
         leaveOrder: function () {
             if (modals.applyValidation('leaveOrderModal')) {
+                var allContacts = resources.uiCheckboxSelected($('#leaveOrderModal .allContacts'));
+                var contactGUIDs = null;
+                if (!allContacts) {
+                    contactGUIDs = new Array();
+                    $('#leaveOrderModal .contactField:checked').each(function () {
+                        contactGUIDs.push($(this).attr('data-id'));
+                    });
+                    if (contactGUIDs.length == 0) {
+                        modals.showNotificationModal('Please select at least one contact');
+                        return;
+                    }
+                }
+
                 var formData = modals.getFormData('leaveOrderModal');
+                formData.contactGUIDs = contactGUIDs;
                 formData.price = resources.toDecimal(formData.price);
                 formData.interestGUID = currentEditingGUID;
                 formData.hours = 0;

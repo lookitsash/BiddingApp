@@ -227,6 +227,23 @@ BiddingApp
                         {
                             SyncChat(userID, contactUserID, leaveHelloMessage, true);
                         }
+
+                        UserData contactUserData = Statics.Access.GetUserData(contactUserID, null, false);
+                        string emailTo = contactUserData.Email;
+                        string loginURL = Statics.BaseURL + "Default.aspx?Action=Login";
+                        string emailSubject = userData.FirstName + " added you as a contact";
+                        string emailBody = @"Hello, " + userData.FirstName + " " + userData.LastName + @" has added you as a contact on BiddingApp.  To add them as your contact too, visit the link below to login:
+
+" + loginURL + @"
+
+Thank you,
+
+Customer Service
+BiddingApp";
+                        if (Statics.Access.User_CreateNotificationEmail(contactUserID, userID, NotificationTypes.NewContactsAddMe, emailSubject, emailBody))
+                        {
+                            Utility.SendEmail(emailTo, emailSubject, Utility.ConvertToHtml(emailBody));
+                        }
                     }
                 }
 
@@ -407,14 +424,62 @@ BiddingApp
                 decimal price = jToken.Value<decimal>("price");
                 int goodUntilHours = jToken.Value<int>("hours");
                 int goodUntilMins = jToken.Value<int>("minutes");
+                List<string> contactGUIDs = jToken.Value<JToken>("contactGUIDs") != null ? JsonConvert.DeserializeObject<List<string>>(jToken.Value<JToken>("contactGUIDs").ToString()) : null;
                 Statics.Access.Interest_PlaceOrder(userID, interestGUID, price, goodUntilHours, goodUntilMins);
 
+                InterestData interest = Statics.Access.Interest_Get(0, interestGUID)[0];
+                UserData userData = Statics.Access.GetUserData(userID, null, false);
+
+                Access access = Statics.Access;
+                List<ContactData> allContacts = access.Contact_Get(userID);
+                List<ContactData> selectedContacts = new List<ContactData>();
+                foreach (ContactData contact in allContacts)
+                {
+                    if (contact.MembershipTypeID == MembershipTypes.Advance && (contactGUIDs == null || contactGUIDs.Contains(contact.GUID)))
+                    {
+                        access.Bid_Create(0, interestGUID, contact.GUID, BidTypes.OrderPlaced, 0);
+                        selectedContacts.Add(contact);
+
+                        try
+                        {
+                            string emailTo = contact.Email;
+                            string loginURL = Statics.BaseURL + "Default.aspx?Action=Login";
+                            string emailSubject = userData.FirstName + " has left an order for " + interest.Product;
+                            string emailBody = @"Hello, " + userData.FirstName + " " + userData.LastName + @" has left an order of " + interest.Price + " for " + interest.Product + @".  To review the details, visit the link below to login to BiddingApp:
+
+" + loginURL + @"
+
+Thank you,
+
+Customer Service
+BiddingApp";
+                            int contactUserID = Statics.Access.GetUserID(contact.GUID, GUIDTypes.Contact);
+                            if (Statics.Access.User_CreateNotificationEmail(contactUserID, userID, NotificationTypes.LeaveOrder, emailSubject, emailBody))
+                            {
+                                Utility.SendEmail(emailTo, emailSubject, Utility.ConvertToHtml(emailBody));
+                            }
+                        }
+                        catch (Exception exc)
+                        {
+                            Log("LeaveOrder notification exception", exc);
+                        }
+                    }
+                }
+
+                foreach (ContactData contact in selectedContacts)
+                {
+                    int contactUserID = Statics.Access.GetUserID(contact.GUID, GUIDTypes.Contact);
+                    SyncInterestUpdate(contactUserID, interestGUID, true);
+                }
+
+                /*
                 List<ContactData> allContacts = GetContacts(userID);
                 foreach (ContactData contact in allContacts)
                 {
                     int contactUserID = Statics.Access.GetUserID(contact.GUID, GUIDTypes.Contact);
                     SyncInterestUpdate(contactUserID, interestGUID);
                 }
+                */
 
                 return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
             }
@@ -490,6 +555,9 @@ BiddingApp
 
                 if (!(bidType == BidTypes.RequestFirm || bidType == BidTypes.RequestIndicative)) throw new Exception("Invalid bid type specified - " + bidType);
 
+                InterestData interest = Statics.Access.Interest_Get(0, interestGUID)[0];
+                UserData userData = Statics.Access.GetUserData(userID, null, false);
+
                 Access access = Statics.Access;
                 List<ContactData> allContacts = access.Contact_Get(userID);
                 List<ContactData> selectedContacts = new List<ContactData>();
@@ -499,6 +567,31 @@ BiddingApp
                     {
                         access.Bid_Create(0, interestGUID, contact.GUID, bidType, 0);
                         selectedContacts.Add(contact);
+
+                        try
+                        {
+                            string emailTo = contact.Email;
+                            string loginURL = Statics.BaseURL + "Default.aspx?Action=Login";
+                            string bidDesc = (bidType == BidTypes.RequestFirm ? "a Firm" : "an Indicative");
+                            string emailSubject = userData.FirstName + " is requesting " + bidDesc + " price for " + interest.Product;
+                            string emailBody = @"Hello, " + userData.FirstName + " " + userData.LastName + @" has requested " + bidDesc + " price for " + interest.Product + @".  To review the details, visit the link below to login to BiddingApp:
+
+" + loginURL + @"
+
+Thank you,
+
+Customer Service
+BiddingApp";
+                            int contactUserID = Statics.Access.GetUserID(contact.GUID, GUIDTypes.Contact);
+                            if (Statics.Access.User_CreateNotificationEmail(contactUserID, userID, NotificationTypes.RequestPrice, emailSubject, emailBody))
+                            {
+                                Utility.SendEmail(emailTo, emailSubject, Utility.ConvertToHtml(emailBody));
+                            }
+                        }
+                        catch (Exception exc)
+                        {
+                            Log("RequestPrice notification exception", exc);
+                        }
                     }
                 }
 
@@ -633,6 +726,28 @@ BiddingApp
                 int interestUserID = Statics.Access.GetUserID(interestGUID, GUIDTypes.Interest);
                 string contactGUID = Statics.Access.Contact_GetGUID(interestUserID, userID);
                 SyncOrderFilled(interestUserID, interestGUID, contactGUID);
+
+                InterestData interest = Statics.Access.Interest_Get(0, interestGUID)[0];
+                if (interest != null)
+                {
+                    UserData userData = Statics.Access.GetUserData(userID, null, false);
+                    UserData interestUserData = Statics.Access.GetUserData(interestUserID, null, false);
+                    string emailTo = interestUserData.Email;
+                    string loginURL = Statics.BaseURL + "Default.aspx?Action=Login";
+                    string emailSubject = userData.FirstName + " filled your order for " + interest.Product;
+                    string emailBody = @"Hello, " + userData.FirstName + " " + userData.LastName + @" has filled your order for " + interest.Product + " at your price of " + interest.Price + @".  To review the details, visit the link below to login to BiddingApp:
+
+" + loginURL + @"
+
+Thank you,
+
+Customer Service
+BiddingApp";
+                    if (Statics.Access.User_CreateNotificationEmail(interestUserID, userID, NotificationTypes.UserFillsOrder, emailSubject, emailBody))
+                    {
+                        Utility.SendEmail(emailTo, emailSubject, Utility.ConvertToHtml(emailBody));
+                    }
+                }
 
                 return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
             }

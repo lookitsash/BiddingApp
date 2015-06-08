@@ -346,12 +346,14 @@ namespace BiddingApp
             }
         }
 
-        public List<InterestData> Interest_Get(int userID)
+        public List<InterestData> Interest_Get(int userID) { return Interest_Get(userID, null); }
+        public List<InterestData> Interest_Get(int userID, string specificInterestGUID)
         {
             List<InterestData> interests = new List<InterestData>();
             using (SqlCommand cmd = SqlProc("STP_Interest_Get"))
             {
-                SqlParam(cmd, "UserID", userID);
+                if (userID > 0) SqlParam(cmd, "UserID", userID);
+                if (!String.IsNullOrEmpty(specificInterestGUID)) SqlParam(cmd, "InterestGUID", specificInterestGUID);
                 DataSet ds = GetSet(cmd);
                 for (int i = 0; i < ds.Tables.Count; i++)
                 {
@@ -645,6 +647,19 @@ namespace BiddingApp
                 }                
             }
             return managerAccounts;
+        }
+
+        public bool User_CreateNotificationEmail(int userID, int sourceUserID, NotificationTypes notificationType, string subject, string message)
+        {
+            using (SqlCommand cmd = SqlProc("STP_User_CreateNotificationEmail"))
+            {
+                SqlParam(cmd, "UserID", userID);
+                if (sourceUserID > 0) SqlParam(cmd, "SourceUserID", sourceUserID);
+                SqlParam(cmd, "NotificationTypeID", notificationType);
+                SqlParam(cmd, "Subject", subject);
+                SqlParam(cmd, "Message", message);
+                return ExecuteScalar<bool>(cmd);
+            }
         }
 
         public List<LogChat> Log_Chat(string email1, string email2)

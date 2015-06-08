@@ -19,7 +19,8 @@ public enum BidTypes
     Firm = 2,
     RequestIndicative = 3,
     RequestFirm = 4,
-    FillOrder = 5
+    FillOrder = 5,
+    OrderPlaced = 6
 }
 
 public enum GUIDTypes

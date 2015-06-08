@@ -141,6 +141,7 @@
     <Content Include="Resources\Scripts\Statics.js" />
     <Content Include="Resources\Scripts\ValidateEmail.js" />
     <Content Include="Resources\Scripts\Windows.js" />
+    <Content Include="Resources\Sounds\Buzzer.mp3" />
     <Content Include="Scripts\jquery-1.6.4-vsdoc.js" />
     <Content Include="Scripts\jquery-1.6.4.js" />
     <Content Include="Scripts\jquery-1.6.4.min.js" />
