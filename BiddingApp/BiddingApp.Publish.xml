@@ -12,7 +12,7 @@
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_highlight-soft_75_ffe45c_1x100.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_glass_65_ffffff_1x400.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-icons_ffffff_256x240.png" publishTime="04/27/2015 22:22:15" />
-    <file relUrl="Web.config" publishTime="06/05/2015 16:23:35" />
+    <file relUrl="Web.config" publishTime="06/07/2015 22:50:30" />
     <file relUrl="Resources/Scripts/ForgotPassword.js" publishTime="06/03/2015 14:54:56" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_flat_10_000000_40x100.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="bin/Microsoft.AspNet.SignalR.Owin.xml" publishTime="05/03/2015 19:52:30" />
@@ -28,21 +28,21 @@
     <file relUrl="Resources/Scripts/ContactUs.js" publishTime="06/02/2015 11:23:58" />
     <file relUrl="Resources/Images/logout.png" publishTime="04/27/2015 21:53:37" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_highlight-soft_100_eeeeee_1x100.png" publishTime="04/27/2015 22:22:15" />
-    <file relUrl="bin/BiddingApp.pdb" publishTime="06/05/2015 16:21:41" />
+    <file relUrl="bin/BiddingApp.pdb" publishTime="06/07/2015 22:50:29" />
     <file relUrl="Foundation.dll" publishTime="04/03/2015 14:03:04" />
     <file relUrl="Resources/Scripts/DefaultPage.js" publishTime="06/05/2015 09:52:18" />
     <file relUrl="Resources/Scripts/jquery-ui/jquery-ui.min.js" publishTime="04/27/2015 22:19:39" />
-    <file relUrl="Resources/Scripts/Bidding.js" publishTime="06/03/2015 13:52:34" />
+    <file relUrl="Resources/Scripts/Bidding.js" publishTime="06/07/2015 22:42:34" />
     <file relUrl="ChatLog.aspx" publishTime="06/05/2015 16:19:48" />
     <file relUrl="bin/Newtonsoft.Json.dll" publishTime="05/03/2015 19:48:53" />
     <file relUrl="Resources/Scripts/jquery.fullPage/jquery.fullPage.js" publishTime="06/03/2015 16:30:35" />
     <file relUrl="bin/Newtonsoft.Json.xml" publishTime="05/03/2015 19:48:53" />
     <file relUrl="bin/Microsoft.Web.Infrastructure.dll" publishTime="05/03/2015 19:52:30" />
     <file relUrl="bin/Microsoft.Owin.Host.SystemWeb.dll" publishTime="05/03/2015 19:52:30" />
-    <file relUrl="Resources/Scripts/Modals.js" publishTime="06/05/2015 12:43:39" />
-    <file relUrl="bin/BiddingApp.dll" publishTime="06/05/2015 16:21:41" />
+    <file relUrl="Resources/Scripts/Modals.js" publishTime="06/07/2015 22:06:57" />
+    <file relUrl="bin/BiddingApp.dll" publishTime="06/07/2015 22:50:30" />
     <file relUrl="bin/Microsoft.AspNet.SignalR.Core.dll" publishTime="05/03/2015 19:52:30" />
-    <file relUrl="Bidding.aspx" publishTime="05/19/2015 23:38:37" />
+    <file relUrl="Bidding.aspx" publishTime="06/07/2015 22:03:16" />
     <file relUrl="Resources/CSS/Images/SelectedSides.png" publishTime="04/27/2015 22:33:32" />
     <file relUrl="Resources/Images/sprite-closemodal-flat-1.png" publishTime="04/16/2015 14:01:48" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_gloss-wave_35_f6a828_500x100.png" publishTime="04/28/2015 08:54:29" />
@@ -63,6 +63,7 @@
     <file relUrl="Receiver.asmx" publishTime="04/26/2015 21:36:23" />
     <file relUrl="bin/Microsoft.AspNet.SignalR.Owin.dll" publishTime="05/03/2015 19:52:30" />
     <file relUrl="Resources/Images/spinner.gif" publishTime="04/27/2015 20:26:59" />
+    <file relUrl="Resources/Sounds/Buzzer.mp3" publishTime="06/07/2015 22:37:13" />
     <file relUrl="Resources/Images/red_light_16.png" publishTime="04/29/2015 16:47:54" />
     <file relUrl="Resources/Scripts/jquery-cmodal.js" publishTime="04/16/2015 10:04:23" />
     <file relUrl="Site.Master" publishTime="05/19/2015 23:04:42" />

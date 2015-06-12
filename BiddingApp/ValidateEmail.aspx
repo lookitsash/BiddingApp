@@ -15,7 +15,7 @@
 <div id="emailVerified" style="display:none;">
     <br /><br />
     <div style="background-color:#558ED5; color:#ffffff; width:400px; padding:15px;">
-    <b>Email successfully verified</b><br />
+    <b>Email address <span class="email"></span> successfully verified</b><br />
     <br />
     You will be directed to our main page in <span class="countdown"></span>.<br />
     <a href="Default.aspx?Action=Login">Click here</a> to continue.

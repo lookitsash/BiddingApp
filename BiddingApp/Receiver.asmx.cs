@@ -61,7 +61,9 @@ namespace BiddingApp
                 {
                     string emailBody = @"Hello, you've just created an account on BiddingApp.  Please verify your email by visiting the link below:
 
-" + verificationURL + @"
+<a href=""" + verificationURL + @""">" + verificationURL + @"</a>
+
+Your security token is " + validationToken + @"
 
 Thank you,
 
@@ -89,10 +91,12 @@ BiddingApp
 
                 if (String.IsNullOrEmpty(resetToken)) throw new Exception("Could not create password reset token");
 
-                string resetURL = Statics.BaseURL + "ForgotPassword.aspx?Token=" + resetToken;
+                string resetURL = Statics.BaseURL + "ForgotPassword.aspx?Token=" + resetToken + "&Email=" + email;
                 string emailBody = @"Hello, you've just requested a password reset on BiddingApp.  You can reset your password by visiting the link below:
 
-" + resetURL + @"
+<a href=""" + resetURL + @""">" + resetURL + @"</a>
+
+Your security token is " + resetToken + @"
 
 Thank you,
 
@@ -234,7 +238,7 @@ BiddingApp
                         string emailSubject = userData.FirstName + " added you as a contact";
                         string emailBody = @"Hello, " + userData.FirstName + " " + userData.LastName + @" has added you as a contact on BiddingApp.  To add them as your contact too, visit the link below to login:
 
-" + loginURL + @"
+<a href=""" + loginURL + @""">" + loginURL + @"</a>
 
 Thank you,
 
@@ -447,7 +451,7 @@ BiddingApp";
                             string emailSubject = userData.FirstName + " has left an order for " + interest.Product;
                             string emailBody = @"Hello, " + userData.FirstName + " " + userData.LastName + @" has left an order of " + interest.Price + " for " + interest.Product + @".  To review the details, visit the link below to login to BiddingApp:
 
-" + loginURL + @"
+<a href=""" + loginURL + @""">" + loginURL + @"</a>
 
 Thank you,
 
@@ -576,7 +580,7 @@ BiddingApp";
                             string emailSubject = userData.FirstName + " is requesting " + bidDesc + " price for " + interest.Product;
                             string emailBody = @"Hello, " + userData.FirstName + " " + userData.LastName + @" has requested " + bidDesc + " price for " + interest.Product + @".  To review the details, visit the link below to login to BiddingApp:
 
-" + loginURL + @"
+<a href=""" + loginURL + @""">" + loginURL + @"</a>
 
 Thank you,
 
@@ -737,7 +741,7 @@ BiddingApp";
                     string emailSubject = userData.FirstName + " filled your order for " + interest.Product;
                     string emailBody = @"Hello, " + userData.FirstName + " " + userData.LastName + @" has filled your order for " + interest.Product + " at your price of " + interest.Price + @".  To review the details, visit the link below to login to BiddingApp:
 
-" + loginURL + @"
+<a href=""" + loginURL + @""">" + loginURL + @"</a>
 
 Thank you,
 
@@ -924,7 +928,7 @@ BiddingApp";
                     string loginURL = Statics.BaseURL + "Default.aspx?Action=Login";
                     string emailBody = @"Hello, " + userInfo + @" has just added you as their manager on BiddingApp.  An account has already been created for you.  Please login by visiting the link below:
 
-" + loginURL + @"
+<a href=""" + loginURL + @""">" + loginURL + @"</a>
 
 Your login email is: " + managerEmail + @"
 Your temporary password is: " + newManagerPassword + @"

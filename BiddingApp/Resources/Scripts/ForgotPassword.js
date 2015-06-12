@@ -88,11 +88,16 @@ $(document).ready(function () {
     modals.clearValidation('forgotPasswordStep2');
 
     var tokenParam = resources.getQuerystringParam('Token');
+    var emailParam = resources.getQuerystringParam('Email');
     if (!resources.stringNullOrEmpty(tokenParam)) {
         forgotPassword.resetToken = tokenParam;
         $('#forgotPasswordStep1').hide();
         $('#forgotPasswordStep2').show();
         $('.data-token').val(tokenParam);
+        if (!resources.stringNullOrEmpty(emailParam)) {
+            $('#forgotPasswordStep2 .email').html(emailParam);
+            $('#forgotPasswordStep2 .emailDiv').show();
+        }
         resources.uiToggleEnable($('.data-token'), false);
     }
 });

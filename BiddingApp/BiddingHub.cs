@@ -153,7 +153,7 @@ namespace BiddingApp
                         string emailSubject = "Unread Messages from " + clientFrom.UserData.FirstName;
                         string emailBody = @"Hello, you have some unread messages on BiddingApp from " + clientFrom.UserData.FirstName + " " + clientFrom.UserData.LastName + @".  Visit the link below to login and view them:
 
-" + loginURL + @"
+<a href=""" + loginURL + @""">" + loginURL + @"</a>
 
 Thank you,
 

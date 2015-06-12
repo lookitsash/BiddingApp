@@ -13,7 +13,7 @@ var validateEmail = (function () {
                         validateEmail.emailVerified();
                     }
                     else {
-                        modals.showNotificationModal(resources.isNull(data.ErrorMessage, 'Email could not be verified.  Are you sure you used the correct token?'), function () { });
+                        modals.showNotificationModal(resources.isNull(data.ErrorMessage, 'Email address ' + $('.data-email').val() + ' could not be verified.  Are you sure you used the correct token?'), function () { });
                     }
                 });
             }
@@ -22,6 +22,7 @@ var validateEmail = (function () {
         secondsUntilRedirect: 10,
 
         emailVerified: function () {
+            $('#emailVerified .email').html($('.data-email').val());
             $('#emailVerified').show();
             $('#emailNotVerified').hide();
             validateEmail.refreshRedirect();

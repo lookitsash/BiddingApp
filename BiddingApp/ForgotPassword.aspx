@@ -24,6 +24,7 @@
 </div>
 <div id="forgotPasswordStep2" style="display:none;">
 <div class="errorHeader">Please enter the required fields below</div>
+<div class="emailDiv" style="display:none;">Email: <span class="email"></span><br /><br /></div>
 <input type="text" class="data-token validateRequired" placeholder="Password Change Token" style="width:300px;" /><br />
 <br />
 <input type="password" class="data-password validateRequired" placeholder="New Password" style="width:300px;" /><br />

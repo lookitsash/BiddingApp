@@ -807,7 +807,7 @@
                             }
                         }
                         else {
-                            var dataValue = $(this).val();
+                            var dataValue = resources.stringTrim($(this).val());
                             if (resources.stringNullOrEmpty(dataValue)) {
                                 errorFields.push($(this));
                                 hasError = true;
@@ -815,7 +815,7 @@
                         }
                     }
                     if (!hasError && $(this).hasClass('validateEmail')) {
-                        var dataValue = $(this).val();
+                        var dataValue = resources.stringTrim($(this).val());
                         if (!resources.stringNullOrEmpty(dataValue) && !resources.isValidEmail(dataValue)) {
                             errorFields.push($(this));
                             hasError = true;
