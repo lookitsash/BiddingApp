@@ -88,15 +88,23 @@
     <Content Include="ForgotPassword.aspx" />
     <Content Include="Foundation.dll" />
     <Content Include="Global.asax" />
+    <Content Include="QuickGuide.aspx" />
     <Content Include="Receiver.asmx" />
     <Content Include="Resources\CSS\Images\SelectedMiddle.png" />
     <Content Include="Resources\CSS\Images\SelectedSides.png" />
     <Content Include="Resources\CSS\Images\TabMenu.png" />
     <Content Include="Resources\CSS\Images\TabSeperator.png" />
+    <Content Include="Resources\Images\ArrowClose.jpg" />
+    <Content Include="Resources\Images\ArrowOpen.jpg" />
     <Content Include="Resources\Images\eye-off.png" />
     <Content Include="Resources\Images\eye-on.png" />
+    <Content Include="Resources\Images\gearOver.png" />
     <Content Include="Resources\Images\green_light_16.png" />
+    <Content Include="Resources\Images\logoutOver.png" />
+    <Content Include="Resources\Images\Notepad.jpg" />
+    <Content Include="Resources\Images\NotepadOver.jpg" />
     <Content Include="Resources\Images\red_light_16.png" />
+    <Content Include="Resources\Images\search.png" />
     <Content Include="Resources\Scripts\Bidding.js" />
     <Content Include="Resources\Scripts\ChatLog.js" />
     <Content Include="Resources\Scripts\ContactUs.js" />
@@ -219,6 +227,13 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QuickGuide.aspx.cs">
+      <DependentUpon>QuickGuide.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="QuickGuide.aspx.designer.cs">
+      <DependentUpon>QuickGuide.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Receiver.asmx.cs">
       <DependentUpon>Receiver.asmx</DependentUpon>
       <SubType>Component</SubType>

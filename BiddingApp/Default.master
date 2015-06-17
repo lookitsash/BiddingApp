@@ -25,25 +25,25 @@
                 </td>
                 <td class="inSession" style="white-space:nowrap;">
                     <div class="userGreeting" style="display:inline; font-size:11pt;"></div>
-                    <a href="#" onclick="modals.logout();return false;"><img style="vertical-align:middle;" src="Resources/Images/logout.png" /></a>
+                    <a href="#" title="Log Out" onclick="modals.logout();return false;"><img style="vertical-align:middle;" class="logoutIcon" /></a>
                 </td>
                 <td class="inSession">
-                    <a href="Settings.aspx"><img src="Resources/Images/gear.png" /></a>
+                    <a title="Settings" href="Settings.aspx"><img class="gearIcon"/></a>
                 </td>
                 <td class="inSession">
                     <a href="Bidding.aspx" class="btn btn-primary">START BIDDING</a>
                 </td>
-                <td class="inSession">
-                    <a href="DealLog.aspx" class="btn btn-primary">DEAL LOG</a>
-                </td>
                 <td>
                     <ul id="menu1" class="menu">
                         <li><a href="#" class="btn"><img style="width:25px;" src="Resources/Images/Hamburger.png" /></a>
-                        <ul class="dropit-right">
-                            <li><a href="#">Some Action 1</a></li>
-                            <li><a href="#">Some Action 2</a></li>
-                            <li><a href="#">Some Action 3</a></li>
-                            <li><a href="#">Some Action 4</a></li>
+                        <ul class="dropit-right" style="width:300px;">
+                            <li><a href="QuickGuide.aspx"><b>Quick Guide</b></a></li>
+                            <li><a href="QuickGuide.aspx?Section=AddNewContacts">&bull;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Add new contacts</a></li>
+                            <li><a href="QuickGuide.aspx?Section=CreateNewInterest">&bull;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Create new interest</a></li>
+                            <li><a href="QuickGuide.aspx?Section=GetPrices">&bull;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get prices</a></li>
+                            <li><a href="QuickGuide.aspx?Section=ShowPrices">&bull;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Show prices</a></li>
+                            <li class="inSession"><a href="Settings.aspx"><b>Admin</b></a></li>
+                            <li><a href="ContactUs.aspx"><b>Contact Us</b></a></li>
                         </ul></li>
                     </ul>
                 </td>
@@ -391,6 +391,9 @@
                             <tr>
                                 <td align="left"><input type="password" style="width:200px;" class="data-password validateRequired" placeholder="Password"/></td>
                                 <td align="right"><input type="password" style="width:200px;" class="data-passwordConfirm validateRequired" placeholder="Re-enter Password"/></td>
+                            </tr>
+                            <tr class="passwordRequirements" style="display:none;">
+                                <td colspan="2" style="font-size:8pt;">Password must be at least 8 characters, and contain 1 capital letter, 1 lowercase letter and 1 number</td>
                             </tr>
                             <tr><td align="left" colspan="2"><br /><b>Membership Type</b></td></tr>
                             <tr>

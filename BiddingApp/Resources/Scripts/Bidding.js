@@ -13,6 +13,8 @@ var bidding = (function () {
         interests: null,
         serverTimeOffsetMS: 0,
         mp3Buzzer: null,
+        hideInterestInterval: null,
+        hideContactInterval: null,
 
         buzz: function () {
             bidding.mp3Buzzer.play();
@@ -28,7 +30,43 @@ var bidding = (function () {
                 }
             });
 
-            $('.contactsButton').bind('click.biddingApp', function (e) {
+            $('.menuInterests').hover(function () {
+                if (bidding.hideInterestInterval != null) {
+                    clearInterval(bidding.hideInterestInterval);
+                    bidding.hideInterestInterval = null;
+                }
+                $('.menuInterestsLI').removeClass('dropit-open');
+                $('.menuInterestsLI').addClass('dropit-open');
+                $('.menuInterestsDropdown').show();
+            }, function () {
+                bidding.hideInterestInterval = setTimeout(function () {
+                    bidding.hideInterestInterval = null;
+                    $('.menuInterestsLI').addClass('dropit-open');
+                    $('.menuInterestsLI').removeClass('dropit-open');
+                    $('.menuInterestsDropdown').hide();
+                }, 500);
+            });
+
+            $('.menuContacts').hover(function () {
+                if (bidding.hideContactInterval != null) {
+                    clearInterval(bidding.hideContactInterval);
+                    bidding.hideContactInterval = null;
+                }
+                $('.menuContactsLI').removeClass('dropit-open');
+                $('.menuContactsLI').addClass('dropit-open');
+                $('.menuContactsDropdown').show();
+            }, function () {
+                if (!resources.uiIsVisible($('.contactsSearchField'))) {
+                    bidding.hideContactInterval = setTimeout(function () {
+                        bidding.hideContactInterval = null;
+                        $('.menuContactsLI').addClass('dropit-open');
+                        $('.menuContactsLI').removeClass('dropit-open');
+                        $('.menuContactsDropdown').hide();
+                    }, 500);
+                }
+            });
+
+            $('.searchContacts').bind('click.biddingApp', function (e) {
                 toggleContactSearch(true);
                 $('.menuContactsLI').removeClass('dropit-open');
                 $('.menuContactsLI').addClass('dropit-open');
@@ -46,6 +84,10 @@ var bidding = (function () {
                 return false;
             });
 
+            $('.contactsSearchField').bind('keyup.biddingApp', function (e) {
+                bidding.refreshContacts();
+            });
+
             bidding.mp3Buzzer = new Audio('Resources/Sounds/Buzzer.mp3');
 
             bidding.getData();
@@ -60,7 +102,6 @@ var bidding = (function () {
                 bidding.refreshContacts();
             };
             $.connection.biddingHub.client.contactBlocked = function (data) {
-                console.log('contactBlocked: ' + data);
                 data = JSON.parse(data);
                 bidding.contacts = data.Contacts;
                 bidding.refreshContacts();
@@ -678,46 +719,51 @@ var bidding = (function () {
         refreshInterests: function (newInterests, refreshCache, hideSaveModal) {
             var _refreshInterests = function () {
                 var htmlArray = new Array();
-                if (bidding.interests.length > 0) htmlArray.push('<li style="white-space:nowrap; text-align:center;"><a href="#" onclick="windows.autoArrangeWindows();return false;">Arrange Windows</a></li>');
-                resources.arrayEnum(bidding.interests, function (interest) {
-                    var interestTypeDesc = (interest.InterestType == INTERESTTYPE_BUY) ? "BUY" : "SELL";
-                    var interestWindowType = bidding.getInterestWindowType(interest);
-                    if (interestWindowType == WINDOWTYPE_BIDDING) {
-                        var html = '<li><div style="background-color:#b9cde5; cursor:pointer; border: 1px solid #000000;"><table width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td style="color:Red; text-align:right; font-weight:bolder;" onclick="bidding.deleteInterest(\'@INTERESTGUID\')">X&nbsp;</td></tr></table></div></li>';
-                        html = resources.stringReplace(html, '@LINE1', '<b>' + interestTypeDesc + '</b> ' + interest.Product);
-                        html = resources.stringReplace(html, '@LINE2', 'Order @ ' + interest.Price);
-                        html = resources.stringReplace(html, '@INTERESTGUID', interest.InterestGUID);
-                        htmlArray.push(html);
-                    }
-                    else if (interestWindowType == WINDOWTYPE_BIDDINGNOORDER) {
-                        var html = '<li><div style="background-color:#d99694; cursor:pointer; border: 1px solid #000000;"><table class="hoverSimple" width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td style="color:Red; text-align:right; font-weight:bolder;" onclick="bidding.deleteInterest(\'@INTERESTGUID\')">X&nbsp;</td></tr></table></div></li>';
-                        html = resources.stringReplace(html, '@LINE1', '<b>' + interestTypeDesc + '</b> ' + interest.Product);
-                        html = resources.stringReplace(html, '@LINE2', interest.Condition);
-                        html = resources.stringReplace(html, '@INTERESTGUID', interest.InterestGUID);
-                        htmlArray.push(html);
-                    }
-                    else if (interestWindowType == WINDOWTYPE_VIEWINTEREST || interestWindowType == WINDOWTYPE_VIEWINTERESTFIRM) {
-                        var contact = bidding.getContactByGUID(interest.ContactGUID);
-                        if (contact != null) {
-                            var html = '<li><div style="background-color:#92d050; cursor:pointer; border: 1px solid #000000;"><table width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td>&nbsp;</td></tr></table></div></li>';
+                if (bidding.interests.length > 0) {
+                    htmlArray.push('<li style="white-space:nowrap; text-align:center;"><a href="#" onclick="windows.autoArrangeWindows();return false;">Arrange Windows</a></li>');
+                    resources.arrayEnum(bidding.interests, function (interest) {
+                        var interestTypeDesc = (interest.InterestType == INTERESTTYPE_BUY) ? "BUY" : "SELL";
+                        var interestWindowType = bidding.getInterestWindowType(interest);
+                        if (interestWindowType == WINDOWTYPE_BIDDING) {
+                            var html = '<li><div style="background-color:#b9cde5; cursor:pointer; border: 1px solid #000000;"><table width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td style="color:Red; text-align:right; font-weight:bolder;" onclick="bidding.deleteInterest(\'@INTERESTGUID\')">X&nbsp;</td></tr></table></div></li>';
                             html = resources.stringReplace(html, '@LINE1', '<b>' + interestTypeDesc + '</b> ' + interest.Product);
-                            html = resources.stringReplace(html, '@LINE2', 'Order @ ' + interest.Price + ' - ' + contact.FirstName + ' ' + contact.LastName);
+                            html = resources.stringReplace(html, '@LINE2', 'Order @ ' + interest.Price);
                             html = resources.stringReplace(html, '@INTERESTGUID', interest.InterestGUID);
                             htmlArray.push(html);
                         }
-                    }
-                    else if (interestWindowType == WINDOWTYPE_VIEWINTERESTNOORDER || interestWindowType == WINDOWTYPE_VIEWINTERESTNOORDERFIRM) {
-                        var contact = bidding.getContactByGUID(interest.ContactGUID);
-                        if (contact != null) {
-                            var html = '<li><div style="background-color:#fac090; cursor:pointer; border: 1px solid #000000;"><table width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td>&nbsp;</td></tr></table></div></li>';
+                        else if (interestWindowType == WINDOWTYPE_BIDDINGNOORDER) {
+                            var html = '<li><div style="background-color:#d99694; cursor:pointer; border: 1px solid #000000;"><table class="hoverSimple" width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td style="color:Red; text-align:right; font-weight:bolder;" onclick="bidding.deleteInterest(\'@INTERESTGUID\')">X&nbsp;</td></tr></table></div></li>';
                             html = resources.stringReplace(html, '@LINE1', '<b>' + interestTypeDesc + '</b> ' + interest.Product);
-                            html = resources.stringReplace(html, '@LINE2', interest.Condition + ' - ' + contact.FirstName + ' ' + contact.LastName);
+                            html = resources.stringReplace(html, '@LINE2', interest.Condition);
                             html = resources.stringReplace(html, '@INTERESTGUID', interest.InterestGUID);
                             htmlArray.push(html);
                         }
-                    }
-                });
-                $('.menuInterests .menuInterestsDropdown').html(htmlArray.join(''));
+                        else if (interestWindowType == WINDOWTYPE_VIEWINTEREST || interestWindowType == WINDOWTYPE_VIEWINTERESTFIRM) {
+                            var contact = bidding.getContactByGUID(interest.ContactGUID);
+                            if (contact != null) {
+                                var html = '<li><div style="background-color:#92d050; cursor:pointer; border: 1px solid #000000;"><table width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td>&nbsp;</td></tr></table></div></li>';
+                                html = resources.stringReplace(html, '@LINE1', '<b>' + interestTypeDesc + '</b> ' + interest.Product);
+                                html = resources.stringReplace(html, '@LINE2', 'Order @ ' + interest.Price + ' - ' + contact.FirstName + ' ' + contact.LastName);
+                                html = resources.stringReplace(html, '@INTERESTGUID', interest.InterestGUID);
+                                htmlArray.push(html);
+                            }
+                        }
+                        else if (interestWindowType == WINDOWTYPE_VIEWINTERESTNOORDER || interestWindowType == WINDOWTYPE_VIEWINTERESTNOORDERFIRM) {
+                            var contact = bidding.getContactByGUID(interest.ContactGUID);
+                            if (contact != null) {
+                                var html = '<li><div style="background-color:#fac090; cursor:pointer; border: 1px solid #000000;"><table width="100%"><tr><td onclick="bidding.showInterestWindow(\'@INTERESTGUID\')">@LINE1<br />@LINE2</td><td>&nbsp;</td></tr></table></div></li>';
+                                html = resources.stringReplace(html, '@LINE1', '<b>' + interestTypeDesc + '</b> ' + interest.Product);
+                                html = resources.stringReplace(html, '@LINE2', interest.Condition + ' - ' + contact.FirstName + ' ' + contact.LastName);
+                                html = resources.stringReplace(html, '@INTERESTGUID', interest.InterestGUID);
+                                htmlArray.push(html);
+                            }
+                        }
+                    });
+                    $('.menuInterests .menuInterestsDropdown').html(htmlArray.join(''));
+                }
+                else {
+                    $('.menuInterests .menuInterestsDropdown').html('You have no interests yet, click on the plus at the top left hand corner to start adding');
+                }
             };
 
             if (newInterests != null) bidding.interests = newInterests;
@@ -732,29 +778,62 @@ var bidding = (function () {
         refreshContacts: function (newContacts, refreshCache) {
             var _refreshContacts = function () {
                 var htmlArray = new Array();
+                var hasContacts = false;
+                var searchResultsFound = false;
                 resources.arrayEnum(bidding.contacts, function (contact) {
                     if (!contact.Block) {
-                        if (contact.MembershipTypeID != MEMBERSHIPTYPE_NOTSIGNEDUP) {
-                            var notSignedUpChatWindow = windows.getWindowByTypeAndID(WINDOWTYPE_CHATCONTACTNOTSIGNEDUP, contact.Email);
-                            if (notSignedUpChatWindow != null) {
-                                var windowPos = $(notSignedUpChatWindow.dialog[0]).dialog('option', 'position');
-                                windows.closeWindow(notSignedUpChatWindow);
-                                var chatWindow = bidding.showChatWindow_Outgoing(contact.GUID);
-                                $(chatWindow.dialog[0]).dialog('option', 'position', windowPos)
-                            }
+                        hasContacts = true;
 
-                            var messageCount = '';
-                            if (contact.UnreadMessages.length > 0) messageCount = '<b>(' + contact.UnreadMessages.length + ')</b> ';
-                            var html = '<li><div onclick="bidding.showChatWindow_Outgoing(\'' + contact.GUID + '\')" style="background-color:white; cursor:pointer; white-space:nowrap;"><table width="100%"><tr><td>' + messageCount + contact.FirstName + ' ' + contact.LastName + '</td><td align="right"><img src="Resources/Images/' + (contact.IsOnline ? 'green_light_16.png' : 'red_light_16.png') + '" /></td></tr></table></div></li>';
-                            htmlArray.push(html);
+                        var contactName = contact.FirstName + ' ' + contact.LastName;
+                        if (contact.MembershipTypeID == MEMBERSHIPTYPE_NOTSIGNEDUP) contactName = contact.Email;
+                        var isSearchMatch = true;
+                        var searchText = $('.contactsSearchField').val();
+                        if (!resources.stringNullOrEmpty(searchText)) {
+                            isSearchMatch = false;
+                            if (resources.stringContains(contactName, searchText)) isSearchMatch = true;
+                            //if (resources.stringContains(contact.Email, searchText)) isSearchMatch = true;
+                            //else if (resources.stringContains(contact.FirstName, searchText)) isSearchMatch = true;
+                            //else if (resources.stringContains(contact.LastName, searchText)) isSearchMatch = true;
+
+                            if (isSearchMatch) {
+                                var pos = contactName.toLowerCase().indexOf(searchText.toLowerCase());
+                                if (pos >= 0) {
+                                    contactName  = contactName.substring(0, pos) + '<b>' + contactName.substring(pos, pos + searchText.length) + '</b>' + contactName.substring(pos + searchText.length);
+                                }
+                            }
                         }
-                        else {
-                            var html = '<li><div onclick="bidding.showChatWindow_Outgoing(\'' + contact.GUID + '\')" style="background-color:white; cursor:pointer; white-space:nowrap;"><table width="100%"><tr><td><i>' + contact.Email + '</i></td><td align="right">&nbsp;</td></tr></table></div></li>';
-                            htmlArray.push(html);
+
+                        if (isSearchMatch) {
+                            searchResultsFound = true;
+                            if (contact.MembershipTypeID != MEMBERSHIPTYPE_NOTSIGNEDUP) {
+                                var notSignedUpChatWindow = windows.getWindowByTypeAndID(WINDOWTYPE_CHATCONTACTNOTSIGNEDUP, contact.Email);
+                                if (notSignedUpChatWindow != null) {
+                                    var windowPos = $(notSignedUpChatWindow.dialog[0]).dialog('option', 'position');
+                                    windows.closeWindow(notSignedUpChatWindow);
+                                    var chatWindow = bidding.showChatWindow_Outgoing(contact.GUID);
+                                    $(chatWindow.dialog[0]).dialog('option', 'position', windowPos)
+                                }
+
+                                var messageCount = '';
+                                if (contact.UnreadMessages.length > 0) messageCount = '<b>(' + contact.UnreadMessages.length + ')</b> ';
+                                var html = '<li><div style="background-color:white; cursor:pointer; white-space:nowrap;"><table width="100%"><tr><td onclick="bidding.showChatWindow_Outgoing(\'' + contact.GUID + '\')"><img src="Resources/Images/' + (contact.IsOnline ? 'green_light_16.png' : 'red_light_16.png') + '" />&nbsp;' + messageCount + contactName + '</td><td align="right"><div onclick="bidding.showDeleteContactModal(\'' + contact.GUID + '\');" style="font-weight:bold;color:#ff0000;font-size:12pt;cursor:pointer;">X</div></td></tr></table></div></li>';
+                                htmlArray.push(html);
+                            }
+                            else {
+                                var html = '<li><div onclick="bidding.showChatWindow_Outgoing(\'' + contact.GUID + '\')" style="background-color:white; cursor:pointer; white-space:nowrap;"><table width="100%"><tr><td><i>' + contactName + '</i></td><td align="right">&nbsp;</td></tr></table></div></li>';
+                                htmlArray.push(html);
+                            }
                         }
                     }
                 });
                 $('.menuContacts .menuContactsDropdown').html(htmlArray.join(''));
+
+                if (!hasContacts) {
+                    $('.menuContacts .menuContactsDropdown').html('<div style="width:250px;">You have no contacts yet, click on the plus at the top right hand corner to start adding</div>');
+                }
+                else if (!searchResultsFound) {
+                    $('.menuContacts .menuContactsDropdown').html('<div style="width:250px;">No contacts found that matches your search, click on the plus at the top left/right hand corner to start adding</div>');
+                }
             };
 
             if (newContacts != null) bidding.contacts = newContacts;
@@ -764,6 +843,13 @@ var bidding = (function () {
                 });
             }
             else _refreshContacts();
+        },
+
+        showDeleteContactModal: function (contactGUID) {
+            var contact = bidding.getContactByGUID(contactGUID);
+            modals.showDeleteContactModal(contact, function (contacts) {
+                bidding.refreshContacts(contacts);
+            });
         },
 
         showNewContactModal: function () {

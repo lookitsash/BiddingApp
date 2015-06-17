@@ -110,4 +110,13 @@ $(document).ready(function () {
         if (resources.stringEqual(pageAction, 'Login')) modals.showLoginModal();
         else if (resources.stringEqual(pageAction, 'Signup')) modals.showSignupModal();
     }
+
+    $('.gearIcon').attr('src', 'Resources/Images/gear.png');
+    $('.gearIcon').hover(function () { $(this).attr('src', 'Resources/Images/gearOver.png'); }, function () { $(this).attr('src', 'Resources/Images/gear.png'); });
+
+    $('.logoutIcon').attr('src', 'Resources/Images/logout.png');
+    $('.logoutIcon').hover(function () { $(this).attr('src', 'Resources/Images/logoutOver.png'); }, function () { $(this).attr('src', 'Resources/Images/logout.png'); });
+
+    $('.logIcon').attr('src', 'Resources/Images/notepad.jpg');
+    $('.logIcon').hover(function () { $(this).attr('src', 'Resources/Images/notepadOver.jpg'); }, function () { $(this).attr('src', 'Resources/Images/notepad.jpg'); });
 });

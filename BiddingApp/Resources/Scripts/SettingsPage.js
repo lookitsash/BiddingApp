@@ -32,7 +32,7 @@ var settingsPage = (function () {
                         settingsPage.refreshAccount();
                     }
                 }
-            });            
+            });
         },
 
         refreshContacts: function (newContacts, refreshCache) {
@@ -99,9 +99,14 @@ var settingsPage = (function () {
         },
 
         showDeleteContactModal: function (contactGUID) {
-            modals.showDeleteContactModal(contactGUID, function (contacts) {
+            var contact = settingsPage.getContactByGUID(contactGUID);
+            modals.showDeleteContactModal(contact, function (contacts) {
                 settingsPage.refreshContacts(contacts);
             });
+        },
+
+        getContactByGUID: function (contactGUID) {
+            return resources.getArrayItem(settingsPage.contacts, function (contact) { return resources.stringEqual(contact.GUID, contactGUID); });
         },
 
         unblockContact: function (contactGUID) {

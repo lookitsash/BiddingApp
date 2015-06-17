@@ -124,7 +124,7 @@
 
                 <section class="panel white solid">
                     <div class="panel-body form" style=" text-align:left;">
-                    Are you sure you want to delete name3 (email3)?<br />
+                    Are you sure you want to delete <span class="contactDetails"></span>?<br />
                     <br />
                     <label><input type="checkbox" class="deleteField" />Also block this contact</label>
                     </div>

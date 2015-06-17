@@ -7,11 +7,13 @@
 
         function toggleContactSearch(isVisible) {
             if (isVisible) {
+                $('.searchContacts').hide();
                 $('.contactsButton').hide();
                 $('.menuContactsLI .contactsSearch').show();
                 $('.contactsSearchField').focus()
             }
             else {
+                $('.searchContacts').show();
                 $('.contactsButton').show();
                 $('.menuContactsLI .contactsSearch').hide();
             }
@@ -32,7 +34,7 @@
                 <td style="width:120px">
                     
                     <ul id="menu1" class="menu menuInterests">
-                        <li><a href="#"><div class="interestsButton">Interests</div></a>
+                        <li class="menuInterestsLI"><a href="#"><div class="interestsButton">Interests</div></a>
                         <ul class="dropit menuInterestsDropdown" style="padding:0px; width:300px;">
                             <li>
                                 <div style="background-color:Green; cursor:pointer; border: 1px solid #000000;">
@@ -53,16 +55,19 @@
                     </ul>
                 </td>
                 <td style="text-align:center;font-size:25pt; font-weight:bold;white-space:nowrap;">
-                    <div class="userGreeting" style="display:inline; font-size:11pt; font-weight:normal;"></div>&nbsp;<a href="#" onclick="modals.logout();return false;"><img style="vertical-align:middle;" src="Resources/Images/logout.png" /></a>
+                    <div class="userGreeting" style="display:inline; font-size:11pt; font-weight:normal;"></div>&nbsp;<a href="#" title="Log Out" onclick="modals.logout();return false;"><img style="vertical-align:middle;" class="logoutIcon" /></a>
                     <span style="margin-left:60px;"></span>
                     <a href="Default.aspx" style="color:#000000;"><span style="font-size:25pt;"><b>Bidding</b><i>App</i></span></a>
                     <span style="margin-left:60px;"></span>
-                    <a href="Settings.aspx"><img style="vertical-align:middle;" src="Resources/Images/gear.png" /></a>
+                    <a href="DealLog.aspx" title="Deal Log"><img style="vertical-align:middle;" class="logIcon" /></a>
+                    <span style="margin-left:60px;"></span>
+                    <a href="Settings.aspx" title="Settings"><img style="vertical-align:middle;" class="gearIcon" /></a>
                 </td>
+                <td style="width:30px"><div style="cursor:pointer;" class="searchContacts"><img src="resources/images/search.png" style="width:25px;" /></div></td>
                 <td style="width:120px">
                     <ul id="Ul1" class="menu menuContacts">
                         <li class="menuContactsLI">
-                            <a href="#"><div class="contactsButton">Contacts</div></a><div class="contactsSearch"><input class="contactsSearchField" style="height:25px;" type="text" /></div>
+                            <a href="#"><div class="contactsButton">Contacts</div></a><div class="contactsSearch"><input class="contactsSearchField" style="width:117px; height:25px;" type="text" /></div>
                             <ul class="dropit-right menuContactsDropdown" style="padding:0px;">
                             </ul>
                         </li>

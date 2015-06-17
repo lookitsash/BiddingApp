@@ -83,6 +83,8 @@ var modals = (function () {
         },
 
         applyValidation: function (modalID) {
+            $('#' + modalID).removeClass('validationPerformed');
+            $('#' + modalID).addClass('validationPerformed');
             return resources.dataFieldsValidate($('#' + modalID), function () { modals.clearValidation(modalID); }, function (errorFields) {
                 $('#' + modalID + ' .errorHeader').show();
                 resources.arrayEnum(errorFields, function (field) { field.addClass('error'); });
@@ -145,6 +147,12 @@ var modals = (function () {
             resources.uiToggleCheckbox($('#signupModal .data-membershipBasic'), true);
             resources.uiToggleCheckbox($('#signupModal .data-membershipAdvance'), false);
             modals.show('signupModal');
+
+            $('#signupModal input').unbind('keyup.biddingApp').bind('keyup', function () {
+                if ($('#signupModal').hasClass('validationPerformed')) modals.applyValidation('signupModal');
+                if ($(this).hasClass('data-password')) $('#signupModal .passwordRequirements').show();
+            });
+
         },
 
         signup: function () {
@@ -225,9 +233,10 @@ var modals = (function () {
             }
         },
 
-        showDeleteContactModal: function (contactGUID, callback) {
+        showDeleteContactModal: function (contact, callback) {
             modalCallback = callback;
-            currentEditingGUID = contactGUID;
+            currentEditingGUID = contact.GUID;
+            $('#deleteContactModal .contactDetails').html(contact.FirstName + ' (' + contact.Email + ')');
             resources.uiToggleCheckbox($('#deleteContactModal .deleteField'), false);
             modals.show('deleteContactModal');
         },
