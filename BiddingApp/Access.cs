@@ -217,7 +217,8 @@ namespace BiddingApp
                                     Email = dra.Get<string>("Email"),
                                     FirstName = dra.Get<string>("FirstName"),
                                     LastName = dra.Get<string>("LastName"),
-                                    Message = dra.Get<string>("Message")
+                                    Message = dra.Get<string>("Message"),
+                                    DateSent = dra.Get<string>("DateSent")
                                 });
                             }
                         }
@@ -308,7 +309,7 @@ namespace BiddingApp
                 SqlParam(cmd, "UserID", userID);
                 foreach (DataRowAdapter dra in DataRowAdapter.Create(GetTable(cmd)))
                 {
-                    ChatData chatData = new ChatData() { ID = dra.Get<int>("ChatID"), FirstName = dra.Get<string>("FirstName"), LastName = dra.Get<string>("LastName"), Email = dra.Get<string>("Email"), Message = dra.Get<string>("Message"), NewContactRequest = true };
+                    ChatData chatData = new ChatData() { ID = dra.Get<int>("ChatID"), FirstName = dra.Get<string>("FirstName"), LastName = dra.Get<string>("LastName"), Email = dra.Get<string>("Email"), Message = dra.Get<string>("Message"), NewContactRequest = true, DateSent = dra.Get<string>("DateSent") };
                     chatItems.Add(chatData);
                 }
             }
@@ -325,7 +326,7 @@ namespace BiddingApp
                 SqlParam(cmd, "LastChatID", lastChatID);
                 foreach (DataRowAdapter dra in DataRowAdapter.Create(GetTable(cmd)))
                 {
-                    ChatData chatData = new ChatData() { ID = dra.Get<int>("ChatID"), FirstName = dra.Get<string>("FirstName"), Message = dra.Get<string>("Message"), Outgoing = dra.Get<bool>("Outgoing") };
+                    ChatData chatData = new ChatData() { ID = dra.Get<int>("ChatID"), FirstName = dra.Get<string>("FirstName"), Message = dra.Get<string>("Message"), Outgoing = dra.Get<bool>("Outgoing"), DateSent = dra.Get<string>("DateSent") };
                     chatItems.Add(chatData);
                 }
             }

@@ -145,7 +145,7 @@ namespace BiddingApp
                     BiddingClient clientTo = GetBiddingClient(emailTo);
                     if (clientTo != null)
                     {
-                        Clients.Client(clientTo.ConnectionID).chatReceived(JsonConvert.SerializeObject(new { FirstName = clientFrom.UserData.FirstName, LastName = clientFrom.UserData.LastName, Email = clientFrom.UserData.Email, Message = message }));
+                        Clients.Client(clientTo.ConnectionID).chatReceived(JsonConvert.SerializeObject(new { FirstName = clientFrom.UserData.FirstName, LastName = clientFrom.UserData.LastName, Email = clientFrom.UserData.Email, Message = message, DateSent = DateTime.Now.ToString() }));
                     }
                     else
                     {

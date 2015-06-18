@@ -127,6 +127,9 @@ var bidding = (function () {
                     var chatContent = $('.chatContent', windowObj.dialog);
                     chatContent.append($(html));
                     chatContent.scrollTop(chatContent.prop("scrollHeight"));
+
+                    if (data.IsOnline) $('.onlineStatusIndicator img', windowObj.dialog).attr('src', 'Resources/images/green_light_16.png');
+                    else $('.onlineStatusIndicator img', windowObj.dialog).attr('src', 'Resources/images/red_light_16.png');
                 }
             };
             $.connection.biddingHub.client.interestUpdated = function (data) {
@@ -798,7 +801,7 @@ var bidding = (function () {
                             if (isSearchMatch) {
                                 var pos = contactName.toLowerCase().indexOf(searchText.toLowerCase());
                                 if (pos >= 0) {
-                                    contactName  = contactName.substring(0, pos) + '<b>' + contactName.substring(pos, pos + searchText.length) + '</b>' + contactName.substring(pos + searchText.length);
+                                    contactName = contactName.substring(0, pos) + '<b>' + contactName.substring(pos, pos + searchText.length) + '</b>' + contactName.substring(pos + searchText.length);
                                 }
                             }
                         }
@@ -820,7 +823,7 @@ var bidding = (function () {
                                 htmlArray.push(html);
                             }
                             else {
-                                var html = '<li><div onclick="bidding.showChatWindow_Outgoing(\'' + contact.GUID + '\')" style="background-color:white; cursor:pointer; white-space:nowrap;"><table width="100%"><tr><td><i>' + contactName + '</i></td><td align="right">&nbsp;</td></tr></table></div></li>';
+                                var html = '<li><div style="background-color:white; cursor:pointer; white-space:nowrap;"><table width="100%"><tr><td onclick="bidding.showChatWindow_Outgoing(\'' + contact.GUID + '\')"><i>' + contactName + '</i></td><td align="right"><div onclick="bidding.showDeleteContactModal(\'' + contact.GUID + '\');" style="font-weight:bold;color:#ff0000;font-size:12pt;cursor:pointer;">X</div></td></table></div></li>';
                                 htmlArray.push(html);
                             }
                         }
@@ -880,6 +883,10 @@ var bidding = (function () {
             var windowTitle = firstName + ' ' + lastName;
             if (windowType == WINDOWTYPE_CHATCONTACTNOTSIGNEDUP) windowTitle = email;
             var chatWindow = windows.spawnWindow(windowType, windowTitle, email, null);
+
+            $('.ui-dialog-title', chatWindow.dialog.closest('.ui-dialog')).css('margin-left', '10px');
+            $('.ui-dialog-titlebar', chatWindow.dialog.closest('.ui-dialog')).css('padding-top', '0px');
+            $('.ui-dialog-titlebar', chatWindow.dialog.closest('.ui-dialog')).css('padding-bottom', '0px');
 
             if (windowType == WINDOWTYPE_CHATCONTACTNOTSIGNEDUP) {
                 //$('.email', chatWindow.dialog).html(email);
@@ -953,7 +960,9 @@ var bidding = (function () {
 
                                 chatItem.Email = emailTo;
                                 bidding.logChat(chatItem, true);
-                                var html = '<div class="chatMessage"><b style="color:#' + (chatItem.Outgoing ? 'ff0000' : '0000ff') + ';">' + chatItem.FirstName + ':</b> ' + resources.stringReplace(chatItem.Message, '\n', '</br>') + '</div>';
+                                var dateSent = bidding.convertDateToLocal(chatItem.DateSent);
+                                var timeStamp = resources.getCalendarDate(null, dateSent) + ' ' + resources.getClockTime(dateSent);
+                                var html = '<div class="chatMessage"><a title="' + timeStamp + '"><b style="color:#' + (chatItem.Outgoing ? 'ff0000' : '0000ff') + ';">' + chatItem.FirstName + ':</b> ' + resources.stringReplace(chatItem.Message, '\n', '</br>') + '</a></div>';
                                 loadingMessages.after($(html));
                             });
                             lastChatID = minChatID;
@@ -994,8 +1003,12 @@ var bidding = (function () {
 
                     if (existingContact.AppearOnline) $('.toggleOnlineStatus img', chatWindow.dialog).attr('src', 'Resources/images/eye-on.png');
                     else $('.toggleOnlineStatus img', chatWindow.dialog).attr('src', 'Resources/images/eye-off.png');
+
+                    if (existingContact.IsOnline) $('.onlineStatusIndicator img', chatWindow.dialog).attr('src', 'Resources/images/green_light_16.png');
+                    else $('.onlineStatusIndicator img', chatWindow.dialog).attr('src', 'Resources/images/red_light_16.png');
                 }
 
+                $('.onlineStatusIndicator', chatWindow.dialog).attr('data-id', email);
                 $('.toggleOnlineStatus', chatWindow.dialog).attr('data-id', email);
                 $('.loadEarlierMessages', chatWindow.dialog).attr('data-id', email);
                 $('.loadEarlierMessages', chatWindow.dialog).attr('data-lastchatid', lastChatID);
@@ -1006,7 +1019,9 @@ var bidding = (function () {
                 if (chatHistoryItems != null) {
                     var chatContent = $('.chatContent', chatWindow.dialog);
                     resources.arrayEnum(chatHistoryItems, function (data) {
-                        var html = '<div class="chatMessage"><b style="color:#' + (data.Outgoing ? 'ff0000' : '0000ff') + ';">' + data.FirstName + ':</b> ' + resources.stringReplace(data.Message, '\n', '</br>') + '</div>';
+                        var dateSent = bidding.convertDateToLocal(data.DateSent);
+                        var timeStamp = resources.getCalendarDate(null, dateSent) + ' ' + resources.getClockTime(dateSent);
+                        var html = '<div class="chatMessage"><a title="' + timeStamp + '"><b style="color:#' + (data.Outgoing ? 'ff0000' : '0000ff') + ';">' + data.FirstName + ':</b> ' + resources.stringReplace(data.Message, '\n', '</br>') + '</a></div>';
                         chatContent.append($(html));
                     });
                     chatContent.scrollTop(chatContent.prop("scrollHeight"));
@@ -1020,7 +1035,9 @@ var bidding = (function () {
                             var message = resources.htmlEncode(resources.stringTrim($(this).val()));
                             if (!resources.stringNullOrEmpty(message)) {
                                 bidding.logChat({ Email: emailTo, FirstName: bidding.userData.FirstName, LastName: bidding.userData.LastName, Message: message, Outgoing: true });
-                                var html = '<div class="chatMessage"><b style="color:#ff0000;">' + bidding.userData.FirstName + ':</b> ' + resources.stringReplace(message, '\n', '</br>') + '</div>';
+                                var dateSent = new Date();
+                                var timeStamp = resources.getCalendarDate(null, dateSent) + ' ' + resources.getClockTime(dateSent);
+                                var html = '<div class="chatMessage"><a title="' + timeStamp + '"><b style="color:#ff0000;">' + bidding.userData.FirstName + ':</b> ' + resources.stringReplace(message, '\n', '</br>') + '</a></div>';
                                 var _chatWindow = windows.getWindowByTypeAndID(WINDOWTYPE_CHAT, emailTo);
 
                                 var chatContent = $('.chatContent', _chatWindow.dialog);
@@ -1061,7 +1078,9 @@ var bidding = (function () {
             }
 
             bidding.logChat({ Email: data.Email, FirstName: data.FirstName, LastName: data.LastName, Message: data.Message });
-            var html = '<div class="chatMessage"><b style="color:#0000ff;">' + data.FirstName + ':</b> ' + resources.stringReplace(data.Message, '\n', '</br>') + '</div>';
+            var dateSent = (data.DateSent == null) ? bidding.convertDateToLocal(data.DateSent) : new Date();
+            var timeStamp = resources.getCalendarDate(null, dateSent) + ' ' + resources.getClockTime(dateSent);
+            var html = '<div class="chatMessage"><a title="' + timeStamp + '"><b style="color:#0000ff;">' + data.FirstName + ':</b> ' + resources.stringReplace(data.Message, '\n', '</br>') + '</a></div>';
             var chatContent = $('.chatContent', chatWindow.dialog);
             chatContent.append($(html));
             chatContent.scrollTop(chatContent.prop("scrollHeight"));

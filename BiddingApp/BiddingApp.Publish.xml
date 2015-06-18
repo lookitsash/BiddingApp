@@ -5,7 +5,8 @@
     <file relUrl="bin/Microsoft.AspNet.SignalR.SystemWeb.xml" publishTime="05/03/2015 19:52:30" />
     <file relUrl="Resources/Scripts/json2.js" publishTime="05/01/2015 20:33:18" />
     <file relUrl="Resources/CSS/Images/TabSeperator.png" publishTime="04/27/2015 22:33:32" />
-    <file relUrl="Default.master" publishTime="06/05/2015 16:19:24" />
+    <file relUrl="DealLog.aspx" publishTime="06/05/2015 16:19:56" />
+    <file relUrl="Default.master" publishTime="06/17/2015 12:09:28" />
     <file relUrl="ContactUs.aspx" publishTime="06/02/2015 11:23:36" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_glass_100_f6f6f6_1x400.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_diagonals-thick_20_666666_40x40.png" publishTime="04/27/2015 22:22:15" />
@@ -13,81 +14,88 @@
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_glass_65_ffffff_1x400.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-icons_ffffff_256x240.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="Web.config" publishTime="06/07/2015 22:50:30" />
-    <file relUrl="Resources/Scripts/ForgotPassword.js" publishTime="06/03/2015 14:54:56" />
+    <file relUrl="Resources/Scripts/ForgotPassword.js" publishTime="06/12/2015 11:48:13" />
+    <file relUrl="QuickGuide.aspx" publishTime="06/17/2015 11:42:34" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_flat_10_000000_40x100.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="bin/Microsoft.AspNet.SignalR.Owin.xml" publishTime="05/03/2015 19:52:30" />
     <file relUrl="bin/Owin.dll" publishTime="05/03/2015 19:52:30" />
+    <file relUrl="Resources/Images/ArrowOpen.jpg" publishTime="06/17/2015 11:26:55" />
     <file relUrl="Global.asax" publishTime="05/03/2015 19:53:16" />
     <file relUrl="Resources/Images/Hamburger.png" publishTime="04/16/2015 10:24:13" />
     <file relUrl="bin/Microsoft.Owin.Host.SystemWeb.xml" publishTime="05/03/2015 19:52:30" />
     <file relUrl="Settings.aspx" publishTime="06/05/2015 12:40:05" />
-    <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_diagonals-thick_18_b81900_40x40.png" publishTime="04/27/2015 22:22:15" />
-    <file relUrl="ForgotPassword.aspx" publishTime="06/03/2015 13:47:37" />
+    <file relUrl="bin/BiddingApp.dll" publishTime="06/17/2015 16:04:17" />
+    <file relUrl="ForgotPassword.aspx" publishTime="06/12/2015 11:50:12" />
     <file relUrl="Resources/Images/eye-on.png" publishTime="05/01/2015 11:23:29" />
     <file relUrl="Resources/Images/gear.png" publishTime="04/27/2015 21:57:48" />
+    <file relUrl="Resources/Images/Notepad.jpg" publishTime="06/17/2015 11:52:55" />
     <file relUrl="Resources/Scripts/ContactUs.js" publishTime="06/02/2015 11:23:58" />
     <file relUrl="Resources/Images/logout.png" publishTime="04/27/2015 21:53:37" />
-    <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_highlight-soft_100_eeeeee_1x100.png" publishTime="04/27/2015 22:22:15" />
-    <file relUrl="bin/BiddingApp.pdb" publishTime="06/07/2015 22:50:29" />
+    <file relUrl="bin/BiddingApp.pdb" publishTime="06/17/2015 16:04:17" />
     <file relUrl="Foundation.dll" publishTime="04/03/2015 14:03:04" />
-    <file relUrl="Resources/Scripts/DefaultPage.js" publishTime="06/05/2015 09:52:18" />
-    <file relUrl="Resources/Scripts/jquery-ui/jquery-ui.min.js" publishTime="04/27/2015 22:19:39" />
-    <file relUrl="Resources/Scripts/Bidding.js" publishTime="06/07/2015 22:42:34" />
-    <file relUrl="ChatLog.aspx" publishTime="06/05/2015 16:19:48" />
+    <file relUrl="Resources/Images/logoutOver.png" publishTime="06/17/2015 11:58:15" />
+    <file relUrl="Resources/Images/NotepadOver.jpg" publishTime="06/17/2015 11:59:19" />
+    <file relUrl="Resources/Scripts/DefaultPage.js" publishTime="06/17/2015 12:07:20" />
+    <file relUrl="Resources/Images/eye-off.png" publishTime="05/01/2015 11:23:29" />
+    <file relUrl="Resources/Scripts/Bidding.js" publishTime="06/17/2015 16:08:47" />
+    <file relUrl="packages.config" publishTime="05/03/2015 19:52:32" />
     <file relUrl="bin/Newtonsoft.Json.dll" publishTime="05/03/2015 19:48:53" />
     <file relUrl="Resources/Scripts/jquery.fullPage/jquery.fullPage.js" publishTime="06/03/2015 16:30:35" />
     <file relUrl="bin/Newtonsoft.Json.xml" publishTime="05/03/2015 19:48:53" />
     <file relUrl="bin/Microsoft.Web.Infrastructure.dll" publishTime="05/03/2015 19:52:30" />
     <file relUrl="bin/Microsoft.Owin.Host.SystemWeb.dll" publishTime="05/03/2015 19:52:30" />
-    <file relUrl="Resources/Scripts/Modals.js" publishTime="06/07/2015 22:06:57" />
-    <file relUrl="bin/BiddingApp.dll" publishTime="06/07/2015 22:50:30" />
-    <file relUrl="bin/Microsoft.AspNet.SignalR.Core.dll" publishTime="05/03/2015 19:52:30" />
-    <file relUrl="Bidding.aspx" publishTime="06/07/2015 22:03:16" />
+    <file relUrl="Resources/Scripts/Modals.js" publishTime="06/17/2015 16:00:09" />
+    <file relUrl="Bidding.aspx" publishTime="06/17/2015 15:22:36" />
     <file relUrl="Resources/CSS/Images/SelectedSides.png" publishTime="04/27/2015 22:33:32" />
     <file relUrl="Resources/Images/sprite-closemodal-flat-1.png" publishTime="04/16/2015 14:01:48" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_gloss-wave_35_f6a828_500x100.png" publishTime="04/28/2015 08:54:29" />
-    <file relUrl="Resources/Scripts/jquery-1.11.0.min.js" publishTime="04/16/2015 10:04:23" />
+    <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_diagonals-thick_18_b81900_40x40.png" publishTime="04/27/2015 22:22:15" />
+    <file relUrl="Resources/Scripts/hoverIntent.js" publishTime="04/29/2015 13:48:09" />
+    <file relUrl="Resources/Scripts/jquery-ui/jquery-ui.min.js" publishTime="04/27/2015 22:19:39" />
     <file relUrl="bin/Microsoft.AspNet.SignalR.Core.xml" publishTime="05/03/2015 19:52:30" />
     <file relUrl="Resources/Scripts/dropit/dropit.css" publishTime="04/29/2015 16:52:31" />
     <file relUrl="Resources/Scripts/Dev.js" publishTime="05/17/2015 19:41:19" />
     <file relUrl="Scripts/jquery-1.6.4.min.js" publishTime="05/03/2015 19:52:31" />
-    <file relUrl="Resources/Images/eye-off.png" publishTime="05/01/2015 11:23:29" />
     <file relUrl="Resources/Scripts/ChatLog.js" publishTime="06/05/2015 16:17:14" />
     <file relUrl="Resources/Scripts/jquery.session.js" publishTime="04/27/2015 21:13:01" />
     <file relUrl="Resources/Scripts/Statics.js" publishTime="06/03/2015 15:17:02" />
     <file relUrl="bin/Microsoft.AspNet.SignalR.SystemWeb.dll" publishTime="05/03/2015 19:52:30" />
+    <file relUrl="Resources/Images/gearOver.png" publishTime="06/17/2015 11:58:32" />
     <file relUrl="Resources/Scripts/jquery.signalR-1.1.4.min.js" publishTime="05/03/2015 19:52:31" />
-    <file relUrl="ValidateEmail.aspx" publishTime="06/02/2015 16:12:09" />
+    <file relUrl="Resources/Images/ArrowClose.jpg" publishTime="06/17/2015 11:26:55" />
+    <file relUrl="ValidateEmail.aspx" publishTime="06/12/2015 11:42:33" />
     <file relUrl="Scripts/jquery.signalR-1.1.4.js" publishTime="05/03/2015 19:52:31" />
-    <file relUrl="Resources/CSS/Site.css" publishTime="06/05/2015 08:42:07" />
+    <file relUrl="Resources/CSS/Site.css" publishTime="06/17/2015 12:01:33" />
     <file relUrl="Receiver.asmx" publishTime="04/26/2015 21:36:23" />
     <file relUrl="bin/Microsoft.AspNet.SignalR.Owin.dll" publishTime="05/03/2015 19:52:30" />
     <file relUrl="Resources/Images/spinner.gif" publishTime="04/27/2015 20:26:59" />
+    <file relUrl="Resources/CSS/Images/SelectedMiddle.png" publishTime="04/27/2015 22:33:32" />
+    <file relUrl="Resources/Images/search.png" publishTime="06/17/2015 15:09:45" />
+    <file relUrl="Resources/Scripts/Windows.js" publishTime="05/19/2015 11:31:16" />
     <file relUrl="Resources/Sounds/Buzzer.mp3" publishTime="06/07/2015 22:37:13" />
     <file relUrl="Resources/Images/red_light_16.png" publishTime="04/29/2015 16:47:54" />
-    <file relUrl="Resources/Scripts/jquery-cmodal.js" publishTime="04/16/2015 10:04:23" />
-    <file relUrl="Site.Master" publishTime="05/19/2015 23:04:42" />
+    <file relUrl="bin/Microsoft.AspNet.SignalR.Core.dll" publishTime="05/03/2015 19:52:30" />
+    <file relUrl="Site.Master" publishTime="06/17/2015 14:39:16" />
     <file relUrl="Scripts/jquery-1.6.4.js" publishTime="05/03/2015 19:52:31" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-icons_222222_256x240.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="Scripts/jquery-1.6.4-vsdoc.js" publishTime="05/03/2015 19:52:31" />
     <file relUrl="Resources/Scripts/DealLog.js" publishTime="06/05/2015 14:48:05" />
-    <file relUrl="DealLog.aspx" publishTime="06/05/2015 16:19:56" />
+    <file relUrl="Resources/Scripts/jquery-cmodal.js" publishTime="04/16/2015 10:04:23" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_glass_100_fdf5ce_1x400.png" publishTime="04/28/2015 09:05:24" />
-    <file relUrl="Resources/Scripts/Resources.js" publishTime="06/02/2015 15:27:00" />
-    <file relUrl="Resources/Scripts/SettingsPage.js" publishTime="06/05/2015 12:45:53" />
+    <file relUrl="Resources/Scripts/SettingsPage.js" publishTime="06/17/2015 14:42:34" />
     <file relUrl="Resources/Scripts/jquery-ui/jquery-ui.min.css" publishTime="04/27/2015 22:19:45" />
+    <file relUrl="Resources/Scripts/ValidateEmail.js" publishTime="06/12/2015 11:44:06" />
     <file relUrl="Resources/Scripts/dropit/dropit.js" publishTime="04/16/2015 10:01:22" />
-    <file relUrl="Resources/Scripts/hoverIntent.js" publishTime="04/29/2015 13:48:09" />
+    <file relUrl="Resources/Scripts/jquery-ui/images/ui-bg_highlight-soft_100_eeeeee_1x100.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="Resources/CSS/Images/TabMenu.png" publishTime="04/27/2015 22:33:32" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-icons_ef8c08_256x240.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="Resources/Scripts/jquery.fullPage/jquery.fullPage.css" publishTime="06/03/2015 16:30:35" />
-    <file relUrl="Resources/Scripts/jquery-ui/images/ui-icons_228ef1_256x240.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="Resources/Images/green_light_16.png" publishTime="04/29/2015 16:47:54" />
-    <file relUrl="packages.config" publishTime="05/03/2015 19:52:32" />
-    <file relUrl="Resources/CSS/Images/SelectedMiddle.png" publishTime="04/27/2015 22:33:32" />
-    <file relUrl="Resources/Scripts/ValidateEmail.js" publishTime="06/02/2015 15:32:01" />
+    <file relUrl="Resources/Scripts/Resources.js" publishTime="06/12/2015 12:04:34" />
+    <file relUrl="Resources/Scripts/jquery-1.11.0.min.js" publishTime="04/16/2015 10:04:23" />
+    <file relUrl="Resources/Scripts/jquery-ui/images/ui-icons_228ef1_256x240.png" publishTime="04/27/2015 22:22:15" />
     <file relUrl="bin/Foundation.dll" publishTime="04/03/2015 14:03:04" />
     <file relUrl="Resources/Scripts/jquery-ui/images/ui-icons_ffd27a_256x240.png" publishTime="04/27/2015 22:22:15" />
-    <file relUrl="Resources/Scripts/Windows.js" publishTime="05/19/2015 11:31:16" />
+    <file relUrl="ChatLog.aspx" publishTime="06/05/2015 16:19:48" />
   </publishProfile>
 </publishData>

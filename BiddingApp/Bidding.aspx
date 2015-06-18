@@ -507,6 +507,7 @@
           <table style="min-width:435px; left:-10px;" border="0" cellpadding="0" cellspacing="0">
             <tr>
                 <td valign="bottom" style="background-color:#ffffff;font-size:10pt; border:3px solid #4f6228; padding:5px; height:110px;">
+                    <div class="onlineStatusIndicator" style="position:absolute; left:20px; top:-21px;"><img src="Resources/images/red_light_16.png" style="height:16px;" /></div>
                     <div class="chatContent" style="overflow:auto; max-height:106px;">
                         <div class="loadEarlierMessages" style="text-align:center; cursor:pointer; font-size:8pt; color:#000000;">- Load Earlier Messages -</div>
                         <div class="loadingMessages" style="overflow:hidden; text-align:center;"><img src="Resources/Images/spinner.gif" /></div>
@@ -515,7 +516,7 @@
             </tr>
             <tr>
                 <td style="background-color:#4f6228; height:50px; padding:5px;">
-                    <textarea class="chatField" style="margin-left:2px; font-size:8pt; width:379px; height:40px;"></textarea><div class="toggleOnlineStatus" style="cursor:pointer; position:absolute; right:50px; top:-30px;"><img src="Resources/images/eye-on.png" style="height:16px;" /></div>
+                    <textarea class="chatField" style="margin-left:2px; font-size:8pt; width:379px; height:40px;"></textarea><div class="toggleOnlineStatus" style="cursor:pointer; position:absolute; right:50px; top:-21px;"><img src="Resources/images/eye-on.png" style="height:16px;" /></div>
                 </td>
             </tr>
           </table>

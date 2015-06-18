@@ -218,13 +218,20 @@ var modals = (function () {
         addNewContact: function () {
             if (modals.applyValidation('createContactModal')) {
                 var formData = resources.dataFieldsToObject($('#createContactModal'));
+                if (resources.stringEqual(defaultPage.getUserData().Email, formData.email)) {
+                    modals.showNotificationModal('You cannot add yourself as a contact');
+                    return;
+                }
                 modals.hide();
                 modals.toggleWaitingModal(true, 'Please wait...');
                 resources.ajaxPost('Receiver', 'AddContact', { guid: defaultPage.sessionGUID(), formData: formData }, function (data) {
                     modals.hide();
                     if (data.Success) {
                         if (data.IsBlocked) modals.showNotificationModal('Unable to add an inactive contact');
-                        else if (modalCallback != null) modalCallback(data.Contacts);
+                        else {
+                            modals.showNotificationModal('Contact successfully added');
+                            if (modalCallback != null) modalCallback(data.Contacts);
+                        }
                     }
                     else {
                         modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('createContactModal'); });

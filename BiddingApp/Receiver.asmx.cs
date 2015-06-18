@@ -213,16 +213,16 @@ BiddingApp
             {
                 JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
                 int userID = GetUserID(jToken);
-                ContactData signupData = JsonConvert.DeserializeObject<ContactData>(jToken.Value<JToken>("formData").ToString());
+                ContactData contactData = JsonConvert.DeserializeObject<ContactData>(jToken.Value<JToken>("formData").ToString());
 
                 UserData userData = Statics.Access.GetUserData(userID, null, false);
                 bool isBlocked = false;
-                int contactUserID = Statics.Access.GetUserID(signupData.Email, GUIDTypes.Email);
+                int contactUserID = Statics.Access.GetUserID(contactData.Email, GUIDTypes.Email);
                 if (contactUserID > 0) isBlocked = Statics.Access.Contact_IsBlocked(contactUserID, userData.Email);
                 
                 if (!isBlocked)
                 {
-                    DataRowAdapter dra = Statics.Access.Contact_Add(userID, signupData.Email);
+                    DataRowAdapter dra = Statics.Access.Contact_Add(userID, contactData.Email);
                     if (dra != null)
                     {
                         //contactUserID = dra.Get<int>("ContactUserID");
@@ -232,11 +232,13 @@ BiddingApp
                             SyncChat(userID, contactUserID, leaveHelloMessage, true);
                         }
 
-                        UserData contactUserData = Statics.Access.GetUserData(contactUserID, null, false);
-                        string emailTo = contactUserData.Email;
-                        string loginURL = Statics.BaseURL + "Default.aspx?Action=Login";
-                        string emailSubject = userData.FirstName + " added you as a contact";
-                        string emailBody = @"Hello, " + userData.FirstName + " " + userData.LastName + @" has added you as a contact on BiddingApp.  To add them as your contact too, visit the link below to login:
+                        if (contactUserID > 0)
+                        {
+                            UserData contactUserData = Statics.Access.GetUserData(contactUserID, null, false);
+                            string emailTo = contactUserData.Email;
+                            string loginURL = Statics.BaseURL + "Default.aspx?Action=Login";
+                            string emailSubject = userData.FirstName + " added you as a contact";
+                            string emailBody = @"Hello, " + userData.FirstName + " " + userData.LastName + @" has added you as a contact on BiddingApp.  To add them as your contact too, visit the link below to login:
 
 <a href=""" + loginURL + @""">" + loginURL + @"</a>
 
@@ -244,8 +246,24 @@ Thank you,
 
 Customer Service
 BiddingApp";
-                        if (Statics.Access.User_CreateNotificationEmail(contactUserID, userID, NotificationTypes.NewContactsAddMe, emailSubject, emailBody))
+                            if (Statics.Access.User_CreateNotificationEmail(contactUserID, userID, NotificationTypes.NewContactsAddMe, emailSubject, emailBody))
+                            {
+                                Utility.SendEmail(emailTo, emailSubject, Utility.ConvertToHtml(emailBody));
+                            }
+                        }
+                        else
                         {
+                            string emailTo = contactData.Email;
+                            string signupURL = Statics.BaseURL + "Default.aspx?Action=Signup";
+                            string emailSubject = userData.FirstName + " added you as a contact";
+                            string emailBody = @"Hello, " + userData.FirstName + " " + userData.LastName + @" has added you as a contact on BiddingApp.  To add them as your contact too, visit the link below to create an account:
+
+<a href=""" + signupURL + @""">" + signupURL + @"</a>
+
+Thank you,
+
+Customer Service
+BiddingApp";
                             Utility.SendEmail(emailTo, emailSubject, Utility.ConvertToHtml(emailBody));
                         }
                     }
@@ -1233,7 +1251,7 @@ BiddingApp
     public class ChatData
     {
         public int ID;
-        public string Email, FirstName, LastName, Message;
+        public string Email, FirstName, LastName, Message, DateSent;
         public bool Outgoing, NewContactRequest;
     }
 
