@@ -85,7 +85,7 @@
     <Content Include="ContactUs.aspx" />
     <Content Include="DealLog.aspx" />
     <Content Include="Default.aspx" />
-    <Content Include="Documentation.txt" />
+    <None Include="Documentation.txt" />
     <Content Include="ForgotPassword.aspx" />
     <Content Include="Foundation.dll" />
     <Content Include="Global.asax" />
