@@ -1,0 +1,46 @@
+﻿References worth mentioning:
+Foundation - custom dll contains really useful functions
+Microsoft.AspNet.SignalR.* - signalr classes
+Newtonsoft.Json - used to serialize/deserialize json data in c#
+Owin - used for signalR
+
+Pages:
+Site.master - master page for entire site.  Contains content/resources present on all pages in site (jquery, jquery plugins, common js files, etc)
+Default.master - nested master page for non-bidding pages.  Contains content/resources required to render navigation header, and shared page functions (signup,login,etc)
+Default.aspx - sample home page (using Default.master)
+Settings.aspx - settings (contact management, profile data, etc)
+Bidding.aspx - main bidding page
+
+Webmethod connections:
+Receiver.asmx (contains all webmethods exposed for calling via jquery ajax, mainly for database interaction)
+
+Classes:
+Access.cs - contains all database access functions
+BasePage.cs - contains common page functions (nothing really in here right now, except for a logging function)
+BiddingHub.cs - access point for signalR.  Contains events like onConnect/onDisconnect which are really useful to track client online states.  Also, functions here can be directly accessed via jquery, just like receiver.asmx  Technically all web methods could reside here and reciever.asmx would not be needed.  Maybe explore this in a future version.
+Enums.cs - contains all enumerations
+Startup.cs - signalR required class
+Statics.cs - static class for shared resources (logging, db access, web.config params, etc)
+
+Javascript files:
+Bidding.js - contains all javascript for bidding page
+DefaultPage.js - contains javascript shared across all pages.  Has useful functions like detecting if user is logged in, getting user profile data, etc.  Name is a little misleading, as its not specific to Default.aspx or Default.master   Should be renamed at some point to something more relevant (like Common.js)
+Dev.js - contains functions used when dev mode is enabled in web.config (like generating random data in signup form)
+Modals.js - contains all functions revolving around the popup modals used on the site
+Resources.js - contains useful utility functions (like string parsing, date utility functions, etc)
+SettingsPage.js - contains all javascript for settings page
+Statics.js - contains static fields that should never be changed (used to simulate enumerations from c#)
+Windows.js - contains funtions for managing the floating windows used in the main bidding page
+
+Sample workflow for a user:
+User loads Default.aspx (home page)
+DefaultPage.js refreshSession called (via Default.master page) to show/hide appropriate panels based on user login status
+User clicks the login button
+Modals.js showLoginModal function called to show login modal
+User fills in login info and clicks submit
+Modals.js login function called, which calls webmethod Receiver.asmx Login function
+If valid login, SessionData object set (contains session guid and user profile data).  SessionData is stored via html5 window.sessionStorage API.  This allows a logged in session to be maintained in a window, regardless of what page you are on.  Note that the session is not tracked across multiple windows/tabs.  So if you create a new browser tab, you will not be logged in.  But if you navigate to different pages in the same window, your session will be tracked.  Also, regarding the session guid, everytime you login, the databsae generates a session guid to track your login instance.  This is a security feature. Every webmethod call requires this session guid to be passed.  It validates that you are logged in when calling webmethods, and can be used to fetch your userid
+DefaultPage.js refreshSession called and shows logged in panels
+User navigates to the main bidding page
+DefaultPage.js validateSession called.  This function needs to be called on every page where the user needs to be logged in to use.  If the user is not logged in, this function will redirect the user to Default.aspx
+Receiver.asmx GetData function called to fetch a variety of data objects used on the bidding page (such as contacts, interest data, chat messages, etc).

@@ -9,10 +9,12 @@ using System.Collections;
 
 namespace BiddingApp
 {
+    // This class is your entry point into the database.  If you need to call stored procedures (or sql directly), use this class.  It is referenced in Statics.Access for easy access.
     public class Access : SmartSql
     {
         public Access(string dbConnectionString) : base(ConnectionStringAdapter.Create(dbConnectionString).SetInitialCatalog("Bidding")) { }
 
+        #region Utility functions to make things easier
         private SqlCommand SqlProc(string stpName) { return new SqlCommand() { CommandText = stpName, CommandType = CommandType.StoredProcedure }; }
         private SqlCommand SqlText(string sql) { return new SqlCommand() { CommandText = sql, CommandType = CommandType.Text }; }
         private void SqlParam(SqlCommand cmd, string paramName, object paramValue)
@@ -24,30 +26,27 @@ namespace BiddingApp
             cmd.Parameters.Add(paramName, dbType).Direction = ParameterDirection.Output;
         }
         private T SqlParamGet<T>(SqlCommand cmd, string paramName) { return ValueConverter.Get<T>(cmd.Parameters[paramName].Value); }
+        #endregion
 
-        /*
-        public int GetUserID(string sessionGUID) { return GetUserID(sessionGUID, null, null, null); }
-        public int GetUserID(string sessionGUID, string email, string interestGUID, string contactGUID)
-        {
-            using (SqlCommand cmd = SqlProc("STP_User_Get"))
-            {
-                if (!String.IsNullOrEmpty(sessionGUID)) SqlParam(cmd, "SessionGUID", sessionGUID);
-                if (!String.IsNullOrEmpty(email)) SqlParam(cmd, "Email", email);
-                if (!String.IsNullOrEmpty(interestGUID)) SqlParam(cmd, "InterestGUID", interestGUID);
-                if (!String.IsNullOrEmpty(contactGUID)) SqlParam(cmd, "ContactGUID", contactGUID);
-                return ExecuteScalar<int>(cmd);
-            }
-        }
-        */
+        // Retrives the userID from a variety of data sources (such as via an email address, session GUID, etc)
         public int GetUserID(string guid, GUIDTypes guidType)
         {
+            // Create a reference to the database stored procedure.
             using (SqlCommand cmd = SqlProc("STP_User_Get"))
             {
+                // SqlParam allows you to add parameters to the procedure
                 if (guidType == GUIDTypes.Session) SqlParam(cmd, "SessionGUID", guid);
                 else if (guidType == GUIDTypes.Email) SqlParam(cmd, "Email", guid);
                 else if (guidType == GUIDTypes.Interest) SqlParam(cmd, "InterestGUID", guid);
                 else if (guidType == GUIDTypes.Contact) SqlParam(cmd, "ContactGUID", guid);
                 else if (guidType == GUIDTypes.Bid) SqlParam(cmd, "BidGUID", guid);
+
+                // ExecuteScalar assumes the stored procedure just returns one row and one column.
+                // ExecuteNonQuery executes the stored procedure assuming it does not return anything (usually "update" procedures)
+                // GetTable executes the stored procedure expecting a table to be returned (multiple rows/columns)
+                // GetTopRow executes the stored procedure and returns the first row in the first table
+                // GetSet executes the stored procedure expecting multiple tables to be returned (eg. a table of contacts, followed by a lookup table showing all pending messages by each contact)
+                // In this case, STP_User_Get will the UserID
                 return ExecuteScalar<int>(cmd);
             }
         }
@@ -57,7 +56,11 @@ namespace BiddingApp
             using (SqlCommand cmd = SqlProc("STP_User_UpdateNotifications"))
             {
                 SqlParam(cmd, "UserID", userID);
+                // string.Join is a useful function to convert a c# list into a comma separated string (used by some stored procedures)
+                // In this case, NotificationTypeIDs contains a delimited list of the notification types the user wants
                 SqlParam(cmd, "NotificationTypeIDs", string.Join(",", notificationTypes.Select(x => ((int)x).ToString()).ToArray()));
+
+                // ExecuteNonQuery is used here because the stored procedure does not return anything (or we did not care what it returned)
                 ExecuteNonQuery(cmd);
             }
         }
@@ -70,10 +73,15 @@ namespace BiddingApp
                 if (!String.IsNullOrEmpty(sessionGUID)) SqlParam(cmd, "SessionGUID", sessionGUID);
 
                 UserData userData = null;
+
+                // Here's an example of GetSet, where multiple sql tables are returned
                 DataSet ds = GetSet(cmd);
+
+                // Loop through all the tables
                 for (int i = 0; i < ds.Tables.Count; i++)
                 {
                     DataTable dt = ds.Tables[i];
+                    // First table is assumed to be a single row table containing specific user data (like name, email, etc.)
                     if (i == 0)
                     {
                         if (dt.Rows.Count > 0)
@@ -94,6 +102,7 @@ namespace BiddingApp
                             if (includeUserID) userData.ID = dra.Get<int>("ID");
                         }                        
                     }
+                    // Second table is assumed to be multiple rows containing the notification types that the user is subscribed to
                     else if (i == 1)
                     {
                         if (userData != null)
@@ -104,6 +113,7 @@ namespace BiddingApp
                             }
                         }
                     }
+                    // Third table is assumed to be multiple rows containing each of the user's managers
                     else if (i == 2)
                     {
                         if (userData != null)

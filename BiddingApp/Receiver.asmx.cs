@@ -17,36 +17,95 @@ namespace BiddingApp
     public class Receiver : System.Web.Services.WebService
     {
         [WebMethod]
+        // "json" param is passed directly from the javascript containing data required for function
         public string Login(string json)
         {
             try
             {
+                // jToken represents the json object passed from javascript
                 JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+
+                // extract email param from json
                 string email = jToken.Value<string>("email");
+
+                // extract password param from json
                 string password = jToken.Value<string>("password");
 
+                // Check to see if user's email was verified or not (affects whether user can actually log into site)
                 EmailVerificationStatuses emailVerificationStatus = Statics.Access.User_GetVerificationStatus(email, password);
 
                 if (emailVerificationStatus == EmailVerificationStatuses.EmailNotVerified)
                 {
+                    // return a json object back to javascript indicating the email was not yet verified (javascript will take user to email verification page)
                     return JsonConvert.SerializeObject(new { Success = true, EmailVerified = false });
                 }
                 else
                 {
+                    // email was verified, so attempt to create a session GUID security token
                     string sessionGUID = (emailVerificationStatus == EmailVerificationStatuses.EmailVerified) ? Statics.Access.Login(email, password, HttpContext.Current.Request.UserHostAddress, HttpContext.Current.Request.UserAgent) : null;
+
+                    // if no session GUID was created, then the username/password must be incorrect
+                    // Note that the NotifyException is thrown here.  Any time you want a specific error message to be displayed to the user, throw it via NotifyException.
+                    // This exception will set the ErrorMessage param which javascript uses.  Any other exception will cause javascript to show a generic error message
                     if (String.IsNullOrEmpty(sessionGUID)) throw new NotifyException("Incorrect username/password, please try again");
 
+                    // retrieve the userID for the user logging in
                     int userID = Statics.Access.GetUserID(sessionGUID, GUIDTypes.Session);
+
+                    // check to see if user is already logged in somewhere else, and if so, use signalR functions to tell that other session to log out
                     SyncForceLogout(userID);
 
+                    // create a session data object to be passed back to the javascript (this object will be saved in the user's logged in session in the browser, and referenced many times from javascript)
                     SessionData sessionData = new SessionData() { GUID = sessionGUID, UserData = Statics.Access.GetUserData(userID, null, false) };
 
+                    // return a successful response to javascript
+                    // Note that this is a common pattern to all the web method calls.  Despite what parameters are returned back to javascript from c#, there will always be a "Success" param.
+                    // If Success = true, then javascript knows the web method call succeeded.
+                    // If Success = false, then javascript knows an error occured.  Some web methods pass in an optional "ErrorMessage" param.  Javascript will show this message to the user if present.
+                    // If ErrorMessage is empty, then javascript shows a generic error message (defined in Resources/Scripts/Statics.js)
                     return JsonConvert.SerializeObject(new { Success = true, SessionData = sessionData, EmailVerified = true });
                 }
             }
             catch (Exception ex)
             {
                 Log("Signup Exception", ex);
+                // An error occurred during the signup process (could be many things - usually database related like timeouts or connectivity issues)
+                // For these type of errors, JsonError is returned with the exception (contains Success=false, and an optional ErrorMessage param)
+                return JsonError(ex);
+            }
+        }
+
+        [WebMethod]
+        public string CreateInterest(string json)
+        {
+            try
+            {
+                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
+
+                // Retrieve the userID of the user making this webmethod call
+                // Javascript will pass in the session GUID (retrieved from the Login webmethod above) for most web methods
+                // This line of code converts the session GUID into a userID (which is required for most database stored procedures).
+                // Even if you never use the userID, you should still call the GetUserID function.  It will throw an exception if the userID could not be retrieved,
+                // meaning the session GUID has expired or is invalid.  Important security feature to prevent hacking the web methods.
+                // Session guids are really only required for web methods where you expect the user to be logged in (eg. its irrevelant in the "forgot password" page where the user is never logged in),
+                // so don't call GetUserID for non-logged in web methods
+                
+                int userID = GetUserID(jToken);
+
+                // Convert the json passed from javascript into an easy to use object
+                InterestData interestData = JsonConvert.DeserializeObject<InterestData>(jToken.Value<JToken>("formData").ToString());
+
+                // Call the database stored procedure to create the interest
+                // Statics.Access (an instance of Access.cs) gives you access to the database.  Most of the stored procedures have wrapper functions in that class.  If you create new stored procedures and want to
+                // access them from c#, add a wrapper function Access.cs
+                Statics.Access.Interest_Create(userID, interestData);
+
+                // return a successful response to the user, with an "Interests" list containing all interests related to them
+                return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
+            }
+            catch (Exception ex)
+            {
+                Log("CreateInterest Exception", ex);
                 return JsonError(ex);
             }
         }
@@ -187,26 +246,6 @@ BiddingApp
         }
 
         [WebMethod]
-        public string CreateInterest(string json)
-        {
-            try
-            {
-                JToken jToken = JsonConvert.DeserializeObject<JToken>(json);
-                int userID = GetUserID(jToken);
-                InterestData interestData = JsonConvert.DeserializeObject<InterestData>(jToken.Value<JToken>("formData").ToString());
-
-                Statics.Access.Interest_Create(userID, interestData);
-
-                return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
-            }
-            catch (Exception ex)
-            {
-                Log("CreateInterest Exception", ex);
-                return JsonError(ex);
-            }
-        }
-
-        [WebMethod]
         public string AddContact(string json)
         {
             try
@@ -226,19 +265,20 @@ BiddingApp
                     if (dra != null)
                     {
                         //contactUserID = dra.Get<int>("ContactUserID");
+                        if (contactUserID > 0) SyncContacts(contactUserID);
+
                         string leaveHelloMessage = dra.Get<string>("LeaveHelloMessage");
                         if (contactUserID > 0 && !String.IsNullOrEmpty(leaveHelloMessage))
                         {
                             SyncChat(userID, contactUserID, leaveHelloMessage, true);
-                        }
 
-                        if (contactUserID > 0)
-                        {
-                            UserData contactUserData = Statics.Access.GetUserData(contactUserID, null, false);
-                            string emailTo = contactUserData.Email;
-                            string loginURL = Statics.BaseURL + "Default.aspx?Action=Login";
-                            string emailSubject = userData.FirstName + " added you as a contact";
-                            string emailBody = @"Hello, " + userData.FirstName + " " + userData.LastName + @" has added you as a contact on BiddingApp.  To add them as your contact too, visit the link below to login:
+                            if (contactUserID > 0)
+                            {
+                                UserData contactUserData = Statics.Access.GetUserData(contactUserID, null, false);
+                                string emailTo = contactUserData.Email;
+                                string loginURL = Statics.BaseURL + "Default.aspx?Action=Login";
+                                string emailSubject = userData.FirstName + " added you as a contact";
+                                string emailBody = @"Hello, " + userData.FirstName + " " + userData.LastName + @" has added you as a contact on BiddingApp.  To add them as your contact too, visit the link below to login:
 
 <a href=""" + loginURL + @""">" + loginURL + @"</a>
 
@@ -246,17 +286,17 @@ Thank you,
 
 Customer Service
 BiddingApp";
-                            if (Statics.Access.User_CreateNotificationEmail(contactUserID, userID, NotificationTypes.NewContactsAddMe, emailSubject, emailBody))
-                            {
-                                Utility.SendEmail(emailTo, emailSubject, Utility.ConvertToHtml(emailBody));
+                                if (Statics.Access.User_CreateNotificationEmail(contactUserID, userID, NotificationTypes.NewContactsAddMe, emailSubject, emailBody))
+                                {
+                                    Utility.SendEmail(emailTo, emailSubject, Utility.ConvertToHtml(emailBody));
+                                }
                             }
-                        }
-                        else
-                        {
-                            string emailTo = contactData.Email;
-                            string signupURL = Statics.BaseURL + "Default.aspx?Action=Signup";
-                            string emailSubject = userData.FirstName + " added you as a contact";
-                            string emailBody = @"Hello, " + userData.FirstName + " " + userData.LastName + @" has added you as a contact on BiddingApp.  To add them as your contact too, visit the link below to create an account:
+                            else
+                            {
+                                string emailTo = contactData.Email;
+                                string signupURL = Statics.BaseURL + "Default.aspx?Action=Signup";
+                                string emailSubject = userData.FirstName + " added you as a contact";
+                                string emailBody = @"Hello, " + userData.FirstName + " " + userData.LastName + @" has added you as a contact on BiddingApp.  To add them as your contact too, visit the link below to create an account:
 
 <a href=""" + signupURL + @""">" + signupURL + @"</a>
 
@@ -264,7 +304,8 @@ Thank you,
 
 Customer Service
 BiddingApp";
-                            Utility.SendEmail(emailTo, emailSubject, Utility.ConvertToHtml(emailBody));
+                                Utility.SendEmail(emailTo, emailSubject, Utility.ConvertToHtml(emailBody));
+                            }
                         }
                     }
                 }
@@ -453,7 +494,7 @@ BiddingApp";
                 UserData userData = Statics.Access.GetUserData(userID, null, false);
 
                 Access access = Statics.Access;
-                List<ContactData> allContacts = access.Contact_Get(userID);
+                List<ContactData> allContacts = GetContacts(userID);
                 List<ContactData> selectedContacts = new List<ContactData>();
                 foreach (ContactData contact in allContacts)
                 {
@@ -581,7 +622,7 @@ BiddingApp";
                 UserData userData = Statics.Access.GetUserData(userID, null, false);
 
                 Access access = Statics.Access;
-                List<ContactData> allContacts = access.Contact_Get(userID);
+                List<ContactData> allContacts = GetContacts(userID);
                 List<ContactData> selectedContacts = new List<ContactData>();
                 foreach (ContactData contact in allContacts)
                 {
@@ -1028,7 +1069,7 @@ BiddingApp
                 {
                     UserData userData = Statics.Access.GetUserData(userID, null, false);
                     var hub = GlobalHost.ConnectionManager.GetHubContext<BiddingHub>();
-                    hub.Clients.Client(client.ConnectionID).contactBlocked(JsonConvert.SerializeObject(new { Email = userData.Email, FirstName = userData.FirstName, IsOnline = false, Contacts = Statics.Access.Contact_Get(contactUserID) }));
+                    hub.Clients.Client(client.ConnectionID).contactBlocked(JsonConvert.SerializeObject(new { Email = userData.Email, FirstName = userData.FirstName, IsOnline = false, Contacts = GetContacts(contactUserID) }));
                 }
             }
             catch (Exception ex)
@@ -1045,7 +1086,7 @@ BiddingApp
                 if (client != null)
                 {
                     var hub = GlobalHost.ConnectionManager.GetHubContext<BiddingHub>();
-                    hub.Clients.Client(client.ConnectionID).contactsUpdated(JsonConvert.SerializeObject(new { Contacts = Statics.Access.Contact_Get(userID) }));
+                    hub.Clients.Client(client.ConnectionID).contactsUpdated(JsonConvert.SerializeObject(new { Contacts = GetContacts(userID) }));
                 }
             }
             catch (Exception ex)
@@ -1065,7 +1106,7 @@ BiddingApp
                     if (sourceUser != null)
                     {
                         var hub = GlobalHost.ConnectionManager.GetHubContext<BiddingHub>();
-                        hub.Clients.Client(client.ConnectionID).chatReceived(JsonConvert.SerializeObject(new { FirstName = sourceUser.FirstName, LastName = sourceUser.LastName, Email = sourceUser.Email, Message = chatMessage, NewContactRequest = newContactRequest }));
+                        hub.Clients.Client(client.ConnectionID).chatReceived(JsonConvert.SerializeObject(new { FirstName = sourceUser.FirstName, LastName = sourceUser.LastName, Email = sourceUser.Email, Message = chatMessage, NewContactRequest = newContactRequest, DateSent = DateTime.Now.ToString() }));
                     }
                 }
             }

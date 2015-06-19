@@ -533,7 +533,7 @@
             </tr>
             <tr>
                 <td style="background-color:#4f6228; height:50px; padding:5px;">
-                    <div style="color:#ffffff;"><span class="email"></span> - <a href="#" class="addToContacts" style="color:#ffffff;"><u>Add to contacts</u></a> to start chatting or <a href="#" class="blockUser" style="color:#ffffff;"><u>Block this user</u></a></div><div onclick="" style="cursor:pointer; position:absolute; right:50px; top:-30px;"><img src="Resources/images/eye-on.png" style="height:16px;" /></div>
+                    <div style="color:#ffffff;"><span class="email"></span> - <a href="#" class="addToContacts" style="color:#ffffff;"><u>Add to contacts</u></a> to start chatting or <a href="#" class="blockUser" style="color:#ffffff;"><u>Block this user</u></a></div>
                 </td>
             </tr>
           </table>

@@ -106,6 +106,19 @@ var bidding = (function () {
                 bidding.contacts = data.Contacts;
                 bidding.refreshContacts();
                 //$.connection.biddingHub.client.toggleContactOnlineStatus(data);
+
+                var windowObj = windows.getWindowByTypeAndID(WINDOWTYPE_CHAT, data.Email);
+                if (windowObj != null) {
+                    var notificationMessage = data.FirstName + ' is no longer online';
+                    if (data.IsOnline) notificationMessage = data.FirstName + ' has just come online';
+                    var html = '<div class="chatMessage"><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + notificationMessage + ' - ' + resources.getClockTime(new Date(), true) + '</i></div>';
+                    var chatContent = $('.chatContent', windowObj.dialog);
+                    chatContent.append($(html));
+                    chatContent.scrollTop(chatContent.prop("scrollHeight"));
+
+                    if (data.IsOnline) $('.onlineStatusIndicator img', windowObj.dialog).attr('src', 'Resources/images/green_light_16.png');
+                    else $('.onlineStatusIndicator img', windowObj.dialog).attr('src', 'Resources/images/red_light_16.png');
+                }
             };
             $.connection.biddingHub.client.toggleContactOnlineStatus = function (data) {
                 data = JSON.parse(data);
@@ -852,6 +865,8 @@ var bidding = (function () {
             var contact = bidding.getContactByGUID(contactGUID);
             modals.showDeleteContactModal(contact, function (contacts) {
                 bidding.refreshContacts(contacts);
+                var chatWindow = windows.getWindowByTypeAndID(WINDOWTYPE_CHAT, contact.Email);
+                if (chatWindow != null) windows.closeWindow(chatWindow);
             });
         },
 
@@ -1034,7 +1049,7 @@ var bidding = (function () {
                             var emailTo = $(this).attr('data-id');
                             var message = resources.htmlEncode(resources.stringTrim($(this).val()));
                             if (!resources.stringNullOrEmpty(message)) {
-                                bidding.logChat({ Email: emailTo, FirstName: bidding.userData.FirstName, LastName: bidding.userData.LastName, Message: message, Outgoing: true });
+                                bidding.logChat({ Email: emailTo, FirstName: bidding.userData.FirstName, LastName: bidding.userData.LastName, Message: message, Outgoing: true, DateSent: new Date() });
                                 var dateSent = new Date();
                                 var timeStamp = resources.getCalendarDate(null, dateSent) + ' ' + resources.getClockTime(dateSent);
                                 var html = '<div class="chatMessage"><a title="' + timeStamp + '"><b style="color:#ff0000;">' + bidding.userData.FirstName + ':</b> ' + resources.stringReplace(message, '\n', '</br>') + '</a></div>';
@@ -1077,7 +1092,7 @@ var bidding = (function () {
                 $(chatWindow.dialog[0]).dialog('moveToTop');
             }
 
-            bidding.logChat({ Email: data.Email, FirstName: data.FirstName, LastName: data.LastName, Message: data.Message });
+            bidding.logChat({ Email: data.Email, FirstName: data.FirstName, LastName: data.LastName, Message: data.Message, DateSent: new Date() });
             var dateSent = (data.DateSent == null) ? bidding.convertDateToLocal(data.DateSent) : new Date();
             var timeStamp = resources.getCalendarDate(null, dateSent) + ' ' + resources.getClockTime(dateSent);
             var html = '<div class="chatMessage"><a title="' + timeStamp + '"><b style="color:#0000ff;">' + data.FirstName + ':</b> ' + resources.stringReplace(data.Message, '\n', '</br>') + '</a></div>';
