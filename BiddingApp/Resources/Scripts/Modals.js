@@ -199,7 +199,7 @@ var modals = (function () {
                 resources.ajaxPost('Receiver', 'CreateInterest', { guid: defaultPage.sessionGUID(), formData: formData }, function (data) {
                     modals.hide();
                     if (data.Success) {
-                        if (modalCallback != null) modalCallback(data.Interests);
+                        if (modalCallback != null) modalCallback(data.Interests, data.InterestGUID);
                     }
                     else {
                         modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { modals.show('createInterestModal'); });

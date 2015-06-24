@@ -152,7 +152,18 @@ var bidding = (function () {
                     resources.replaceObjectInArray(bidding.interests, interest, function (a, b) { return resources.stringEqual(a.InterestGUID, b.InterestGUID); }, true);
                     bidding.refreshInterests();
                     var windowObj = windows.getWindowByID(interest.InterestGUID);
-                    if (windowObj != null || data.OpenWindow) bidding.showInterestWindow(null, interest);
+                    if (windowObj != null || data.OpenWindow) {
+                        var playBuzzer = true;
+                        var userData = defaultPage.getUserData();
+                        if (resources.stringContains(interest.StatusDescription, 'firm')) {
+                            playBuzzer = resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_BUZZFIRMPRICE);
+                        }
+                        else if (resources.stringContains(interest.StatusDescription, 'indic')) {
+                            playBuzzer = resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_BUZZINDICPRICE);
+                        }
+                        if (playBuzzer) bidding.buzz();
+                        bidding.showInterestWindow(null, interest);
+                    }
                 }
             };
             $.connection.biddingHub.client.interestDeleted = function (data) {
@@ -325,8 +336,9 @@ var bidding = (function () {
         },
 
         showNewInterestModal: function () {
-            modals.showNewInterestModal(function (interests) {
+            modals.showNewInterestModal(function (interests, interestGUID) {
                 bidding.refreshInterests(interests);
+                bidding.showInterestWindow(interestGUID);
             });
         },
 
@@ -928,16 +940,20 @@ var bidding = (function () {
                     return false;
                 });
                 $('.blockUser', chatWindow.dialog).bind('click', function (e) {
-                    modals.toggleWaitingModal(true, 'Please wait...');
-                    resources.ajaxPost('Receiver', 'BlockContact', { guid: defaultPage.sessionGUID(), contactEmail: email }, function (data) {
-                        modals.hide();
-                        if (data.Success) {
-                            bidding.contacts = data.Contacts;
-                            bidding.refreshContacts();
-                            windows.closeWindow(chatWindow);
-                        }
-                        else {
-                            modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { });
+                    modals.showConfirmModal('Are you sure you want to block this user?', function (success) {
+                        if (success) {
+                            modals.toggleWaitingModal(true, 'Please wait...');
+                            resources.ajaxPost('Receiver', 'BlockContact', { guid: defaultPage.sessionGUID(), contactEmail: email }, function (data) {
+                                modals.hide();
+                                if (data.Success) {
+                                    bidding.contacts = data.Contacts;
+                                    bidding.refreshContacts();
+                                    windows.closeWindow(chatWindow);
+                                }
+                                else {
+                                    modals.showNotificationModal(resources.isNull(data.ErrorMessage, STRING_ERROR_GENERICAJAX), function () { });
+                                }
+                            });
                         }
                     });
                     return false;
@@ -1083,13 +1099,21 @@ var bidding = (function () {
             var windowType = WINDOWTYPE_CHAT;
             if (bidding.getContactByEmail(data.Email) == null || data.NewContactRequest) windowType = WINDOWTYPE_CHATCONTACTREQUEST;
             //if (data.NewContactRequest) windowType = WINDOWTYPE_CHATCONTACTREQUEST;
+            var userData = defaultPage.getUserData();
+            var playBuzzer = resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_BUZZNEWMESSAGE);
             var chatWindow = windows.getWindowByTypeAndID(windowType, data.Email);
             if (chatWindow == null) {
                 chatWindow = bidding.showChatWindow(data.FirstName, data.LastName, data.Email, windowType);
+                if (playBuzzer) bidding.buzz();
             }
             else {
-
-                $(chatWindow.dialog[0]).dialog('moveToTop');
+                //$(chatWindow.dialog[0]).dialog('moveToTop');
+                if (windows.currentFocusedWindow != chatWindow) {
+                    if (!chatWindow.isFlashing) {
+                        windows.flashStart(chatWindow);
+                        if (playBuzzer) bidding.buzz();
+                    }
+                }
             }
 
             bidding.logChat({ Email: data.Email, FirstName: data.FirstName, LastName: data.LastName, Message: data.Message, DateSent: new Date() });

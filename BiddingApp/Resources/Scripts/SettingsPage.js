@@ -170,6 +170,9 @@ var settingsPage = (function () {
             if (resources.uiCheckboxSelected($('.notificationType' + NOTIFICATIONTYPE_NEWINTEREST))) notificationTypes.push(NOTIFICATIONTYPE_NEWINTEREST);
             if (resources.uiCheckboxSelected($('.notificationType' + NOTIFICATIONTYPE_REQUESTPRICE))) notificationTypes.push(NOTIFICATIONTYPE_REQUESTPRICE);
             if (resources.uiCheckboxSelected($('.notificationType' + NOTIFICATIONTYPE_LEAVEORDER))) notificationTypes.push(NOTIFICATIONTYPE_LEAVEORDER);
+            if (resources.uiCheckboxSelected($('.notificationType' + NOTIFICATIONTYPE_BUZZNEWMESSAGE))) notificationTypes.push(NOTIFICATIONTYPE_BUZZNEWMESSAGE);
+            if (resources.uiCheckboxSelected($('.notificationType' + NOTIFICATIONTYPE_BUZZINDICPRICE))) notificationTypes.push(NOTIFICATIONTYPE_BUZZINDICPRICE);
+            if (resources.uiCheckboxSelected($('.notificationType' + NOTIFICATIONTYPE_BUZZFIRMPRICE))) notificationTypes.push(NOTIFICATIONTYPE_BUZZFIRMPRICE);
             resources.ajaxPost('Receiver', 'UpdateNotifications', { guid: defaultPage.sessionGUID(), notificationTypes: notificationTypes }, function (data) {
                 modals.hide();
                 if (data.Success) {
@@ -193,6 +196,9 @@ var settingsPage = (function () {
             resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_NEWINTEREST), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_NEWINTEREST));
             resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_REQUESTPRICE), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_REQUESTPRICE));
             resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_LEAVEORDER), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_LEAVEORDER));
+            resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_BUZZNEWMESSAGE), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_BUZZNEWMESSAGE));
+            resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_BUZZINDICPRICE), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_BUZZINDICPRICE));
+            resources.uiToggleCheckbox($('.notificationType' + NOTIFICATIONTYPE_BUZZFIRMPRICE), resources.arrayContainsItem(userData.NotificationTypes, NOTIFICATIONTYPE_BUZZFIRMPRICE));
 
             $('#notificationTypes .advanceOnly').hide();
             if (userData.MembershipType == MEMBERSHIPTYPE_ADVANCE) $('#notificationTypes .advanceOnly').show();

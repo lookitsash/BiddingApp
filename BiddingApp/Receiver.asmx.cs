@@ -98,10 +98,10 @@ namespace BiddingApp
                 // Call the database stored procedure to create the interest
                 // Statics.Access (an instance of Access.cs) gives you access to the database.  Most of the stored procedures have wrapper functions in that class.  If you create new stored procedures and want to
                 // access them from c#, add a wrapper function Access.cs
-                Statics.Access.Interest_Create(userID, interestData);
+                string interestGUID = Statics.Access.Interest_Create(userID, interestData);
 
                 // return a successful response to the user, with an "Interests" list containing all interests related to them
-                return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID) });
+                return JsonConvert.SerializeObject(new { Success = true, Interests = Statics.Access.Interest_Get(userID), InterestGUID = interestGUID });
             }
             catch (Exception ex)
             {

@@ -10,6 +10,8 @@ var windows = (function () {
     var actualWindowSize = { width: 425, height: 250 };
 
     return {
+        currentFocusedWindow: null,
+
         isChatWindow: function (windowType) {
             return (windowType == WINDOWTYPE_CHAT || windowType == WINDOWTYPE_CHATCONTACTREQUEST || windowType == WINDOWTYPE_CHATCONTACTNOTSIGNEDUP);
         },
@@ -133,10 +135,11 @@ var windows = (function () {
             windowPos = { my: "left top", at: "left+" + pos.left + " top+" + pos.top, of: window };
             //}
 
+            var windowObj = { windowType: windowType, dialog: null, windowID: windowID, data: data };
             var dialogHtml = $('.' + windowType).html();
             dialogHtml = resources.stringReplace(dialogHtml, '!MAXHEIGHT', '175px');
             var div = $(dialogHtml);
-            var dia = $(div).dialog({
+            windowObj.dialog = $(div).dialog({
                 position: windowPos,
                 width: defaultWindowSize.width,
                 height: defaultWindowSize.height,
@@ -146,11 +149,12 @@ var windows = (function () {
                 dialogClass: windowType,
                 close: function (event, ui) {
                     resources.removeObjectInArray(windows.getWindowCollection(windowType), event.target, function (a, b) { return a.dialog[0] == b; });
+                },
+                focus: function (event, ui) {
+                    windows.currentFocusedWindow = windowObj;
+                    windows.flashStop(windowObj);
                 }
             });
-            //$(div).html($('.dialogBox').html());
-
-            var windowObj = { windowType: windowType, dialog: dia, windowID: windowID, data: data };
             windows.getWindowCollection(windowType).push(windowObj);
             return windowObj;
         },
@@ -170,6 +174,29 @@ var windows = (function () {
 
         closeWindow: function (windowObj) {
             $(windowObj.dialog[0]).dialog('close');
+        },
+
+        flashStart: function (windowObj) {
+            if (windowObj.isFlashing) return;
+
+            windowObj.isFlashing = true;
+            windowObj.flashFunc = function () {
+                if (windowObj.isFlashing) {
+                    if (windowObj.originalBorderStyle == null) windowObj.originalBorderStyle = windowObj.dialog.parent().css('border');
+
+                    var curBorderStyle = windowObj.dialog.parent().css('border');
+                    var newBorderStyle = '3px solid #000000';
+                    if (!resources.stringEqual(curBorderStyle, windowObj.originalBorderStyle)) newBorderStyle = windowObj.originalBorderStyle;
+                    windowObj.dialog.parent().css('border', newBorderStyle)
+                    setTimeout(windowObj.flashFunc, 500);
+                }
+            };
+            setTimeout(windowObj.flashFunc, 500);
+        },
+
+        flashStop: function (windowObj) {
+            windowObj.isFlashing = false;
+            if (windowObj.originalBorderStyle != null) windowObj.dialog.parent().css('border', windowObj.originalBorderStyle)
         }
     };
 })();

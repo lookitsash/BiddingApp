@@ -72,30 +72,39 @@
     <tr>
     <td>
         <div id="changePassword">
-        <b>Change Password</b>
-        <div class="errorHeader">Please enter the required fields below</div>
-        <div style="height:5px;"></div>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="password" class="data-oldpassword validateRequired" placeholder="Old Password" />
-        <div style="height:5px;"></div>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="password" class="data-password validateRequired" placeholder="New Password" />
-        <div style="height:5px;"></div>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="password" class="data-passwordconfirm validateRequired" placeholder="Re-enter Password" />
-        <div style="height:5px;"></div>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="settingsPage.changePassword();return false;" class="btn btn-primary">Change Password</a><br />
+            <b>Change Password</b>
+            <div class="errorHeader">Please enter the required fields below</div>
+            <div style="height:5px;"></div>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="password" class="data-oldpassword validateRequired" placeholder="Old Password" />
+            <div style="height:5px;"></div>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="password" class="data-password validateRequired" placeholder="New Password" />
+            <div style="height:5px;"></div>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="password" class="data-passwordconfirm validateRequired" placeholder="Re-enter Password" />
+            <div style="height:5px;"></div>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="settingsPage.changePassword();return false;" class="btn btn-primary">Change Password</a><br />
         </div>
         <br />
         <div id="notificationTypes">
-        <b>Notification Email, email me when:</b><br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" class="notificationType1" />I receive offline messages</label><br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" class="notificationType2" />New contacts add me</label><br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" class="notificationType3" />Advance user fills my order</label><br />
-        <div class="advanceOnly">
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" class="notificationType4" />Basic creates a new interest</label><br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" class="notificationType5" />Basic requests for a price</label><br />
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" class="notificationType6" />Basic leaves an order</label>
+            <b>Notification Email, email me when:</b><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" class="notificationType1" />I receive offline messages</label><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" class="notificationType2" />New contacts add me</label><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" class="notificationType3" />Advance user fills my order</label><br />
+            <div class="advanceOnly">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" class="notificationType4" />Basic creates a new interest</label><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" class="notificationType5" />Basic requests for a price</label><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" class="notificationType6" />Basic leaves an order</label>
+            </div>
+            <div style="height:5px;"></div>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="settingsPage.updateNotifications();return false;" class="btn btn-primary">Update</a><br />
         </div>
-        <div style="height:5px;"></div>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="settingsPage.updateNotifications();return false;" class="btn btn-primary">Update</a><br />
+        <br />
+        <div id="soundNotificationTypes">
+            <b>Play sound notification when:</b><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" class="notificationType7" />New message from contact</label><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" class="notificationType8" />Contact calls for indicative prices</label><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="checkbox" class="notificationType9" />Contact calls for firm prices</label><br />
+            <div style="height:5px;"></div>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="settingsPage.updateNotifications();return false;" class="btn btn-primary">Update</a><br />
         </div>
     </td>
     </tr>

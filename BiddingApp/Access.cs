@@ -343,7 +343,7 @@ namespace BiddingApp
             return chatItems;
         }
 
-        public void Interest_Create(int userID, InterestData interestData)
+        public string Interest_Create(int userID, InterestData interestData)
         {
             using (SqlCommand cmd = SqlProc("STP_Interest_Create"))
             {
@@ -353,7 +353,7 @@ namespace BiddingApp
                 SqlParam(cmd, "Condition", interestData.Condition);
                 SqlParam(cmd, "Quantity", interestData.Quantity);
                 SqlParam(cmd, "Remarks", interestData.Remarks);
-                ExecuteNonQuery(cmd);
+                return ExecuteScalar<string>(cmd);
             }
         }
 

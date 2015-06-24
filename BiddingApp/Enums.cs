@@ -46,5 +46,8 @@ public enum NotificationTypes
     UserFillsOrder = 3,
     NewInterest = 4,
     RequestPrice = 5,
-    LeaveOrder = 6
+    LeaveOrder = 6,
+    BuzzNewMessage = 7,
+    BuzzIndicPrice = 8,
+    BuzzFirmPrice = 9
 }
